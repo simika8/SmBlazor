@@ -1,2 +1,2 @@
-# SmBlazor
-Simple Blazor Datagrid
+# SmBlazorProba
+Blazor Component package

@@ -1,0 +1,355 @@
+﻿@using System.Text.Json.Serialization
+@namespace SmBlazor
+@using Microsoft.JSInterop
+@inject IJSRuntime Js
+
+<div class="Grid @Settings.Name @StyleSettingsHelper.GetStyleClasses(Settings.StyleSettings)">
+
+
+    @if (Settings.StyleSettings.HasFlag(StyleSettings.GridHeight)){
+        var gridHeight = Settings.Height.ToString()+"px";
+        <style>.GridBodyDiv {height: @gridHeight;}</style>
+    }
+    @if (Settings.StyleSettings.HasFlag(StyleSettings.ColumnAlign) || Settings.StyleSettings.HasFlag(StyleSettings.ColumnWidth)){
+        for (int i = 0; i < Settings.Columns.VisibleColumns().Count; i++)
+        {
+            var col = Settings.Columns.VisibleColumns()[i];
+            var nthchild = i + 1;
+            var colWidth = Settings.StyleSettings.HasFlag(StyleSettings.ColumnWidth)? col.Width.ToString()+"px;":null;
+            var textAlign = col.RightAligned ? "right" : null;
+            <style> th:nth-child(@nthchild), td:nth-child(@nthchild) { text-align: @textAlign; width: @colWidth} </style>
+        }
+    }
+
+    <Input @ref="Input" @bind-Value=@Settings.Search CursorEvent=@CursorEvent OnChange=@SearchChanged />
+    <div class="GridHeadDiv">
+        <table>
+
+            <thead>
+                <tr>
+
+                    @foreach (var col in Settings.Columns.VisibleColumns())
+                    {
+                        var columnOrderInfo = Settings.Order.ColumnOrderInfo(col.FieldName);
+                        <th>
+                            <div @onclick="(mea) => ChangeOrderClick(col.FieldName, mea)">
+                                @col.Title
+                                @if (columnOrderInfo != null)
+                                {
+                                    if (columnOrderInfo.Value.Descending)
+                                    {
+                                        <span class="oi oi-arrow-top"></span>
+                                        @:@columnOrderInfo.Value.Nth
+                                    }
+                                    else
+                                    {
+                                        <span class="oi oi-arrow-bottom"></span>
+                                        @:@columnOrderInfo.Value.Nth
+                                    }
+
+                                }
+
+                            </div>
+                        </th>
+                    }
+
+                </tr>
+                <tr>
+
+                    @foreach (var col in Settings.Columns.VisibleColumns())
+                    {
+                        if (!Settings.FilterValues.ContainsKey(col.FieldName))
+                            Settings.FilterValues[col.FieldName] = "";
+                        <th>
+                            <Input @ref=FilterInputs[col.FieldName] @bind-Value=@Settings.FilterValues[col.FieldName] CursorEvent=@CursorEvent OnChange=@SearchChanged />
+                        </th>
+                    }
+
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="GridBodyDiv" @ref="GridBodyDivRef" >
+        <table>
+            <tbody>
+                @{
+                    if (GridData.Rows == null)
+                    {
+                            <p><em>Loading...</em></p>
+                    }
+                    else
+                    {
+                        @foreach (var row in GridData.Rows)
+                        {
+                            var rowIsCursorSelected = row.Index == Settings.Cursor;
+                            var idx = row.Index.ToString();
+                            <GridRow @ref=GridRows[idx] Row=row.Row RowIsCursorSelected="rowIsCursorSelected" Columns="Settings.Columns.ColumnList" RowClick="RowClick" />
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div id="Loaded"></div>
+</div>
+
+
+@code {
+
+    [EditorRequired]
+    [Parameter]
+    public Settings Settings { get; set; } = null!;
+
+    public GridData GridData { get; set; } = new GridData();
+
+    public Dictionary<string, Input?> FilterInputs { get; set; } = new Dictionary<string, Input?>(StringComparer.OrdinalIgnoreCase);
+    public ElementReference? GridBodyDivRef { get; set; }
+    private Input? Input { get; set; }
+    public Dictionary<string, GridRow?> GridRows { get; set; } = new Dictionary<string, GridRow?>(StringComparer.OrdinalIgnoreCase);
+
+    public async Task ScrollToCursor()
+    {
+        await using var SmJsInterop = new SmJsInterop(Js);
+        if (Settings.Cursor > -1)
+        {
+            try
+            {
+                var curEl = GridRows.TryGetValue(Settings.Cursor.ToString(), out var val) ? val?.TrElement : null;
+                await SmJsInterop.ScrollToElement(curEl);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+    }
+
+    private async Task SearchChanged(string value)
+    {
+        await ReQuery();
+    }
+    private async Task CursorEvent(string value)
+    {
+        await using var ExampleJsInterop = new SmJsInterop(Js);
+        //await Task.Delay(1);
+        var KeyPressed = "Key Pressed is " + value;
+        //var cursor = Table.GetCursor();
+        var cursor = Settings.Cursor;
+        switch (value)
+        {
+            case "ArrowDown":
+                cursor++;
+                break;
+            case "ArrowUp":
+                cursor--;
+                break;
+            case "Home":
+                cursor = 0;
+                break;
+            case "End":
+                cursor = int.MaxValue;
+                break;
+            case "PageUp":
+                //var gr = GridRows.Select(x => x.Value?.TrElement).ToArray();
+                //var heights =
+                cursor = CursorPageUpDown(cursor, await GetHeights(GridRows, ExampleJsInterop), await ExampleJsInterop.ClientHeight(GridBodyDivRef), -1);
+                //cursor -= 10;
+                break;
+            case "PageDown":
+                cursor = CursorPageUpDown(cursor, await GetHeights(GridRows, ExampleJsInterop), await ExampleJsInterop.ClientHeight(GridBodyDivRef), 1);
+                break;
+            case "+":
+                break;
+        }
+        int ToRange(int actvalue, int? minvalue, int? maxvalue)
+        {
+            return Math.Max(Math.Min(actvalue, maxvalue ?? int.MaxValue), minvalue ?? int.MinValue);
+        }
+
+        int CursorPageUpDown(int cursor, List<int> heights, int gridBodyDivHeight, int direction)
+        {
+            var mincursor = 0;
+            var maxcursor = Math.Min(GridData.Rows?.Count ?? 1 - 1, heights.Count - 1);
+
+            //ha az adott irányba már nem tudok tovább mozogni, akkor visszadom a régi cursort
+            if (cursor + direction != ToRange(cursor + direction, mincursor, maxcursor))
+            {
+                return cursor;
+            }
+
+            var nextCursor = cursor;
+            nextCursor = ToRange(nextCursor, mincursor, maxcursor);
+            var jumpheight = 0;
+            //addig megyek, amíg az ugrási magasság több nem lesz, mint a rendelkezésre álló hely
+            while (jumpheight < gridBodyDivHeight)
+            {
+                nextCursor += direction;
+                if (nextCursor != ToRange(nextCursor, mincursor, maxcursor))
+                    break;
+                jumpheight += heights[nextCursor];
+            }
+            //kettőt visszaugrok, hogy az ugrás csak akkora legyen, hogy az előző kurzoros sor is látszódjon
+            nextCursor -= 2 * direction;
+            //ha nem változott a kurzor,mert túl kicsit ugrottam volna, akkor legalább egyet ugrok
+            if (cursor == nextCursor || nextCursor == 1)
+                nextCursor += direction;
+
+            nextCursor = ToRange(nextCursor, 0, GridData.Rows?.Count - 1);
+            return nextCursor;
+        }
+
+        cursor = ToRange(cursor, 0, GridData.Rows?.Count - 1);
+
+        await SetCursor(cursor);
+        /*await using var ExampleJsInterop = new ExampleJsInterop(Js);
+        await ExampleJsInterop.FocusToElement(Table.FilterInputs["Name"].InputElement);*/
+    }
+    private async Task SetCursor(int? cursor)
+    {
+        if (cursor == null)
+            return;
+        if (Settings.Cursor != cursor)
+        {
+            if (cursor >= 0)
+            {
+                var idx = cursor.ToString()??"";
+                GridRows[idx]?.SetCursor(true);
+            }
+
+            if (Settings.Cursor >= 0)
+            {
+                var idx2 = Settings.Cursor.ToString() ?? "";
+                GridRows[idx2]?.SetCursor(false);
+            }
+
+            Settings.Cursor = (int)cursor;
+            await ScrollToCursor();
+        }
+        if (Settings.Cursor == GridData.Rows?.Count - 1 && Settings.Cursor > 1)
+            await LoadMoreRecords();
+
+    }
+
+    private async Task<List<int>> GetHeights(Dictionary<string, GridRow?> gridRows, SmJsInterop exampleJsInterop)
+    {
+        var res = new List<int>();
+        for (var i = 0; i < gridRows.Count(); i++)
+        {
+            if (gridRows.TryGetValue(i.ToString(), out var row))
+            {
+                var gr = row?.TrElement;
+                int ch;
+                if (gr != null)
+                    ch = await exampleJsInterop.ClientHeight(gr);
+                else
+                    ch = 0;
+
+                res.Add(ch);
+            }
+        }
+
+        //Console.WriteLine(res.Sum());
+        return res;
+    }
+
+    private async Task ChangeOrderClick(string fieldName, MouseEventArgs args)
+    {
+        Settings.Order.SetOrder(fieldName, args.ShiftKey);
+        //Console.WriteLine("GetOrderString: " + GridData.GetOrderString());
+
+        Input?.InputElementRef.Current?.FocusAsync();
+        await ReQuery();
+        //Console.WriteLine("ChangeOrderClick: " + fieldName + "args.ShiftKey:" + args.ShiftKey);
+    }
+
+    private async Task RowClick((ElementReference? elementReference, MouseEventArgs args) data)
+    {
+        //for (var i = 0; i < GridRows.Count())
+
+        int? GridRowId(ElementReference? elementReference)
+        {
+            int? gridRowId = null;
+            foreach (var gridRow in GridRows)
+            {
+                if (gridRow.Value != null)
+                {
+                    if (gridRow.Value.TrElement.Equals(elementReference))
+                    {
+
+                        gridRowId = int.TryParse(gridRow.Key, out var val) ? val : null;
+                        //gridRowId = ;
+                    }
+
+                }
+            }
+            return gridRowId;
+
+        }
+        var ri = GridRowId(data.elementReference);
+        //Console.WriteLine(ri);
+        await SetCursor(ri);
+        Input?.InputElementRef.Current?.FocusAsync();
+        ;
+    }
+
+
+    public async Task ReQuery()
+    {
+
+        GridRows = new Dictionary<string, GridRow?>();
+        GridData.Rows = null;
+        Settings.Cursor = -1;
+        _myShouldRender = true;
+        StateHasChanged();
+
+        await GridData.ReQuery(Settings);
+        Settings.Cursor = -1;
+
+        _myShouldRender = true;
+        StateHasChanged();
+    }
+    public async Task LoadMoreRecords()
+    {
+        await GridData.LoadMoreRecords(Settings);
+        _myShouldRender = true;
+        StateHasChanged();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        ;
+        await ReQuery();
+
+        //await using var ExampleJsInterop = new ExampleJsInterop(Js);
+        //await ExampleJsInterop.FocusToElement(Input?.InputElement);
+        //Input?.InputElement.FocusAsync();
+
+    }
+
+    bool _myShouldRender = true;
+    protected override bool ShouldRender()
+    {
+        if (_myShouldRender)
+        {
+            _myShouldRender = false;
+            return base.ShouldRender();
+        }
+        else
+        {
+            //_myShouldRender = true;
+            return false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await Task.Delay(0);
+        //Console.WriteLine(this.GetType().Name + " OnAfterRenderAsync");
+        var a = Input?.InputElementRef;
+        if (firstRender)
+            Input?.InputElementRef.Current?.FocusAsync();
+    }
+    
+}

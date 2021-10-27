@@ -1,0 +1,21 @@
+﻿/**************Layout***************/
+.BS tbody tr td {
+    overflow: hidden;
+}
+
+.BS tr.Cursor {
+    color: #fff;
+    background-color: rgba(92,149,197,1);
+}
+
+.ES table td {
+    padding: 7px;
+    padding-top: 7px;
+    padding-right: 7px;
+    padding-bottom: 7px;
+    padding-left: 7px;
+}
+
+.ES table td:not(:first-child) {
+    border-left: 1px solid #ddd;
+}

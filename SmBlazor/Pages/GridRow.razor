@@ -1,0 +1,55 @@
+﻿@using System.Text.Json.Serialization
+@namespace SmBlazor
+@using Microsoft.JSInterop
+@inject IJSRuntime Js
+
+@{
+    <tr @ref="TrElement" class=@(RowIsCursorSelected ? "Cursor" : null)
+        @onclick="(mouseEventArgs) => InternalRowClick(mouseEventArgs)"
+        >
+        @foreach (var col in Columns)
+        {
+            if (col.Visible)
+            {
+                var val = GridData.GetPropertyValue(Row, col.SplittedFieldName);
+                var valformatted = col.CellFormatter(val);
+                <td>@valformatted</td>
+            }
+        }
+    </tr>
+
+}
+
+@code {
+    [Parameter]
+    public EventCallback<(ElementReference?, MouseEventArgs)> RowClick { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public bool RowIsCursorSelected { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public object Row { get; set; } = null!;
+
+    [EditorRequired]
+    [Parameter]
+    public List<Column> Columns { get; set; } = null!;
+
+
+    public ElementReference? TrElement { get; set; }
+
+    public void SetCursor(bool val)
+    {
+        RowIsCursorSelected = val;
+        StateHasChanged();
+    }
+
+    private async Task InternalRowClick(MouseEventArgs mouseEventArgs)
+    {
+        if (TrElement == null)
+            return;
+        var x = TrElement.Value.Id;
+        await RowClick.InvokeAsync((TrElement, mouseEventArgs));
+    }
+}

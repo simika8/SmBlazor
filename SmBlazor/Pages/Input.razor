@@ -1,0 +1,94 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@namespace SmBlazor
+@using Microsoft.JSInterop
+@inject IJSRuntime JsRuntime
+@implements IAsyncDisposable
+
+
+@Render(InputElementRef)
+
+@code {
+    string _value = "";
+    [Parameter]
+    public string Value
+    {
+        get { return _value; }
+        set
+        {
+            if (_value != value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+                OnChange.InvokeAsync(value);
+            }
+        }
+    }
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnChange { get; set; }
+
+    [Parameter]
+    public EventCallback<string> CursorEvent { get; set; }
+
+    public RenderFragment<ForwardRef> Render = ref1 => __builder =>
+    {
+        <input id="Input" type="search" placeholder="search" autocomplete="off"
+            @ref="ref1.Current"  />
+    };
+
+    public ForwardRef InputElementRef { get; set; } = new ForwardRef();
+    public DotNetObjectReference<Input>? componentRef { get; set; }
+
+
+    private SmBlazor.SmJsInterop? SmJsInterop { get; set; }
+
+
+
+    [JSInvokable("setValueFromJS")]
+    public void SetValueFromJS(string newValue)
+    {
+        Value = newValue;
+        StateHasChanged();
+    }
+
+    [JSInvokable("keyboardEventHandlerFromJs")]
+    public async Task KeyboardEventHandlerFromJs(int keycode, string code)
+    {
+        await CursorEvent.InvokeAsync(code);
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        //Console.WriteLine($"{this.GetType().Name}: OnAfterRenderAsync. firstRender: {firstRender}");
+
+        if (firstRender)
+        {
+            var componentRef = DotNetObjectReference.Create(this);
+
+            SmJsInterop = new SmBlazor.SmJsInterop(JsRuntime);
+
+            await SmJsInterop.SubscribeToChange(componentRef, InputElementRef.Current);
+        }
+    }
+    
+    public async ValueTask DisposeAsync()
+    {
+        componentRef?.Dispose();
+        if ( SmJsInterop != null)
+        {
+            try
+            {
+                await SmJsInterop.DisposeAsync();
+            }
+            catch 
+            {
+                ;
+            }
+            
+        }
+    }
+
+}
