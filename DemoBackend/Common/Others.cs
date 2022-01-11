@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.OData.Query.Wrapper;
 using System.Collections;
+using System.Linq.Expressions;
 
 namespace Common
 {
     public static class Others
     {
+        
+
+
         public static Guid GetGuidKey<T>(T o)
         {
             return (Guid)(o?.GetType().GetProperty("Id")?.GetValue(o) ?? Guid.Empty);

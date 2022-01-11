@@ -79,6 +79,7 @@ namespace Common
                 var stockcount = (productNumber % 10) == 1 ?2:1;
                 for (int i = 0; i < stockcount ; i++)
                 {
+                    p.Stocks = new List<InventoryStock>();
                     p.Stocks.Add(new InventoryStock()
                     {
                         Id = Guid.NewGuid(),

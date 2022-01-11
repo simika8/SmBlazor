@@ -24,9 +24,9 @@ namespace Controllers
         [HttpGet()]
         public async Task<ActionResult> Get(SmData.SmQueryOptionsUrl smQueryOptionsUrl)
         {
-            var smQueryOptions = SmData.SmQueryOptionsUrl.Convert2SmQueryOptions(smQueryOptionsUrl);
+            var smQueryOptions = SmData.SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             var query = Table.Select(x => x.Value).AsQueryable();
-            query = smQueryOptions.Apply<Models.Product>(query);
+            query = smQueryOptions.Apply(query);
             var res = query.ToList();
             ;
             await Task.Delay(0);

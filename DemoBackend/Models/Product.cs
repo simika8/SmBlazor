@@ -26,7 +26,7 @@ namespace Models
         public int Rating { get; set; }
         public ProductType Type {  get; set; }
         public ProductExt? Ext { get; set; }
-        public List<InventoryStock> Stocks { get; set; } = new List<InventoryStock>();
+        public List<InventoryStock>? Stocks { get; set; }
 
     }
 

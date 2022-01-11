@@ -1,11 +1,16 @@
 using Microsoft.AspNetCore.OData;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers()
+    .AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+    })
     .AddOData(opt => opt.AddRouteComponents("odata",
                         Models.ProductODataEdmModel.GetEdmModel()).Filter().Expand().Select().Count().SkipToken().OrderBy().SetMaxTop(500))
                 ;
@@ -30,6 +35,7 @@ app.UseCors(options => {
     options.AllowAnyHeader();
     options.AllowAnyMethod();
 });
+
 
 app.UseAuthorization();
 
