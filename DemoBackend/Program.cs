@@ -18,15 +18,21 @@ builder.Services.AddControllers()
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "DemoBackend", Version = "v1" });
+    //var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    //c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
+
 builder.Services.AddCors();
-    
 
 var app = builder.Build();
 
 app.UseDeveloperExceptionPage();
 app.UseSwagger();
-app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoBackend v1"); c.RoutePrefix = string.Empty; });
+
+app.UseSwaggerUI(
+    c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoBackend v1"); 
+        c.RoutePrefix = string.Empty;
+    });
 
 app.UseHttpsRedirection();
 

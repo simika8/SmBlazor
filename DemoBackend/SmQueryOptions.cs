@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -68,6 +69,16 @@ public class SmQueryOptions
             if (filter.FilterType == FilterType.StartsWithCaseInsensitive)
             {
                 var expression = StartsWithCaseInsensitiveExpression<T>(parameterExpression, filter.FieldName, filter.FilterValue);
+                expressions.Add(expression);
+            }
+            if (filter.FilterType == FilterType.Equals)
+            {
+                var expression = Equals<T>(parameterExpression, filter.FieldName, filter.FilterValue);
+                expressions.Add(expression);
+            }
+            if (filter.FilterType == FilterType.Between)
+            {
+                var expression = Between<T>(parameterExpression, filter.FieldName, filter.FilterValue, filter.FilterValue2);
                 expressions.Add(expression);
             }
         }
@@ -147,6 +158,83 @@ public class SmQueryOptions
 
         return res;
     }
+    public Expression? Equals<T>(ParameterExpression parameterExpression, string propertyName, string constant)
+    {
+        PropertyInfo? propertyInfo =
+            typeof(T).GetProperties()
+                .Where(x => x.Name == propertyName)
+                .FirstOrDefault();
+        if (propertyInfo == null) return null;
+
+        var ty = propertyInfo.PropertyType;
+
+
+
+        if (ty == typeof(string))
+        {
+            var equalsMethod = typeof(string).GetMethod("Equals", new[] { typeof(string), typeof(StringComparison) });
+            if (equalsMethod == null)
+                throw new NotSupportedException("Not supported data type");
+            var res = Expression.Call(
+                Expression.Property(parameterExpression, propertyInfo)
+                , equalsMethod
+                , Expression.Constant(constant)
+                , Expression.Constant(StringComparison.InvariantCultureIgnoreCase)
+                );
+            return res;
+        }
+        else
+        {
+            var equalsMethod = ty.GetMethod("Equals", new[] { ty });
+            var parseMethod = ty.GetMethod("Parse", new[] { typeof(string), typeof(CultureInfo) });
+            if (parseMethod == null)
+                throw new NotSupportedException("Not supported data type");
+            dynamic? typedConsant = parseMethod.Invoke(ty, new object[] { constant, CultureInfo.InvariantCulture });
+            var res = Expression.Call(
+                Expression.Property(parameterExpression, propertyInfo)
+                , equalsMethod
+                , Expression.Constant(typedConsant)
+                );
+            return res;
+
+        }
+    }
+    public Expression? Between<T>(ParameterExpression parameterExpression, string propertyName, string constant1, string? constant2)
+    {
+        PropertyInfo? propertyInfo =
+            typeof(T).GetProperties()
+                .Where(x => x.Name == propertyName)
+                .FirstOrDefault();
+        if (propertyInfo == null) return null;
+
+        var ty = propertyInfo.PropertyType;
+
+
+
+        if (ty == typeof(string))
+            throw new NotSupportedException("Not supported data type");
+
+        var parseMethod = ty.GetMethod("Parse", new[] { typeof(string), typeof(CultureInfo) });
+        if (parseMethod == null)
+            throw new NotSupportedException("Not supported data type");
+
+        var cult = CultureInfo.InvariantCulture;
+        dynamic? typedConsant1 = parseMethod.Invoke(ty, new object[] { constant1, CultureInfo.InvariantCulture });
+        dynamic? typedConsant2 = parseMethod.Invoke(ty, new object[] { constant2??"", CultureInfo.InvariantCulture });
+
+        var res = Expression.And(
+            Expression.GreaterThanOrEqual(
+                Expression.Property(parameterExpression, propertyInfo), 
+                Expression.Constant(typedConsant1)
+                ),
+            Expression.LessThanOrEqual(
+                Expression.Property(parameterExpression, propertyInfo), 
+                Expression.Constant(typedConsant2)
+                )
+            );
+
+        return res;
+    }
 
     private IQueryable<T> ApplySelect<T>(IQueryable<T> sourceQuery)
     {
@@ -217,19 +305,24 @@ public class SmQueryOptions
 [ModelBinder(BinderType = typeof(SmData.SmQueryOptionsUrlBinder))]
 public class SmQueryOptionsUrl
 {
-    public int? Top { get; set; } = 1;
-    public int? Skip { get; set; } = 0;
+    [DefaultValue(10)]
+    public int? Top { get; set; }
+    public int? Skip { get; set; }
+    [DefaultValue("asdf")]
     public string? Search { get; set; }
+    [DefaultValue("Name startswith 'Product, with spec chars:('', &?) in it''s name, asdf.', Rating eq 2, Code eq 'c0000001', Price between 123.4 and 1234.5")]
     public string? Filter { get; set; }
-    public string? Orderby { get; set; } = "Price desc, Name";
-    public string? Select { get; set; } = "Id, Name, Price";
+    [DefaultValue("Price desc, Name")]
+    public string? Orderby { get; set; }
+    [DefaultValue("Id, Code, Name, Price, Stocks, Rating")]
+    public string? Select { get; set; }
 
     /// <summary>
-    /// : "Name sw 'Product, with spec chars ('',&?) in it''s name, asdf.', Id eq 3, Price between 12.2 and 323.2"
+    /// : Name sw 'Product, with spec chars ('',&?) in it''s name, asdf.', Id eq 3, Price between 12.2 and 323.2
     /// -> 
-    /// "Name sw 'Product, with spec chars ('',&?) in it''s name, asdf.'"
-    /// " Id eq 3"
-    /// " Price between 12.2 and 323.2"
+    /// Name sw 'Product, with spec chars ('',&?) in it''s name, asdf.'
+    /// Id eq 3
+    /// Price between 12.2 and 323.2
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
@@ -256,7 +349,7 @@ public class SmQueryOptionsUrl
             var count = currentLine.Count(c => c == '\'');
             if (count % 2 == 0)
             {
-                res2.Add(currentLine.Trim());
+                res2.Add(currentLine.Trim().Replace("''", "'", StringComparison.InvariantCulture));
                 currentLine = "";
             }
         }

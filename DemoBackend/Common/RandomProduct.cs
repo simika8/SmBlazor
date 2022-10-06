@@ -60,6 +60,7 @@ namespace Common
             {
                 //Id = Guid.NewGuid(),
                 Id = id,
+                Code = "C" + productNumber.ToString().PadLeft(7,'0'),
                 Active = rnd.Next(2) == 0,
                 Ext = new ProductExt()
                 {
@@ -77,9 +78,11 @@ namespace Common
             if (IsPrime(productNumber) && p.Type == ProductType.Product)
             {
                 var stockcount = (productNumber % 10) == 1 ?2:1;
+                if (stockcount > 0)
+                    p.Stocks = new List<InventoryStock>();
+
                 for (int i = 0; i < stockcount ; i++)
                 {
-                    p.Stocks = new List<InventoryStock>();
                     p.Stocks.Add(new InventoryStock()
                     {
                         Id = Guid.NewGuid(),
