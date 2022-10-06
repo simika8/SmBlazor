@@ -28,6 +28,8 @@ namespace Models
                 var p = RandomProduct.GenerateProduct(i, prodcount);
                 if (i == 1)
                     p.Name = "Product, with spec chars:(', &?) in it's name, asdf. fdsafasdf sadfasd .";
+                if (i == 2)
+                    p.Code = "Prod C0000002";
                 Products.Add(p.Id, p);
 
             }

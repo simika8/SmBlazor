@@ -52,6 +52,7 @@ public class SmQueryOptions
         res = ApplyPaging(res);
         res = ApplySelect(res);
 
+
         return res;
     }
 
@@ -88,6 +89,47 @@ public class SmQueryOptions
                 );
 
         Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(aggregatedExpression, parameterExpression);
+
+        var res = sourceQuery.Where(lambda);
+        return res;
+    }
+
+    private Expression? DefaultSearchExpression<T>(ParameterExpression parameterExpression, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+            return null;
+
+        const string defaultSearchPropertyName = "Name";
+
+        PropertyInfo? propertyInfo =
+            typeof(T).GetProperties()
+                .Where(x => x.PropertyType == typeof(string))
+                .Where(x => x.Name == defaultSearchPropertyName)
+                .FirstOrDefault();
+        if (propertyInfo == null) 
+            return null;
+
+        var expression = StartsWithCaseInsensitiveExpression<T>(parameterExpression, defaultSearchPropertyName, search);
+
+        return expression;
+    }
+
+    public IQueryable<T> ApplySearch<T>(ParameterExpression parameterExpression, IQueryable<T> sourceQuery, Expression searchExpression)
+    {
+        if (string.IsNullOrWhiteSpace(Search))
+            return sourceQuery;
+
+        Expression expression;
+        if (searchExpression != null)
+            expression = searchExpression;
+        else
+            expression = DefaultSearchExpression<T>(parameterExpression, Search);
+        if (expression == null)
+            return sourceQuery;
+
+        //var expression = DefaultSearchExpression<T>(parameterExpression, Search);
+
+        Expression <Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(expression, parameterExpression);
 
         var res = sourceQuery.Where(lambda);
         return res;
@@ -135,17 +177,24 @@ public class SmQueryOptions
                 .Invoke(null, new object[] { source, lambda })!;
         return (IOrderedQueryable<T>)result;
     }
-
-    public Expression? StartsWithCaseInsensitiveExpression<T>(ParameterExpression parameterExpression, string propertyName, string constant)
+    public static PropertyInfo? GetPropertyInfo<T>(string propertyName)
+    {
+        PropertyInfo? propertyInfo =
+            typeof(T).GetProperties()
+                .Where(x => x.Name == propertyName)
+                .FirstOrDefault();
+        return propertyInfo;
+    }
+    public static Expression? StartsWithCaseInsensitiveExpression<T>(ParameterExpression parameterExpression, string propertyName, string constant)
     {
         MethodInfo startsWithMethod = typeof(string).GetMethod("StartsWith", new[] { typeof(string), typeof(bool), typeof(CultureInfo) })!;
 
-        PropertyInfo? propertyInfo =
-            typeof(T).GetProperties()
-                .Where(x => x.PropertyType == typeof(string))
-                .Where(x => x.Name == propertyName)
-                .FirstOrDefault();
-        if (propertyInfo == null) return null;
+        PropertyInfo? propertyInfo = GetPropertyInfo<T>(propertyName);
+
+        if (propertyInfo == null) 
+            return null;
+        if (propertyInfo.PropertyType != typeof(string)) 
+            return null;
 
         var res = Expression.Call(
             Expression.Property(parameterExpression, propertyInfo)
@@ -158,13 +207,35 @@ public class SmQueryOptions
 
         return res;
     }
+
+    public static Expression? ContainsCaseInsensitiveExpression<T>(ParameterExpression parameterExpression, string propertyName, string constant)
+    {
+        //var a = "".Contains("sadf", StringComparison.InvariantCultureIgnoreCase);
+        MethodInfo containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) })!;
+
+        PropertyInfo? propertyInfo = GetPropertyInfo<T>(propertyName);
+
+        if (propertyInfo == null)
+            return null;
+        if (propertyInfo.PropertyType != typeof(string))
+            return null;
+
+        var res = Expression.Call(
+            Expression.Property(parameterExpression, propertyInfo)
+            , containsMethod
+            , Expression.Constant(constant)
+            , Expression.Constant(StringComparison.InvariantCultureIgnoreCase)
+
+            );
+
+        return res;
+    }
+
     public Expression? Equals<T>(ParameterExpression parameterExpression, string propertyName, string constant)
     {
-        PropertyInfo? propertyInfo =
-            typeof(T).GetProperties()
-                .Where(x => x.Name == propertyName)
-                .FirstOrDefault();
-        if (propertyInfo == null) return null;
+        PropertyInfo? propertyInfo = GetPropertyInfo<T>(propertyName);
+        if (propertyInfo == null) 
+            return null;
 
         var ty = propertyInfo.PropertyType;
 
@@ -201,11 +272,9 @@ public class SmQueryOptions
     }
     public Expression? Between<T>(ParameterExpression parameterExpression, string propertyName, string constant1, string? constant2)
     {
-        PropertyInfo? propertyInfo =
-            typeof(T).GetProperties()
-                .Where(x => x.Name == propertyName)
-                .FirstOrDefault();
-        if (propertyInfo == null) return null;
+        PropertyInfo? propertyInfo = GetPropertyInfo<T>(propertyName);
+        if (propertyInfo == null)
+            return null;
 
         var ty = propertyInfo.PropertyType;
 
@@ -308,7 +377,7 @@ public class SmQueryOptionsUrl
     [DefaultValue(10)]
     public int? Top { get; set; }
     public int? Skip { get; set; }
-    [DefaultValue("asdf")]
+    [DefaultValue("prod")]
     public string? Search { get; set; }
     [DefaultValue("Name startswith 'Product, with spec chars:('', &?) in it''s name, asdf.', Rating eq 2, Code eq 'c0000001', Price between 123.4 and 1234.5")]
     public string? Filter { get; set; }
@@ -464,6 +533,57 @@ public class SmQueryOptionsUrl
         return res;
     }
 
+    public static SmQueryOptionsUrl Parse(SmQueryOptions queryOptions)
+    {
+        var res = new SmQueryOptionsUrl();
+
+        res.Top = queryOptions.Top;
+        res.Skip = queryOptions.Skip;
+        res.Search = queryOptions.Search;
+
+        var stringfilters = new List<string>();
+        //queryOptionsUrl.Filter = "Name startswith 'Product, with spec chars ('',&?) in it''s name, asdf.', Id eq 3, Price between 12.2 and 323.2";
+        foreach (var filter in queryOptions.Filters)
+        {
+            switch (filter.FilterType)
+            {
+                case FilterType.Between:
+                    stringfilters.Add($"{filter.FieldName} between {filter.FilterValue} and {filter.FilterValue2}");
+                    break;
+                case FilterType.Equals:
+                    stringfilters.Add($"{filter.FieldName} equals '{filter.FilterValue}'");
+                    break;
+                case FilterType.StartsWithCaseInsensitive:
+                    stringfilters.Add($"{filter.FieldName} startswith '{filter.FilterValue}'");
+                    break;
+                default:
+                    break;
+            }
+
+        }
+        res.Filter = string.Join(", ", stringfilters);
+
+        res.Orderby = string.Join(", ", queryOptions.OrderFields.Select(x => x.FieldName + (x.Descending?" desc":"")));
+
+        res.Select = string.Join(", ", queryOptions.Select);
+        //queryOptionsUrl.Orderby = "Rating desc, Name"
+        /*var orders = SmSplit(queryOptions.Orderby);
+        foreach (var orderbystr in orders)
+        {
+            var o = ParseOrderField(orderbystr);
+            if (o != null)
+                res.OrderFields.Add(o);
+        }
+
+        //queryOptionsUrl.Select = "Id, Name, Price, Rating"
+        var selects = SmSplit(queryOptions.Select);
+        foreach (var select in selects)
+        {
+            res.Select.Add(select.Trim());
+        }*/
+
+        return res;
+    }
 
 }
 
