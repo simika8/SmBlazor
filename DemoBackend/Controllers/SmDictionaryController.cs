@@ -21,12 +21,12 @@ namespace Controllers
     public class SmDictionaryController<T> : ControllerBase
     {
         protected Dictionary<Guid, T> Table { get; set; } = new Dictionary<Guid, T> { };
-        
 
+        //[ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder))]
         [HttpGet()]
-        public async Task<ActionResult> Get(SmQueryOptions.SmQueryOptionsUrl smQueryOptionsUrl)
+        public async Task<ActionResult> Get([ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder.SmQueryOptionsUrlBinder))]SmQueryOptionsUrl smQueryOptionsUrl)
         {
-            var smQueryOptions = SmQueryOptions.SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
+            var smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             var query = Table.Select(x => x.Value).AsQueryable();
             Type elementType = typeof(Models.Product);
             ParameterExpression parameterExpression = Expression.Parameter(elementType);
