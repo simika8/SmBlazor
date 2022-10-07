@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoBlazorWasm", "DemoBlazo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoBlazor", "DemoBlazor\DemoBlazor.csproj", "{6A5AB941-EC44-4C76-A632-E2A932943162}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmQueryOptions", "SmQueryOptions\SmQueryOptions.csproj", "{A15BF5D7-20AE-428F-B5A3-330EB16C9835}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{6A5AB941-EC44-4C76-A632-E2A932943162}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A5AB941-EC44-4C76-A632-E2A932943162}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A5AB941-EC44-4C76-A632-E2A932943162}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A15BF5D7-20AE-428F-B5A3-330EB16C9835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A15BF5D7-20AE-428F-B5A3-330EB16C9835}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A15BF5D7-20AE-428F-B5A3-330EB16C9835}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A15BF5D7-20AE-428F-B5A3-330EB16C9835}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

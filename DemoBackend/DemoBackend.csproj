@@ -15,4 +15,8 @@
     <PackageReference Include="EFCore.NamingConventions" Version="6.0.0-rc.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SmQueryOptions\SmQueryOptions.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -13,7 +13,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace SmData;
+namespace SmQueryOptions;
 
 public enum FilterType
 {
@@ -371,7 +371,7 @@ public class SmQueryOptions
 
 }
 
-[ModelBinder(BinderType = typeof(SmData.SmQueryOptionsUrlBinder))]
+[ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder))]
 public class SmQueryOptionsUrl
 {
     [DefaultValue(10)]
@@ -587,20 +587,3 @@ public class SmQueryOptionsUrl
 
 }
 
-
-public class SmQueryOptionsUrlBinder : IModelBinder
-{
-    public Task BindModelAsync(ModelBindingContext bindingContext)
-    {
-        SmQueryOptionsUrl queryOptionsUrl = new SmQueryOptionsUrl();
-        queryOptionsUrl.Top = Convert.ToInt32(bindingContext.ValueProvider.GetValue("Top").FirstOrDefault());
-        queryOptionsUrl.Skip = Convert.ToInt32(bindingContext.ValueProvider.GetValue("Skip").FirstOrDefault());
-        queryOptionsUrl.Search = bindingContext.ValueProvider.GetValue("Search").FirstOrDefault();
-        queryOptionsUrl.Filter = bindingContext.ValueProvider.GetValue("Filter").FirstOrDefault();
-        queryOptionsUrl.Orderby = bindingContext.ValueProvider.GetValue("Orderby").FirstOrDefault();
-        queryOptionsUrl.Select = bindingContext.ValueProvider.GetValue("Select").FirstOrDefault();
-
-        bindingContext.Result = ModelBindingResult.Success(queryOptionsUrl);
-        return Task.FromResult(result: true);
-    }
-}

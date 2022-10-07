@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SmQueryOptions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -23,9 +24,9 @@ namespace Controllers
         
 
         [HttpGet()]
-        public async Task<ActionResult> Get(SmData.SmQueryOptionsUrl smQueryOptionsUrl)
+        public async Task<ActionResult> Get(SmQueryOptions.SmQueryOptionsUrl smQueryOptionsUrl)
         {
-            var smQueryOptions = SmData.SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
+            var smQueryOptions = SmQueryOptions.SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             var query = Table.Select(x => x.Value).AsQueryable();
             Type elementType = typeof(Models.Product);
             ParameterExpression parameterExpression = Expression.Parameter(elementType);
@@ -56,7 +57,7 @@ namespace Controllers
 
             var expressions = new List<Expression>();
 
-            AddExpressionIfNotNull(expressions, SmData.SmQueryOptions.StartsWithCaseInsensitiveExpression<T>(parameterExpression, defaultSearchPropertyName, search));
+            AddExpressionIfNotNull(expressions, SmQueryOptions.SmQueryOptions.StartsWithCaseInsensitiveExpression<T>(parameterExpression, defaultSearchPropertyName, search));
 
             Expression aggregatedExpression = expressions.Aggregate((prev, current) => Expression.Or(prev, current));
 
