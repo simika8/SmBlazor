@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Models
+namespace DemoModels
 {
     public static class ProductODataEdmModel
     {
@@ -14,9 +14,9 @@ namespace Models
             var builder = new Microsoft.OData.ModelBuilder.ODataConventionModelBuilder();
 
 
-            builder.EntitySet<Models.Product>(nameof(Models.Product));
-            builder.EntitySet<Models.ProductExt>(nameof(Models.ProductExt));
-            builder.EntitySet<Models.InventoryStock>(nameof(Models.InventoryStock));
+            builder.EntitySet<DemoModels.Product>(nameof(DemoModels.Product));
+            builder.EntitySet<DemoModels.ProductExt>(nameof(DemoModels.ProductExt));
+            builder.EntitySet<DemoModels.InventoryStock>(nameof(DemoModels.InventoryStock));
 
             return builder.GetEdmModel();
 

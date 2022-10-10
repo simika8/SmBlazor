@@ -18,7 +18,7 @@ namespace Controllers
         [HttpGet()]
         public async Task<ActionResult> Ping()
         {
-            Models.DataTables.InitRandomData();
+            DemoModels.DataTables.InitRandomData();
             await Task.Delay(0);
             return Ok();
         }

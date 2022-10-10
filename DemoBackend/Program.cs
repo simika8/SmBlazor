@@ -12,7 +12,7 @@ builder.Services.AddControllers()
         opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
     })
     .AddOData(opt => opt.AddRouteComponents("odata",
-                        Models.ProductODataEdmModel.GetEdmModel()).Filter().Expand().Select().Count().SkipToken().OrderBy().SetMaxTop(500))
+                        DemoModels.ProductODataEdmModel.GetEdmModel()).Filter().Expand().Select().Count().SkipToken().OrderBy().SetMaxTop(500))
                 ;
 
 builder.Services.AddSwaggerGen(c =>

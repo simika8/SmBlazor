@@ -16,15 +16,15 @@ namespace ProductApi
 {
 
     [Route("[controller]")]
-    public class ProductController : DictionaryODataController<Models.Product>
+    public class ProductController : DictionaryODataController<DemoModels.Product>
     {
         public ProductController()
         {
-            Models.DataTables.InitRandomData();
-            Table = Models.DataTables.Products;
+            DemoModels.DataTables.InitRandomData();
+            Table = DemoModels.DataTables.Products;
         }
 
-        protected override IQueryable<Models.Product> ApplySearchFilter(IQueryable<Models.Product> q1, string keywords)
+        protected override IQueryable<DemoModels.Product> ApplySearchFilter(IQueryable<DemoModels.Product> q1, string keywords)
         {
             var q2 = q1
                 .Where(x => 

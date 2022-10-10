@@ -28,7 +28,7 @@ namespace Controllers
         {
             var smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             var query = Table.Select(x => x.Value).AsQueryable();
-            Type elementType = typeof(Models.Product);
+            Type elementType = typeof(DemoModels.Product);
             ParameterExpression parameterExpression = Expression.Parameter(elementType);
 
             query = smQueryOptions.ApplySearch(parameterExpression, query, SearchExpression<T>(parameterExpression, smQueryOptions.Search));

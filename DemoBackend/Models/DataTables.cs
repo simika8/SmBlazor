@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Logging;
 
-namespace Models
+namespace DemoModels
 {
     public static class DataTables
     {

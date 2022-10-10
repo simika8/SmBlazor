@@ -15,12 +15,12 @@ namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SmProductController : SmDictionaryController<Models.Product>
+    public class SmProductController : SmDictionaryController<DemoModels.Product>
     {
         public SmProductController()
         {
-            Models.DataTables.InitRandomData();
-            Table = Models.DataTables.Products;
+            DemoModels.DataTables.InitRandomData();
+            Table = DemoModels.DataTables.Products;
         }
 
         protected override Expression? SearchExpression<T>(ParameterExpression parameterExpression, string? search)
