@@ -6,14 +6,30 @@
 
 @code {
     private Grid? Grid { get; set; }
-    private Settings Settings { get; set; } = new Settings("ProductsList");
+    private Settings Settings { get; set; } = new Settings()
+        {
+            /*DataSourceSettings = new()
+            {
+                DataSourceType = DataSourceType.Odata,
+                //DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
+                DataSourceApiBaseUri = "https://localhost:7157",
+                DataSourceApiPathUri = "/odata",
+                DataSourceApiNameUri = "Product",
+                DataSourceOdataExpand = new List<string>() { "Ext", "Stocks" },
+            },/**/
+            DataSourceSettings = new()
+            {
+                DataSourceType = DataSourceType.SmQueryOptions,
+                DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
+                //DataSourceApiBaseUri = "https://localhost:7157",
+                DataSourceApiPathUri = "/api",
+                DataSourceApiNameUri = "SmProduct",
+            },/**/
+        };
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(0);
-        //Settings.DataSource = new ODataSource("https://smdemobackend.azurewebsites.net/odata", "Product", new List<string>() { "Ext", "Stocks" });
-        //Settings.DataSource = new ODataDataSource("https://localhost:7157/odata", "Product", new List<string>() { "Ext", "Stocks" });
-        Settings.DataSource = new SmQueryOptionsDataSource("https://localhost:7157/api", "SmProduct");
 
         //var exmodel = DtoTypeBuilder.ExampleSmEdmModel();
         //Gd.RowType = DtoTypeBuilder.GetType(exmodel, "Product");

@@ -10,9 +10,29 @@ namespace SmBlazor
     public class GridData
     {
         public List<(int Index, dynamic? Row)>? Rows { get; set; }
+        public DataSourceSettings DataSourceSettings { get; set; }
+        public IDataSource DataSource { get; set; }
+
+        private void InitDataSource(DataSourceSettings dataSourceSettings)
+        {
+            DataSourceSettings = dataSourceSettings;
+            switch (DataSourceSettings.DataSourceType)
+            {
+                case DataSourceType.SmQueryOptions:
+                    DataSource = new SmQueryOptionsDataSource(DataSourceSettings.DataSourceApiBaseUri + DataSourceSettings.DataSourceApiPathUri, DataSourceSettings.DataSourceApiNameUri);
+                    break;
+                case DataSourceType.Odata:
+                    DataSource = new ODataDataSource(DataSourceSettings.DataSourceApiBaseUri + DataSourceSettings.DataSourceApiPathUri, DataSourceSettings.DataSourceApiNameUri, DataSourceSettings.DataSourceOdataExpand);
+                    break;
+                default:
+                    throw new NotSupportedException();
+
+            }
+        }
 
         public async Task ReQuery(Settings settings)
         {
+            InitDataSource(settings.DataSourceSettings);
             var top = settings.FirstTopCount;
             Rows = null;
             var newRows = await GetRows(settings, top);
@@ -59,10 +79,10 @@ namespace SmBlazor
             }
            
         }
-        private static async Task<List<dynamic?>> GetRows(Settings settings, int top, int? skip = null)
+        private async Task<List<dynamic?>> GetRows(Settings settings, int top, int? skip = null)
         {
             var qo = SmQueryOptionsHelper.CreateSmQueryOptions(settings, top, skip);
-            var res = await settings.DataSource.GetRows(qo);
+            var res = await DataSource.GetRows(qo);
             return res;
         }
 
