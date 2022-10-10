@@ -227,7 +227,7 @@
             Settings.Cursor = (int)cursor;
             await ScrollToCursor();
         }
-        if (Settings.Cursor == GridData.Rows?.Count - 1 && Settings.Cursor > 1)
+        if (Settings.Cursor == GridData.Rows?.Count - 1 && Settings.Cursor > 0)
             await LoadMoreRecords();
 
     }
