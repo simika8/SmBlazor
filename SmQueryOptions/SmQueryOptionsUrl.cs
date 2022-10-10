@@ -11,7 +11,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace SmQueryOptions;
+namespace SmQueryOptionsNs;
 
 public class SmQueryOptionsUrl
 {
@@ -184,47 +184,60 @@ public class SmQueryOptionsUrl
 
         var stringfilters = new List<string>();
         //queryOptionsUrl.Filter = "Name startswith 'Product, with spec chars ('',&?) in it''s name, asdf.', Id eq 3, Price between 12.2 and 323.2";
-        foreach (var filter in queryOptions.Filters)
+        if (queryOptions.Filters != null)
         {
-            switch (filter.FilterType)
+            foreach (var filter in queryOptions.Filters)
             {
-                case FilterType.Between:
-                    stringfilters.Add($"{filter.FieldName} between {filter.FilterValue} and {filter.FilterValue2}");
-                    break;
-                case FilterType.Equals:
-                    stringfilters.Add($"{filter.FieldName} equals '{filter.FilterValue}'");
-                    break;
-                case FilterType.StartsWithCaseInsensitive:
-                    stringfilters.Add($"{filter.FieldName} startswith '{filter.FilterValue}'");
-                    break;
-                default:
-                    break;
-            }
+                switch (filter.FilterType)
+                {
+                    case FilterType.Between:
+                        stringfilters.Add($"{filter.FieldName} between {filter.FilterValue} and {filter.FilterValue2}");
+                        break;
+                    case FilterType.Equals:
+                        stringfilters.Add($"{filter.FieldName} equals '{filter.FilterValue}'");
+                        break;
+                    case FilterType.StartsWithCaseInsensitive:
+                        stringfilters.Add($"{filter.FieldName} startswith '{filter.FilterValue}'");
+                        break;
+                    default:
+                        break;
+                }
 
+            }
         }
         res.Filter = string.Join(", ", stringfilters);
 
-        res.Orderby = string.Join(", ", queryOptions.OrderFields.Select(x => x.FieldName + (x.Descending?" desc":"")));
+        if (queryOptions.OrderFields != null)
+        {
+            res.Orderby = string.Join(", ", queryOptions.OrderFields.Select(x => x.FieldName + (x.Descending ? " desc" : "")));
+        } else
+            res.Orderby = null;
 
         res.Select = string.Join(", ", queryOptions.Select);
-        //queryOptionsUrl.Orderby = "Rating desc, Name"
-        /*var orders = SmSplit(queryOptions.Orderby);
-        foreach (var orderbystr in orders)
-        {
-            var o = ParseOrderField(orderbystr);
-            if (o != null)
-                res.OrderFields.Add(o);
-        }
-
-        //queryOptionsUrl.Select = "Id, Name, Price, Rating"
-        var selects = SmSplit(queryOptions.Select);
-        foreach (var select in selects)
-        {
-            res.Select.Add(select.Trim());
-        }*/
-
         return res;
     }
 
+    public static string CalculateURL(SmQueryOptions qo)
+    {
+        var qou = Parse(qo);
+
+        var urlParams = new Dictionary<string, string?>();
+
+
+
+        urlParams["search"] = qou.Search;
+        urlParams["top"] = qou.Top?.ToString();
+        urlParams["skip"] = qou.Skip?.ToString();
+        urlParams["select"] = qou.Select;
+        urlParams["filter"] = qou.Filter;
+        urlParams["orderby"] = qou.Orderby;
+        
+
+        var url = string.Join("&", urlParams.Where(x => !string.IsNullOrEmpty(x.Value)).Select(x => $"{x.Key}={x.Value}"));
+
+        if (!string.IsNullOrEmpty(url))
+            url = "?" + url;
+        return url;
+    }
 }
 

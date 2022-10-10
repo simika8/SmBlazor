@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SmQueryOptionsNs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SmBlazor
 {
-    public class ODataSource
+    public class ODataDataSource: IDataSource
     {
         private string ApiBaseUri { get; set; } = null!;
         private string ApiNameUri { get; set; } = null!;
@@ -17,7 +18,7 @@ namespace SmBlazor
 
         private CancellationTokenSource cts = new CancellationTokenSource();
 
-        public ODataSource(string apiBaseUri, string apiNameUri, List<string> expand)
+        public ODataDataSource(string apiBaseUri, string apiNameUri, List<string> expand)
         {
             ApiBaseUri = apiBaseUri;
             ApiNameUri = apiNameUri;
@@ -38,6 +39,7 @@ namespace SmBlazor
 
 
             var temp = await http.GetStreamAsync(ApiBaseUri + "\\" + ApiNameUri + url, cts.Token);
+
             using var jsd = JsonDocument.Parse(temp);
             JsonElement root = jsd.RootElement;
             root.TryGetProperty("value", out var rows);
@@ -45,8 +47,9 @@ namespace SmBlazor
             {
                 var rowClone = row.Clone();
                 res.Add(rowClone);
-            }
+                //var rowClonestring = rowClone.ToString();
 
+            }
             return res;
 
         }

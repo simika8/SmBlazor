@@ -17,7 +17,7 @@ namespace SmBlazor
         public Columns Columns { get; set; } = new Columns();
         public Order Order { get; set; } = new Order();
         public Dictionary<string, string?> FilterValues { get; set; } = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-        public ODataSource DataSource { get; set; } = null!;
+        public IDataSource DataSource { get; set; } = null!;
         public StyleSettings StyleSettings { get; set; } = StyleSettingsHelper.GetDefaultStyleSettings();
         public Settings(string name)
         {

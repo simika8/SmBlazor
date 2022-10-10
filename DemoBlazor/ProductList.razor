@@ -11,7 +11,9 @@
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(0);
-        Settings.DataSource = new ODataSource("https://smdemobackend.azurewebsites.net/odata", "Product", new List<string>() { "Ext", "Stocks" });
+        //Settings.DataSource = new ODataSource("https://smdemobackend.azurewebsites.net/odata", "Product", new List<string>() { "Ext", "Stocks" });
+        //Settings.DataSource = new ODataDataSource("https://localhost:7157/odata", "Product", new List<string>() { "Ext", "Stocks" });
+        Settings.DataSource = new SmQueryOptionsDataSource("https://localhost:7157/api", "SmProduct");
 
         //var exmodel = DtoTypeBuilder.ExampleSmEdmModel();
         //Gd.RowType = DtoTypeBuilder.GetType(exmodel, "Product");
@@ -26,6 +28,7 @@
         Settings.Columns.Add(new Column("Ext.ProbaList", typeof(List<string>)) { Width = 60, Visible = false, });
         Settings.Columns.Add(new Column("Ext.Aa.Proba", typeof(string)) {Width = 60, Visible = false, });
         Settings.Columns.Add(new Column("Id", typeof(Guid)) {Title = "Id", Width = 150,});
+        Settings.Columns.Add(new Column("Code", typeof(string)) {Width = 60, Visible = true, });
         Settings.Columns.Add(new Column("Name", typeof(string)) {Title = "Név", Width = 170,});
         Settings.Columns.Add(new Column("Active", typeof(bool)) {Title = "Aktív", Width = 20,});
         Settings.Columns.Add(new Column("Price", typeof(double)) {Title = "Ár", Width = 40, RightAligned = false,});
@@ -34,8 +37,8 @@
         Settings.Columns.Add(new Column(typeof(ModelsDemo.ProductDemo), "Type") {Width = 40,});
         Settings.Columns.Add(new Column("Ext.Description", typeof(string)) {Width = 60,});
         Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
-         //Gd.FlexibleWidthColumn = Gd.GetColumn("Price");
-        /**/
+        //Settings.FirstTopCount = 2;
+        //Gd.FlexibleWidthColumn = Gd.GetColumn("Price");
     }
 
 }

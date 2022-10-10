@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SmQueryOptionsNs;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,35 +9,6 @@ using System.Threading.Tasks;
 
 namespace SmBlazor
 {
-    public class SmQueryOptions
-    {
-        public int? Top { get; set; }
-        public int? Skip { get; set; }
-        public string? Search { get; set; }
-        public List<RowFilter>? Filters { get; set; }
-        public List<OrderField>? OrderFields { get; set; }
-        public List<string>? Select { get; set; }
-
-    }
-    public enum FilterType
-    {
-        Equals = 0,
-        StartsWithCaseInsensitive = 1,
-    }
-    
-    public class RowFilter
-    {
-        public string FieldName { get; set; } = null!;
-        public string FilterValue { get; set; } = null!;
-        public FilterType? FilterType { get; set; }
-    }
-
-    public class OrderField
-    {
-        public string FieldName { get; set; } = null!;
-        public bool Descending { get; set; }
-    }
-    
     public static class SmQueryOptionsHelper
     {
         public static SmQueryOptions CreateSmQueryOptions(Settings settings, int? top, int? skip)

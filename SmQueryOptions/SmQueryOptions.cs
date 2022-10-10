@@ -11,7 +11,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace SmQueryOptions;
+namespace SmQueryOptionsNs;
 
 public enum FilterType
 {
@@ -104,7 +104,7 @@ public class SmQueryOptions
                 .Where(x => x.PropertyType == typeof(string))
                 .Where(x => x.Name == defaultSearchPropertyName)
                 .FirstOrDefault();
-        if (propertyInfo == null) 
+        if (propertyInfo == null)
             return null;
 
         var expression = StartsWithCaseInsensitiveExpression<T>(parameterExpression, defaultSearchPropertyName, search);
@@ -127,7 +127,7 @@ public class SmQueryOptions
 
         //var expression = DefaultSearchExpression<T>(parameterExpression, Search);
 
-        Expression <Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(expression, parameterExpression);
+        Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(expression, parameterExpression);
 
         var res = sourceQuery.Where(lambda);
         return res;
@@ -159,7 +159,7 @@ public class SmQueryOptions
         Expression expr = arg;
         foreach (string prop in props)
         {
-            PropertyInfo pi = type.GetProperty(prop)!;
+            PropertyInfo pi = GetPropertyInfo<T>(prop)!;
             expr = Expression.Property(expr, pi);
             type = pi.PropertyType;
         }
@@ -179,7 +179,7 @@ public class SmQueryOptions
     {
         PropertyInfo? propertyInfo =
             typeof(T).GetProperties()
-                .Where(x => x.Name == propertyName)
+                .Where(x => x.Name.ToLowerInvariant() == propertyName.ToLowerInvariant())
                 .FirstOrDefault();
         return propertyInfo;
     }
@@ -189,9 +189,9 @@ public class SmQueryOptions
 
         PropertyInfo? propertyInfo = GetPropertyInfo<T>(propertyName);
 
-        if (propertyInfo == null) 
+        if (propertyInfo == null)
             return null;
-        if (propertyInfo.PropertyType != typeof(string)) 
+        if (propertyInfo.PropertyType != typeof(string))
             return null;
 
         var res = Expression.Call(
@@ -232,7 +232,7 @@ public class SmQueryOptions
     public Expression? Equals<T>(ParameterExpression parameterExpression, string propertyName, string constant)
     {
         PropertyInfo? propertyInfo = GetPropertyInfo<T>(propertyName);
-        if (propertyInfo == null) 
+        if (propertyInfo == null)
             return null;
 
         var ty = propertyInfo.PropertyType;
@@ -287,15 +287,15 @@ public class SmQueryOptions
 
         var cult = CultureInfo.InvariantCulture;
         dynamic? typedConsant1 = parseMethod.Invoke(ty, new object[] { constant1, CultureInfo.InvariantCulture });
-        dynamic? typedConsant2 = parseMethod.Invoke(ty, new object[] { constant2??"", CultureInfo.InvariantCulture });
+        dynamic? typedConsant2 = parseMethod.Invoke(ty, new object[] { constant2 ?? "", CultureInfo.InvariantCulture });
 
         var res = Expression.And(
             Expression.GreaterThanOrEqual(
-                Expression.Property(parameterExpression, propertyInfo), 
+                Expression.Property(parameterExpression, propertyInfo),
                 Expression.Constant(typedConsant1)
                 ),
             Expression.LessThanOrEqual(
-                Expression.Property(parameterExpression, propertyInfo), 
+                Expression.Property(parameterExpression, propertyInfo),
                 Expression.Constant(typedConsant2)
                 )
             );
@@ -305,7 +305,17 @@ public class SmQueryOptions
 
     private IQueryable<T> ApplySelect<T>(IQueryable<T> sourceQuery)
     {
-        var selectfields = string.Join(",", Select);
+        //Sub object field select not supported yet. Workaround
+        var workaroundSelect = Select
+            .Select(x => x.Contains('.') ? x.Substring(0, x.IndexOf('.')) : x)
+            .Select(x => x.ToLowerInvariant())
+            .Distinct();
+
+
+
+        var selectfields = string.Join(",", workaroundSelect);
+
+
         var selectExpression = SelectExpression<T>(selectfields);
         var res = sourceQuery.Select(selectExpression);
         return res;
@@ -335,14 +345,14 @@ public class SmQueryOptions
             .Select(o =>
             {
 
-                    // property "Field1"
-                    var mi = typeof(T).GetProperty(o);
+                // property "Field1"
+                var mi = GetPropertyInfo<T>(o);
 
-                    // original value "o.Field1"
-                    var xOriginal = Expression.Property(xParameter, mi!);
+                // original value "o.Field1"
+                var xOriginal = Expression.Property(xParameter, mi!);
 
-                    // set value "Field1 = o.Field1"
-                    return Expression.Bind(mi!, xOriginal);
+                // set value "Field1 = o.Field1"
+                return Expression.Bind(mi!, xOriginal);
             }
         );
 
@@ -355,6 +365,7 @@ public class SmQueryOptions
         // compile to Func<Data, Data>
         return lambda;
     }
+
 
     private IQueryable<T> ApplyPaging<T>(IQueryable<T> sourceQuery)
     {

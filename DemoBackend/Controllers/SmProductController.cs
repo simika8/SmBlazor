@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using SmQueryOptions;
+using SmQueryOptionsNs;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Controllers
@@ -30,8 +30,8 @@ namespace Controllers
 
             var expressions = new List<Expression>();
 
-            AddExpressionIfNotNull(expressions, SmQueryOptions.SmQueryOptions.ContainsCaseInsensitiveExpression<T>(parameterExpression, "Name", search));
-            AddExpressionIfNotNull(expressions, SmQueryOptions.SmQueryOptions.StartsWithCaseInsensitiveExpression<T>(parameterExpression, "Code", search));
+            AddExpressionIfNotNull(expressions, SmQueryOptionsNs.SmQueryOptions.ContainsCaseInsensitiveExpression<T>(parameterExpression, "Name", search));
+            AddExpressionIfNotNull(expressions, SmQueryOptionsNs.SmQueryOptions.StartsWithCaseInsensitiveExpression<T>(parameterExpression, "Code", search));
 
             Expression aggregatedExpression = expressions.Aggregate((prev, current) => Expression.Or(prev, current));
 
@@ -40,7 +40,7 @@ namespace Controllers
         }
 
         [HttpGet("test")]
-        public async Task<ActionResult> test(SmQueryOptions.SmQueryOptionsUrl smQueryOptionsUrl)
+        public async Task<ActionResult> test(SmQueryOptionsNs.SmQueryOptionsUrl smQueryOptionsUrl)
         {
             var smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             var res = SmQueryOptionsUrl.Parse(smQueryOptions);

@@ -12,7 +12,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using SmQueryOptions;
+using SmQueryOptionsNs;
 
 namespace SmQueryOptionsUrlBinder;
 

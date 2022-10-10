@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using SmQueryOptions;
+using SmQueryOptionsNs;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -57,7 +57,7 @@ namespace Controllers
 
             var expressions = new List<Expression>();
 
-            AddExpressionIfNotNull(expressions, SmQueryOptions.SmQueryOptions.StartsWithCaseInsensitiveExpression<T>(parameterExpression, defaultSearchPropertyName, search));
+            AddExpressionIfNotNull(expressions, SmQueryOptionsNs.SmQueryOptions.StartsWithCaseInsensitiveExpression<T>(parameterExpression, defaultSearchPropertyName, search));
 
             Expression aggregatedExpression = expressions.Aggregate((prev, current) => Expression.Or(prev, current));
 

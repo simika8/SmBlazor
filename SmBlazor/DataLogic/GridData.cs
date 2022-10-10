@@ -134,7 +134,15 @@ namespace SmBlazor
         {
             if (src is System.Text.Json.JsonElement)
             {
-                ((System.Text.Json.JsonElement)src).TryGetProperty(fieldName, out var res);
+                var jse = (System.Text.Json.JsonElement)src;
+
+                var property = jse.EnumerateObject()
+                                      .FirstOrDefault(p => string.Compare(p.Name, fieldName,
+                                                                          StringComparison.OrdinalIgnoreCase) == 0);
+
+                var res = property.Value;
+
+                //((System.Text.Json.JsonElement)src).TryGetProperty(fieldName.ToLowerInvariant(), out var res);
                 return res;
             }
             else
