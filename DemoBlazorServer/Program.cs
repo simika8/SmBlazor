@@ -1,7 +1,6 @@
 using DemoBlazorServer.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Http.Connections;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,9 +25,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
-//app.MapBlazorHub(); //helyette:
-app.MapBlazorHub(configureOptions: options =>{options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;});
+app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
