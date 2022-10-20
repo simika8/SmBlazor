@@ -43,6 +43,8 @@
         //Gd.DataSource.Aaaa();
 
         Settings.Height = 300;
+        Settings.FirstTopCount = 5;
+
         //Gd.RowType = typeof(Models.Product);
         //Gd.RowType = typeof(SmBlazor.Product);
 
@@ -64,7 +66,6 @@
 
         //SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings.Columns, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true,} );
         SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping} );
-        Settings.FirstTopCount = 5;
         //Gd.FlexibleWidthColumn = Gd.GetColumn("Price");
     }
 
