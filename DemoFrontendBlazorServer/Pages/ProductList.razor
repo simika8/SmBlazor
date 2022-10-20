@@ -18,10 +18,10 @@
             /*DataSourceSettings = new()
             {
                 DataSourceType = DataSourceType.Odata,
-                DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
-                //DataSourceApiBaseUri = "https://localhost:7157",
+                //DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
+                DataSourceApiBaseUri = "https://localhost:7157",
                 DataSourceApiPathUri = "/odata",
-                DataSourceApiNameUri = "Product",
+                DataSourceApiNameUri = "ProductOdata",
                 DataSourceOdataExpand = new List<string>() { "Ext", "Stocks" },
             },/**/
             DataSourceSettings = new()
@@ -30,7 +30,7 @@
                 //DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
                 DataSourceApiBaseUri = "https://localhost:7157",
                 DataSourceApiPathUri = "/api",
-                DataSourceApiNameUri = "SmProduct",
+                DataSourceApiNameUri = "Product",
             },/**/
         };
 
@@ -45,23 +45,25 @@
         Settings.Height = 300;
         //Gd.RowType = typeof(Models.Product);
         //Gd.RowType = typeof(SmBlazor.Product);
-        
+
         //opcionális cuccok
-        //Gd.ColumnInfo.Columns.Add(new Column() { FieldName = "Stocks", Width = 60, PropertyType = typeof(List<Models.InventoryStock>), Visible = false});
-        Settings.Columns.Add(new Column("Ext.ProbaList", typeof(List<string>)) { Width = 60, Visible = false, });
-        Settings.Columns.Add(new Column("Ext.Aa.Proba", typeof(string)) {Width = 60, Visible = false, });
-        Settings.Columns.Add(new Column("Id",typeof(Guid)) {Title = "Id", Width = 150,});
-        Settings.Columns.Add(new Column("Code", typeof(string)) {Width = 60, Visible = true, });
-        Settings.Columns.Add(new Column("Name", typeof(string)) {Title = "Név", Width = 170,});
-        Settings.Columns.Add(new Column("Active", typeof(bool)) {Title = "Aktív", Width = 20,});
-        Settings.Columns.Add(new Column("Price", typeof(double)) {Title = "Ár", Width = 40, RightAligned = false,});
-        Settings.Columns.Add(new Column("Rating", typeof(int)) {Width = 20,});
-        Settings.Columns.Add(new Column("ReleaseDate", typeof(DateTime)) {Width = 90,});
-        Settings.Columns.Add(new Column(typeof(DemoModels.Product), "Type") {Width = 40,});
-        Settings.Columns.Add(new Column("Ext.Description", typeof(string)) {Width = 60,});
+
+        Settings.Columns.Add(new Column() {FieldName = "Ext.ProbaList", PropertyTypeName = "List<string>", Width = 60, Visible = false, });
+        Settings.Columns.Add(new Column() {FieldName = "Ext.Aa.Proba", Width = 60, Visible = false, });
+        Settings.Columns.Add(new Column() {FieldName = "Id", PropertyTypeName = "Guid", Title = "Id", Width = 150,});
+        Settings.Columns.Add(new Column() {FieldName = "Code", Width = 60, Visible = true, });
+        Settings.Columns.Add(new Column() {FieldName = "Name", Title = "Név", Width = 170,});
+        Settings.Columns.Add(new Column() {FieldName = "Active", PropertyTypeName = "bool", Title = "Aktív", Width = 20,});
+        Settings.Columns.Add(new Column() {FieldName = "Price", PropertyTypeName = "double", Title = "Ár", Width = 40, RightAligned = false,});
+        Settings.Columns.Add(new Column() {FieldName = "Rating", PropertyTypeName = "int", Width = 20,});
+        Settings.Columns.Add(new Column() {FieldName = "ReleaseDate", PropertyTypeName = "DateTime", Width = 90,});
+        Settings.Columns.Add(new Column() {FieldName = "Type", PropertyTypeName ="DemoModels.ProductType", Width = 40, });
+        Settings.Columns.Add(new Column() {FieldName = "Ext.Description",  Width = 60,});
         Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
 
-        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true,} );
+
+        //SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings.Columns, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true,} );
+        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping} );
         Settings.FirstTopCount = 5;
         //Gd.FlexibleWidthColumn = Gd.GetColumn("Price");
     }

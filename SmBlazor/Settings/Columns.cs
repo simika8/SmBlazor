@@ -10,25 +10,58 @@ namespace SmBlazor
 {
     public class Column
     {
-        public string[] SplittedFieldName { get; }
-        public string FieldName { get; }
+        private string fieldName;
+        private string[] splittedFieldName;
+        private string? propertyTypeName;
+        private bool? rightAligned;
+        private FilterType? filterType;
+        private Func<object?, object?>? cellFormatter;
+
+        internal string[] SplittedFieldName { get => splittedFieldName; }
+        public string FieldName
+        {
+            get => fieldName;
+            set
+            {
+                fieldName = value;
+                splittedFieldName = fieldName.Split(".");
+                Title = Title ?? FieldName;
+            }
+        }
+        public string PropertyTypeName
+        {
+            get => propertyTypeName??"string";
+            set
+            {
+                propertyTypeName = value;
+                rightAligned = rightAligned ?? ColumnHelper.DefaultRightAligned(propertyTypeName);
+                FilterType = filterType ?? (propertyTypeName == "string" ? FilterType.StartsWithCaseInsensitive : FilterType.Equals);
+                CellFormatter = ColumnHelper.DefaultCellFormatter(propertyTypeName);
+            }
+        }
         public string? Title { get; set; }
         public int Width { get; set; } = 100;
         public bool Visible { get; set; } = true;
-        public bool RightAligned { get; set; }
-        public FilterType FilterType { get; set; }
-        public Func<object?, object?> CellFormatter { get; set; }
-        public Column(string fieldName, Type propertyType)
+        public bool RightAligned { get => rightAligned ?? false; set => rightAligned = value; }
+        public FilterType FilterType { get => filterType ?? FilterType.Equals; set => filterType = value; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        internal Func<object?, object?> CellFormatter { get => cellFormatter?? ColumnHelper.DefaultCellFormatter(PropertyTypeName); set => cellFormatter = value; }
+        public Column(string fieldName, string propertyTypeName)
         {
             FieldName = fieldName;
-            RightAligned = ColumnHelper.DefaultRightAligned(propertyType);
-            FilterType = propertyType == typeof(string) ? FilterType.StartsWithCaseInsensitive : FilterType.Equals;
-            CellFormatter = ColumnHelper.DefaultCellFormatter(propertyType.Name);
-            Title = FieldName;
-            SplittedFieldName = fieldName.Split(".");
+            PropertyTypeName = propertyTypeName;
+
+            //RightAligned = ColumnHelper.DefaultRightAligned(propertyTypeName);
+            //FilterType = propertyTypeName == "string" ? FilterType.StartsWithCaseInsensitive : FilterType.Equals;
+            //CellFormatter = ColumnHelper.DefaultCellFormatter(propertyTypeName);
+            //Title = FieldName;
+            //SplittedFieldName = fieldName.Split(".");
 
         }
-        public Column(Type rowType, string fieldName) : this(fieldName, propertyType: rowType.GetProperty(fieldName)?.PropertyType??typeof(string)) { }
+        public Column(Type rowType, string fieldName) : this(fieldName, propertyTypeName: rowType.GetProperty(fieldName)?.PropertyType.Name ?? "string") { }
+        public Column() 
+        { 
+        }
     }
     /*public class Columns
     {
@@ -77,8 +110,6 @@ namespace SmBlazor
     }*/
     public class Columns: List<Column>
     {
-
-        //protected internal List<Column> ColumnList { get; set; } = new List<Column>();
         protected internal Dictionary<string, Column> ColumnDictionaryByFieldName { get; set; } = new Dictionary<string, Column>(System.StringComparer.OrdinalIgnoreCase);
 
 
@@ -109,7 +140,7 @@ namespace SmBlazor
             {
                 foreach (var prop in (rowType).GetProperties())
                 {
-                    base.Add(new Column(prop.Name, prop.PropertyType));
+                    base.Add(new Column(prop.Name, prop.PropertyType.Name));
                 }
             }
         }
@@ -125,8 +156,11 @@ namespace SmBlazor
     public static class ColumnHelper
     {
         public readonly static HashSet<Type> RightAlignedTypes = new HashSet<Type> { typeof(double), typeof(int), typeof(decimal), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), };
-        public static bool DefaultRightAligned(Type type)
+        public static bool DefaultRightAligned(string typeName)
         {
+            var type = Type.GetType(typeName);
+            if (type == null)
+                return false;
             var nullableType = Nullable.GetUnderlyingType(type) ?? typeof(string);
             var res = RightAlignedTypes.Contains(type) || RightAlignedTypes.Contains(nullableType);
             return res;
