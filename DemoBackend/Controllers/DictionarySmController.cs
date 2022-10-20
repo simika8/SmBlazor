@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Common;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -18,7 +20,7 @@ namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SmDictionaryController<T> : ControllerBase
+    public class DictionarySmController<T> : ControllerBase where T : class
     {
         protected Dictionary<Guid, T> Table { get; set; } = new Dictionary<Guid, T> { };
 
@@ -40,7 +42,99 @@ namespace Controllers
             await Task.Delay(0);
             return Ok(res);
         }
-        
+
+        [HttpGet("{id:Guid}")]
+        public async Task<ActionResult<T>> Get(Guid id)
+        {
+            if (Table.TryGetValue(id, out var entity))
+            {
+                return entity;
+            }
+            else
+                return NotFound();
+        }
+
+        [HttpPut]
+        public IActionResult Put(Guid id, [FromBody] T modifiedEntity)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (Table.TryGetValue(id, out var entity))
+            {
+                Table[id] = modifiedEntity;
+                //entity = modifiedEntity;
+            } else
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpPatch]
+        public IActionResult Patch(Guid id, [FromBody] JsonPatchDocument<T> patch)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (Table.TryGetValue(id, out var entity))
+            {
+                patch.ApplyTo(entity);
+
+                var isValid = TryValidateModel(entity);
+                if (!isValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                //Table[key] = entity;
+                //entity = modifiedEntity;
+            }
+            else
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] T entity)
+        {
+            var id = Others.GetGuidKey(entity);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            /*if (Table.TryGetValue(key, out var dbentity))
+            {
+                Table[key] = entity;
+                //entity = modifiedEntity;
+            }
+            else*/
+            Table[id] = entity;
+
+            return CreatedAtAction(nameof(Post), id, entity);
+
+        }
+
+        [HttpDelete]
+        public async Task<ActionResult<T>> Delete(Guid id)
+        {
+            if (Table.ContainsKey(id))
+            {
+                Table.Remove(id);
+            }
+            else
+                return NotFound();
+
+            return NoContent();
+        }
+
+
         protected virtual Expression? SearchExpression<T>(ParameterExpression parameterExpression, string? search)
         {
             const string defaultSearchPropertyName = "Name";

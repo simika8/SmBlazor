@@ -14,9 +14,9 @@ namespace DemoModels
             var builder = new Microsoft.OData.ModelBuilder.ODataConventionModelBuilder();
 
 
-            builder.EntitySet<DemoModels.Product>(nameof(DemoModels.Product));
-            builder.EntitySet<DemoModels.ProductExt>(nameof(DemoModels.ProductExt));
-            builder.EntitySet<DemoModels.InventoryStock>(nameof(DemoModels.InventoryStock));
+            builder.EntitySet<DemoModels.Product>(nameof(DemoModels.Product)+"Odata");
+            builder.EntitySet<DemoModels.ProductExt>(nameof(DemoModels.ProductExt) + "Odata");
+            builder.EntitySet<DemoModels.InventoryStock>(nameof(DemoModels.InventoryStock) + "Odata");
 
             return builder.GetEdmModel();
 

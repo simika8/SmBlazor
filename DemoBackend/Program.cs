@@ -1,19 +1,36 @@
 using Microsoft.AspNetCore.OData;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers()
+/*builder.Services.AddControllers(options =>
+    {
+        options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
+    })
     .AddJsonOptions(opt =>
     {
         opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
     })
     .AddOData(opt => opt.AddRouteComponents("odata",
                         DemoModels.ProductODataEdmModel.GetEdmModel()).Filter().Expand().Select().Count().SkipToken().OrderBy().SetMaxTop(500))
+                ;*/
+
+builder.Services.AddControllers(options =>
+    {
+        options.InputFormatters.Insert(0, MyJpif.GetJsonPatchInputFormatter());
+    }).AddNewtonsoftJson(opt =>
+    {
+        opt.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+    })
+    .AddOData(opt => opt.AddRouteComponents("odata",
+                        DemoModels.ProductODataEdmModel.GetEdmModel()).Filter().Expand().Select().Count().SkipToken().OrderBy().SetMaxTop(500))
                 ;
+
 
 builder.Services.AddSwaggerGen(c =>
 {

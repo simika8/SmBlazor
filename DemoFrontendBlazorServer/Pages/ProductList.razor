@@ -27,8 +27,8 @@
             DataSourceSettings = new()
             {
                 DataSourceType = DataSourceType.SmQueryOptions,
-                DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
-                //DataSourceApiBaseUri = "https://localhost:7157",
+                //DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
+                DataSourceApiBaseUri = "https://localhost:7157",
                 DataSourceApiPathUri = "/api",
                 DataSourceApiNameUri = "SmProduct",
             },/**/
@@ -62,7 +62,7 @@
         Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
 
         SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true,} );
-        Settings.FirstTopCount = 2;
+        Settings.FirstTopCount = 5;
         //Gd.FlexibleWidthColumn = Gd.GetColumn("Price");
     }
 
