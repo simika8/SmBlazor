@@ -30,7 +30,7 @@ namespace SmBlazor
         }
         public Column(Type rowType, string fieldName) : this(fieldName, propertyType: rowType.GetProperty(fieldName)?.PropertyType??typeof(string)) { }
     }
-    public class Columns
+    /*public class Columns
     {
 
         protected internal List<Column> ColumnList { get; set; } = new List<Column>();
@@ -74,7 +74,53 @@ namespace SmBlazor
             ColumnDictionaryByFieldName.Add(column.FieldName, column);
         }
 
+    }*/
+    public class Columns: List<Column>
+    {
+
+        //protected internal List<Column> ColumnList { get; set; } = new List<Column>();
+        protected internal Dictionary<string, Column> ColumnDictionaryByFieldName { get; set; } = new Dictionary<string, Column>(System.StringComparer.OrdinalIgnoreCase);
+
+
+        public List<Column> VisibleColumns()
+        {
+            return this.Where(x => x.Visible).ToList();
+        }
+        public Column? GetColumn(string fieldName)
+        {
+            if (ColumnDictionaryByFieldName.TryGetValue(fieldName, out var column2))
+                return column2;
+            else
+                return null;
+
+        }
+
+        public Column? GetIdField()
+        {
+            var res = GetColumn("Id");
+
+            return res;
+        }
+
+        public void AddAllColumnsByRowType(Type rowType)
+        {
+            //ha nincsenek oszlopok megadva akkor az osztály típus alapján elkészítem.
+            if (base.Count == 0)
+            {
+                foreach (var prop in (rowType).GetProperties())
+                {
+                    base.Add(new Column(prop.Name, prop.PropertyType));
+                }
+            }
+        }
+        public new void Add(Column column)
+        {
+            base.Add(column);
+            ColumnDictionaryByFieldName.Add(column.FieldName, column);
+        }
+
     }
+
 
     public static class ColumnHelper
     {

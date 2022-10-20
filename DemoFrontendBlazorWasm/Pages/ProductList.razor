@@ -60,8 +60,10 @@
         Settings.Columns.Add(new Column(typeof(DemoModels.Product), "Type") {Width = 40,});
         Settings.Columns.Add(new Column("Ext.Description", typeof(string)) {Width = 60,});
         Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
-
-        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true,} );
+        
+        
+        //SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings.Columns, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true,} );
+        //SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true,} );
         Settings.FirstTopCount = 5;
         //Gd.FlexibleWidthColumn = Gd.GetColumn("Price");
     }

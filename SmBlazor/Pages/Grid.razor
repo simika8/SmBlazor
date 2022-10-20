@@ -83,7 +83,7 @@
                         {
                             var rowIsCursorSelected = row.Index == Settings.Cursor;
                             var idx = row.Index.ToString();
-                            <GridRow @ref=GridRows[idx] Row=row.Row RowIsCursorSelected="rowIsCursorSelected" Columns="Settings.Columns.ColumnList" RowClick="RowClick" />
+                            <GridRow @ref=GridRows[idx] Row=row.Row RowIsCursorSelected="rowIsCursorSelected" Columns="Settings.Columns" RowClick="RowClick" />
                         }
                     }
                 }
