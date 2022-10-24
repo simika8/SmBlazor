@@ -1,6 +1,10 @@
 ﻿@page "/counter"
+@using SmBlazor
 
 <PageTitle>Counter</PageTitle>
+<ComponentProba Settings=@Settings></ComponentProba>
+<textarea @bind="description"/>
+<textarea @bind="description"/>
 
 <h1>Counter</h1>
 
@@ -10,9 +14,23 @@
 
 @code {
     private int currentCount = 0;
-
+    private string description;
+    private SmGridSettings Settings { get; set; } = new();
     private void IncrementCount()
     {
         currentCount++;
+        Settings.Name = description;
+        //Settings.Columns.Add(new(){ FieldName = "asdf"});
+        //Settings.Columns = new 
+        //Settings.Columns[0].FieldName = "currentCount";
     }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        //Settings.Columns = { new ComponentProba.SmColumn2() { } };
+        //Settings = new();
+        Settings.Name = "asdfas";
+        Console.WriteLine("Counter.OnParametersSetAsync");
+    }
+    
 }

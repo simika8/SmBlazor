@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SmBlazor
 {
-    public class Column
+    public class SmColumn
     {
         private string fieldName;
         private string[] splittedFieldName;
@@ -46,7 +46,7 @@ namespace SmBlazor
         public FilterType FilterType { get => filterType ?? FilterType.Equals; set => filterType = value; }
         [System.Text.Json.Serialization.JsonIgnore]
         internal Func<object?, object?> CellFormatter { get => cellFormatter?? ColumnHelper.DefaultCellFormatter(PropertyTypeName); set => cellFormatter = value; }
-        public Column(string fieldName, string propertyTypeName)
+        public SmColumn(string fieldName, string propertyTypeName)
         {
             FieldName = fieldName;
             PropertyTypeName = propertyTypeName;
@@ -58,8 +58,8 @@ namespace SmBlazor
             //SplittedFieldName = fieldName.Split(".");
 
         }
-        public Column(Type rowType, string fieldName) : this(fieldName, propertyTypeName: rowType.GetProperty(fieldName)?.PropertyType.Name ?? "string") { }
-        public Column() 
+        public SmColumn(Type rowType, string fieldName) : this(fieldName, propertyTypeName: rowType.GetProperty(fieldName)?.PropertyType.Name ?? "string") { }
+        public SmColumn() 
         { 
         }
     }
@@ -108,16 +108,16 @@ namespace SmBlazor
         }
 
     }*/
-    public class Columns: List<Column>
+    public class Columns: List<SmColumn>
     {
-        protected internal Dictionary<string, Column> ColumnDictionaryByFieldName { get; set; } = new Dictionary<string, Column>(System.StringComparer.OrdinalIgnoreCase);
+        protected internal Dictionary<string, SmColumn> ColumnDictionaryByFieldName { get; set; } = new Dictionary<string, SmColumn>(System.StringComparer.OrdinalIgnoreCase);
 
 
-        public List<Column> VisibleColumns()
+        public List<SmColumn> VisibleColumns()
         {
             return this.Where(x => x.Visible).ToList();
         }
-        public Column? GetColumn(string fieldName)
+        public SmColumn? GetColumn(string fieldName)
         {
             if (ColumnDictionaryByFieldName.TryGetValue(fieldName, out var column2))
                 return column2;
@@ -126,7 +126,7 @@ namespace SmBlazor
 
         }
 
-        public Column? GetIdField()
+        public SmColumn? GetIdField()
         {
             var res = GetColumn("Id");
 
@@ -140,11 +140,11 @@ namespace SmBlazor
             {
                 foreach (var prop in (rowType).GetProperties())
                 {
-                    base.Add(new Column(prop.Name, prop.PropertyType.Name));
+                    base.Add(new SmColumn(prop.Name, prop.PropertyType.Name));
                 }
             }
         }
-        public new void Add(Column column)
+        public new void Add(SmColumn column)
         {
             base.Add(column);
             ColumnDictionaryByFieldName.Add(column.FieldName, column);

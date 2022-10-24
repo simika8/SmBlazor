@@ -7,8 +7,10 @@ using System.Reflection.Emit;
 
 namespace SmBlazor
 {
-    public class Settings
+    public class SmGridSettings
     {
+        private string idFieldName;
+
         public string Name { get; set; }
         public int FirstTopCount { get; set; } = 20;
         public int Height { get; set; } = 200;
@@ -20,6 +22,7 @@ namespace SmBlazor
         public Dictionary<string, string?> FilterValues { get; set; } = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         public StyleSettings StyleSettings { get; set; } = StyleSettingsHelper.GetDefaultStyleSettings();
         public DataSourceSettings DataSourceSettings { get; set; }
+        public string IdFieldName { get; set; } = "Id";
 
     }
 

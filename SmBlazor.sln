@@ -9,11 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoBackend", "DemoBackend\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmQueryOptions", "SmQueryOptions\SmQueryOptions.csproj", "{A15BF5D7-20AE-428F-B5A3-330EB16C9835}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoFrontendBlazorWasm", "DemoFrontendBlazorWasm\DemoFrontendBlazorWasm.csproj", "{7FBC9870-4417-4326-AA51-1D46EA210445}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoFrontendBlazorWasm", "DemoFrontendBlazorWasm\DemoFrontendBlazorWasm.csproj", "{7FBC9870-4417-4326-AA51-1D46EA210445}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoModels", "DemoModels\DemoModels.csproj", "{3D12FA44-E7E8-4D8C-A74D-2FA72CC0B429}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoModels", "DemoModels\DemoModels.csproj", "{3D12FA44-E7E8-4D8C-A74D-2FA72CC0B429}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoFrontendBlazorServer", "DemoFrontendBlazorServer\DemoFrontendBlazorServer.csproj", "{E4E6B44A-4E3B-434F-A76C-4ED2FCAA34D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoFrontendBlazorServer", "DemoFrontendBlazorServer\DemoFrontendBlazorServer.csproj", "{E4E6B44A-4E3B-434F-A76C-4ED2FCAA34D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

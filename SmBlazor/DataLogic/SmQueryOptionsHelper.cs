@@ -11,7 +11,7 @@ namespace SmBlazor
 {
     public static class SmQueryOptionsHelper
     {
-        public static SmQueryOptions CreateSmQueryOptions(Settings settings, int? top, int? skip)
+        public static SmQueryOptions CreateSmQueryOptions(SmGridSettings settings, int? top, int? skip)
         {
             var res = new SmQueryOptions();
             res.Top = top > 0 ? top : null;

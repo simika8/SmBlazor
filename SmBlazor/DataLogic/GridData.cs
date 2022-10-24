@@ -30,12 +30,13 @@ namespace SmBlazor
             }
         }
 
-        public async Task ReQuery(Settings settings)
+        public async Task ReQuery(SmGridSettings settings)
         {
             InitDataSource(settings.DataSourceSettings);
             var top = settings.FirstTopCount;
             Rows = null;
             var newRows = await GetRows(settings, top);
+            Rows = null;
             AddToRows(newRows);
         }
         public void AddToRows(List<dynamic?> newRows)
@@ -49,7 +50,7 @@ namespace SmBlazor
                 Rows.Add(new(i + oldRowsCount, row));
             }
         }
-        public async Task LoadMoreRecords(Settings settings)
+        public async Task LoadMoreRecords(SmGridSettings settings)
         {
             var origRecCount = Rows?.Count??0;
             var redundantRecordCount = Math.Max((int)(origRecCount * 0.03), 1);
@@ -60,8 +61,7 @@ namespace SmBlazor
             var newRows = await GetRows(settings, top, skip);
 
 
-            var idField = settings.Columns.GetIdField();
-            if (CanMerge(Rows, newRows, redundantRecordCount, idField, out var trueRedundantsCount))
+            if (CanMerge(Rows, newRows, redundantRecordCount, settings.IdFieldName, out var trueRedundantsCount))
             {
                 var nonRedundantNewRows = newRows.Skip(trueRedundantsCount);
                 AddToRows(nonRedundantNewRows.ToList());
@@ -79,14 +79,14 @@ namespace SmBlazor
             }
            
         }
-        private async Task<List<dynamic?>> GetRows(Settings settings, int top, int? skip = null)
+        private async Task<List<dynamic?>> GetRows(SmGridSettings settings, int top, int? skip = null)
         {
             var qo = SmQueryOptionsHelper.CreateSmQueryOptions(settings, top, skip);
             var res = await DataSource.GetRows(qo);
             return res;
         }
 
-        private static bool CanMerge(List<(int id, dynamic? row)>? origRows, List<dynamic?> newRows, int redundantRecordCount, Column? idField, out int trueRedundantsCount)
+        private static bool CanMerge(List<(int id, dynamic? row)>? origRows, List<dynamic?> newRows, int redundantRecordCount, string idFieldName, out int trueRedundantsCount)
         {
             if (origRows == null)
             {
@@ -99,8 +99,8 @@ namespace SmBlazor
             }
 
 
-            var origRedundantRows = origRows.TakeLast(redundantRecordCount).Select(x => GetIdProperty(x.row, idField)).ToList();
-            var newRedundantRows = newRows.Take(redundantRecordCount).Select(x => GetIdProperty(x, idField)).ToList();
+            var origRedundantRows = origRows.TakeLast(redundantRecordCount).Select(x => GetIdProperty(x.row, idFieldName)).ToList();
+            var newRedundantRows = newRows.Take(redundantRecordCount).Select(x => GetIdProperty(x, idFieldName)).ToList();
             trueRedundantsCount = 0;
             foreach (var orow in origRedundantRows)
             {
@@ -121,9 +121,9 @@ namespace SmBlazor
         }
 
 
-        private static object? GetIdProperty(dynamic? row, Column idField)
+        private static object? GetIdProperty(dynamic? row, string idFieldName)
         {
-            var res = Get1LevelPropertyValue(row, idField.FieldName);
+            var res = Get1LevelPropertyValue(row, idFieldName);
             return res;
         }
 

@@ -13,7 +13,7 @@
 
 
     private Grid? Grid { get; set; }
-    private Settings Settings { get; set; } = new Settings()
+    private SmGridSettings Settings { get; set; } = new SmGridSettings()
         {
             /*DataSourceSettings = new()
             {
@@ -50,17 +50,17 @@
 
         //opcionális cuccok
 
-        Settings.Columns.Add(new Column() {FieldName = "Ext.ProbaList", PropertyTypeName = "List<string>", Width = 60, Visible = false, });
-        Settings.Columns.Add(new Column() {FieldName = "Ext.Aa.Proba", Width = 60, Visible = false, });
-        Settings.Columns.Add(new Column() {FieldName = "Id", PropertyTypeName = "Guid", Title = "Id", Width = 150,});
-        Settings.Columns.Add(new Column() {FieldName = "Code", Width = 60, Visible = true, });
-        Settings.Columns.Add(new Column() {FieldName = "Name", Title = "Név", Width = 170,});
-        Settings.Columns.Add(new Column() {FieldName = "Active", PropertyTypeName = "bool", Title = "Aktív", Width = 20,});
-        Settings.Columns.Add(new Column() {FieldName = "Price", PropertyTypeName = "double", Title = "Ár", Width = 40, RightAligned = false,});
-        Settings.Columns.Add(new Column() {FieldName = "Rating", PropertyTypeName = "int", Width = 20,});
-        Settings.Columns.Add(new Column() {FieldName = "ReleaseDate", PropertyTypeName = "DateTime", Width = 90,});
-        Settings.Columns.Add(new Column() {FieldName = "Type", PropertyTypeName ="DemoModels.ProductType", Width = 40, });
-        Settings.Columns.Add(new Column() {FieldName = "Ext.Description",  Width = 60,});
+        Settings.Columns.Add(new SmColumn() {FieldName = "Ext.ProbaList", PropertyTypeName = "List<string>", Width = 60, Visible = false, });
+        Settings.Columns.Add(new SmColumn() {FieldName = "Ext.Aa.Proba", Width = 60, Visible = false, });
+        Settings.Columns.Add(new SmColumn() {FieldName = "Id", PropertyTypeName = "Guid", Title = "Id", Width = 150,});
+        Settings.Columns.Add(new SmColumn() {FieldName = "Code", Width = 60, Visible = true, });
+        Settings.Columns.Add(new SmColumn() {FieldName = "Name", Title = "Név", Width = 170,});
+        Settings.Columns.Add(new SmColumn() {FieldName = "Active", PropertyTypeName = "bool", Title = "Aktív", Width = 20,});
+        Settings.Columns.Add(new SmColumn() {FieldName = "Price", PropertyTypeName = "double", Title = "Ár", Width = 40, RightAligned = false,});
+        Settings.Columns.Add(new SmColumn() {FieldName = "Rating", PropertyTypeName = "int", Width = 20,});
+        Settings.Columns.Add(new SmColumn() {FieldName = "ReleaseDate", PropertyTypeName = "DateTime", Width = 90,});
+        Settings.Columns.Add(new SmColumn() {FieldName = "Type", PropertyTypeName ="DemoModels.ProductType", Width = 40, });
+        Settings.Columns.Add(new SmColumn() {FieldName = "Ext.Description",  Width = 60,});
         Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
 
 

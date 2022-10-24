@@ -99,7 +99,7 @@
 
     [EditorRequired]
     [Parameter]
-    public Settings Settings { get; set; } = null!;
+    public SmGridSettings Settings { get; set; } = null!;
 
     public GridData GridData { get; set; } = new GridData();
 
@@ -297,6 +297,8 @@
 
     public async Task ReQuery()
     {
+        if (Settings == null)
+            return;
 
         GridRows = new Dictionary<string, GridRow?>();
         GridData.Rows = null;
@@ -319,14 +321,16 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        ;
-        await ReQuery();
+        if (Settings.DataSourceSettings == null)
+            return; 
 
-        //await using var ExampleJsInterop = new ExampleJsInterop(Js);
-        //await ExampleJsInterop.FocusToElement(Input?.InputElement);
-        //Input?.InputElement.FocusAsync();
+        if (SettingsChanged())
+            _myShouldRender = true;
 
+        if (_myShouldRender)
+            await ReQuery();
     }
+
 
     bool _myShouldRender = true;
     protected override bool ShouldRender()
@@ -334,13 +338,25 @@
         if (_myShouldRender)
         {
             _myShouldRender = false;
-            return base.ShouldRender();
+            return true;
         }
         else
         {
             //_myShouldRender = true;
             return false;
         }
+    }
+
+    private string _oldSettingsJson;
+    private bool SettingsChanged()
+    {
+        var actSettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping} );
+        if (actSettingsJson != _oldSettingsJson)
+        {
+            _oldSettingsJson = actSettingsJson;
+            return true;
+        }
+        return false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

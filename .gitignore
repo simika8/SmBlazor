@@ -348,3 +348,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/DemoFrontendBlazorServer/Properties/ServiceDependencies/SmDemoBlazorServer - Zip Deploy/profile.arm.json
+/DemoFrontendBlazorWasm/Properties/ServiceDependencies/SmDemoBlazorWasm - Web Deploy/profile.arm.json

@@ -1,0 +1,51 @@
+﻿@using SmBlazor
+
+<h3>ComponentProba</h3>
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public SmGridSettings Settings { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SettingsChanged())
+            _myShouldRender = true;
+        Console.WriteLine("ComponentProba.OnParametersSetAsync: " + _myShouldRender);
+    }
+
+    bool _myShouldRender = true;
+    protected override bool ShouldRender()
+    {
+        if (_myShouldRender)
+        {
+            _myShouldRender = false;
+            return true;
+        }
+        else
+        {
+            //_myShouldRender = true;
+            return false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("ComponentProba.OnAfterRenderAsync");
+    }
+
+
+    private string oldSettingsJson;
+
+    private bool SettingsChanged()
+    {
+        var actSettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping} );
+        if (actSettingsJson != oldSettingsJson)
+        {
+            oldSettingsJson = actSettingsJson;
+            return true;
+        }
+        return false;
+    }
+
+}
