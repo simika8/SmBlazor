@@ -69,7 +69,7 @@ namespace SmBlazor
             if (InputElementRef == null)
                 return false;
             var module = await moduleTask.Value;
-            await module.InvokeAsync<bool>("subscribeToChange", new object[] { inputComponentRef, InputElementRef });
+            await module.InvokeVoidAsync("subscribeToChange", new object[] { inputComponentRef, InputElementRef });
             return true;
         }
 
