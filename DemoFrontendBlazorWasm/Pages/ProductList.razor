@@ -1,6 +1,7 @@
 ﻿@using System.Text.Json.Serialization
 @using SmBlazor
 @inject HttpClient Http
+@inject IJSRuntime JsRuntime
 
 <Grid @ref="Grid" Settings=@Settings/>
 
@@ -54,11 +55,33 @@
 
 
     private Grid? Grid { get; set; }
-    private SmGridSettings Settings { get; set; } = new();
+
+    private SmGridSettings Settings { get; set; } = new SmGridSettings()
+    {
+        /*DataSourceSettings = new()
+        {
+            DataSourceType = DataSourceType.Odata,
+            //DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
+            DataSourceApiBaseUri = "https://localhost:7157",
+            DataSourceApiPathUri = "/odata",
+            DataSourceApiNameUri = "ProductOdata",
+            DataSourceOdataExpand = new List<string>() { "Ext", "Stocks" },
+        },/**/
+        DataSourceSettings = new()
+        {
+            DataSourceType = DataSourceType.SmQueryOptions,
+            DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
+            //DataSourceApiBaseUri = "https://localhost:7157",
+            DataSourceApiPathUri = "/api",
+            DataSourceApiNameUri = "Product",
+        },/**/
+    };
+
 
     protected override async Task OnInitializedAsync()
     {
-        Settings = await Http.GetFromJsonAsync<SmGridSettings>("sample-data/Settings.json");
+        //Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
+        Settings = await Common.GetFromJsonAsync<SmGridSettings>(JsRuntime, Http, "sample-data/SmGridSettings.json");
     }
 
 

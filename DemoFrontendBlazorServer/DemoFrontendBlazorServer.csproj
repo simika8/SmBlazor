@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazorise.Bootstrap5" Version="1.1.2" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DemoModels\DemoModels.csproj" />
     <ProjectReference Include="..\SmBlazor\SmBlazor.csproj" />
   </ItemGroup>

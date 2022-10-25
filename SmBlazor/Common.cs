@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -34,7 +36,32 @@ namespace SmBlazor
                 ? results
                 : throw new AggregateException(exceptions);
         }
-        
+
+        public static bool BlazorIsWasm(IJSRuntime jsRuntime)
+        {
+            var res = jsRuntime is IJSInProcessRuntime;
+            return res;
+        }
+
+        public static async Task<T> GetFromJsonAsync<T>(IJSRuntime jsRuntime, HttpClient http, string pathFromWwwRoot)
+        {
+            T? res;
+            if (BlazorIsWasm(jsRuntime))
+            {
+                res = await http.GetFromJsonAsync<T>(pathFromWwwRoot);
+            } else
+            {
+                var jsonString = await File.ReadAllTextAsync("wwwroot/" + pathFromWwwRoot);
+                res = JsonSerializer.Deserialize<T>(jsonString);
+
+                //return await http.GetFromJsonAsync<T>("https://localhost:7153/" + pathFroWwwwRoot);
+            }
+            if (res != null)
+                return res;
+            else
+                throw new FileNotFoundException($"File not found: { pathFromWwwRoot }. BlazorIsWasm : {BlazorIsWasm(jsRuntime)}");
+        }
+
 
     }
 }

@@ -1,0 +1,130 @@
+﻿{
+  "Name": "Products",
+  "FirstTopCount": 5,
+  "Height": 300,
+  "Search": "",
+  "Cursor": -1,
+  "Columns": [
+    {
+      "FieldName": "Ext.ProbaList",
+      "PropertyTypeName": "List<string>",
+      "Title": "Ext.ProbaList",
+      "Width": 60,
+      "Visible": false,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "Ext.Aa.Proba",
+      "PropertyTypeName": "string",
+      "Title": "Ext.Aa.Proba",
+      "Width": 60,
+      "Visible": false,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "Id",
+      "PropertyTypeName": "Guid",
+      "Title": "Id",
+      "Width": 150,
+      "Visible": true,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "Code",
+      "PropertyTypeName": "string",
+      "Title": "Code",
+      "Width": 60,
+      "Visible": true,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "Name",
+      "PropertyTypeName": "string",
+      "Title": "Név",
+      "Width": 170,
+      "Visible": true,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "Active",
+      "PropertyTypeName": "bool",
+      "Title": "Aktív",
+      "Width": 20,
+      "Visible": true,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "Price",
+      "PropertyTypeName": "double",
+      "Title": "Ár",
+      "Width": 40,
+      "Visible": true,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "Rating",
+      "PropertyTypeName": "int",
+      "Title": "Rating",
+      "Width": 20,
+      "Visible": true,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "ReleaseDate",
+      "PropertyTypeName": "DateTime",
+      "Title": "ReleaseDate",
+      "Width": 90,
+      "Visible": true,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "Type",
+      "PropertyTypeName": "DemoModels.ProductType",
+      "Title": "Type",
+      "Width": 40,
+      "Visible": true,
+      "RightAligned": false,
+      "FilterType": 0
+    },
+    {
+      "FieldName": "Ext.Description",
+      "PropertyTypeName": "string",
+      "Title": "Ext.Description",
+      "Width": 60,
+      "Visible": true,
+      "RightAligned": false,
+      "FilterType": 0
+    }
+  ],
+  "Order": {
+    "OrderFields": []
+  },
+  "FilterValues": {
+    "Id": "",
+    "Code": "",
+    "Name": "",
+    "Active": "",
+    "Price": "",
+    "Rating": "",
+    "ReleaseDate": "",
+    "Type": "",
+    "Ext.Description": ""
+  },
+  "StyleSettings": 95,
+  "DataSourceSettings": {
+    "DataSourceType": 0,
+    "DataSourceApiBaseUri": "https://smdemobackend.azurewebsites.net",
+    "DataSourceApiPathUri": "/api",
+    "DataSourceApiNameUri": "Product",
+    "DataSourceOdataExpand": []
+  }
+}

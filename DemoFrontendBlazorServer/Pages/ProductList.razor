@@ -1,72 +1,88 @@
 ﻿@using System.Text.Json.Serialization
 @using SmBlazor
-
+@inject HttpClient Http
+@inject IJSRuntime JsRuntime
 
 <Grid @ref="Grid" Settings=@Settings/>
 
-<div>
-    <textarea @bind="SettingsJson" @bind:event="oninput" />
-</div>
+<Button Color="Color.Primary" Clicked="@ShowModal">Setup</Button>
+<Modal @ref="modalRef">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Employee edit</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Field>
+                <FieldLabel>Settings</FieldLabel>
+                
+                <MemoEdit @bind-Text="@SettingsJson" Rows="30"/>
+            </Field>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Primary" Clicked="@Ok">Ok</Button>
+            <Button Color="Color.Secondary" Clicked="@Cancel">Cancel</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 
 @code {
+    private Modal modalRef;
+
+    private Task ShowModal()
+    {
+        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping} );
+        return modalRef.Show();
+    }
+
+    private Task Ok()
+    {
+        Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson);
+        return modalRef.Hide();
+    }
+
+    private Task Cancel()
+    {
+        return modalRef.Hide();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        ;
+    }
+
     public string SettingsJson { get; set; } = string.Empty;
 
 
     private Grid? Grid { get; set; }
+
     private SmGridSettings Settings { get; set; } = new SmGridSettings()
+    {
+        /*DataSourceSettings = new()
         {
-            /*DataSourceSettings = new()
-            {
-                DataSourceType = DataSourceType.Odata,
-                //DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
-                DataSourceApiBaseUri = "https://localhost:7157",
-                DataSourceApiPathUri = "/odata",
-                DataSourceApiNameUri = "ProductOdata",
-                DataSourceOdataExpand = new List<string>() { "Ext", "Stocks" },
-            },/**/
-            DataSourceSettings = new()
-            {
-                DataSourceType = DataSourceType.SmQueryOptions,
-                DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
-                //DataSourceApiBaseUri = "https://localhost:7157",
-                DataSourceApiPathUri = "/api",
-                DataSourceApiNameUri = "Product",
-            },/**/
-        };
+            DataSourceType = DataSourceType.Odata,
+            //DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
+            DataSourceApiBaseUri = "https://localhost:7157",
+            DataSourceApiPathUri = "/odata",
+            DataSourceApiNameUri = "ProductOdata",
+            DataSourceOdataExpand = new List<string>() { "Ext", "Stocks" },
+        },/**/
+        DataSourceSettings = new()
+        {
+            DataSourceType = DataSourceType.SmQueryOptions,
+            DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
+            //DataSourceApiBaseUri = "https://localhost:7157",
+            DataSourceApiPathUri = "/api",
+            DataSourceApiNameUri = "Product",
+        },/**/
+    };
+
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(0);
-
-        //var exmodel = DtoTypeBuilder.ExampleSmEdmModel();
-        //Gd.RowType = DtoTypeBuilder.GetType(exmodel, "Product");
-        //Gd.DataSource.Aaaa();
-
-        Settings.Height = 300;
-        Settings.FirstTopCount = 5;
-
-        //Gd.RowType = typeof(Models.Product);
-        //Gd.RowType = typeof(SmBlazor.Product);
-
-        //opcionális cuccok
-
-        Settings.Columns.Add(new SmColumn() {FieldName = "Ext.ProbaList", PropertyTypeName = "List<string>", Width = 60, Visible = false, });
-        Settings.Columns.Add(new SmColumn() {FieldName = "Ext.Aa.Proba", Width = 60, Visible = false, });
-        Settings.Columns.Add(new SmColumn() {FieldName = "Id", PropertyTypeName = "Guid", Title = "Id", Width = 150,});
-        Settings.Columns.Add(new SmColumn() {FieldName = "Code", Width = 60, Visible = true, });
-        Settings.Columns.Add(new SmColumn() {FieldName = "Name", Title = "Név", Width = 170,});
-        Settings.Columns.Add(new SmColumn() {FieldName = "Active", PropertyTypeName = "bool", Title = "Aktív", Width = 20,});
-        Settings.Columns.Add(new SmColumn() {FieldName = "Price", PropertyTypeName = "double", Title = "Ár", Width = 40, RightAligned = false,});
-        Settings.Columns.Add(new SmColumn() {FieldName = "Rating", PropertyTypeName = "int", Width = 20,});
-        Settings.Columns.Add(new SmColumn() {FieldName = "ReleaseDate", PropertyTypeName = "DateTime", Width = 90,});
-        Settings.Columns.Add(new SmColumn() {FieldName = "Type", PropertyTypeName ="DemoModels.ProductType", Width = 40, });
-        Settings.Columns.Add(new SmColumn() {FieldName = "Ext.Description",  Width = 60,});
-        Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
-
-
-        //SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings.Columns, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true,} );
-        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping} );
-        //Gd.FlexibleWidthColumn = Gd.GetColumn("Price");
+        //Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
+        Settings = await Common.GetFromJsonAsync<SmGridSettings>(JsRuntime, Http, "sample-data/SmGridSettings.json");
     }
+
 
 }
