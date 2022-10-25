@@ -6,6 +6,13 @@
 <textarea @bind="description"/>
 <textarea @bind="description"/>
 
+<input @bind="description2"/>
+<input @bind="description2"/>
+
+<Input @ref="Input" @bind-Value=@description2 OnChange=@SearchChanged />
+<Input @bind-Value=@description2 />
+<PasswordBox @bind-Value=@description2 />
+
 <h1>Counter</h1>
 
 <p role="status">Current count: @currentCount</p>
@@ -15,14 +22,19 @@
 @code {
     private int currentCount = 0;
     private string description;
+    private string description2;
+    private string description3;
     private SmGridSettings Settings { get; set; } = new();
-    private void IncrementCount()
+    private Input? Input { get; set; }
+    private async Task IncrementCount()
     {
         currentCount++;
         Settings.Name = description;
         //Settings.Columns.Add(new(){ FieldName = "asdf"});
         //Settings.Columns = new 
         //Settings.Columns[0].FieldName = "currentCount";
+        await Input.SetValueFromCode("asdf");
+
     }
 
     protected override async Task OnParametersSetAsync()
@@ -32,5 +44,11 @@
         Settings.Name = "asdfas";
         Console.WriteLine("Counter.OnParametersSetAsync");
     }
-    
+
+    private async Task SearchChanged(string value)
+    {
+        //description2 = value;
+        //await ReQuery();
+    }
+
 }

@@ -20,9 +20,13 @@
                 _value = value;
                 ValueChanged.InvokeAsync(value);
                 OnChange.InvokeAsync(value);
+                var task = SetValueFromCode(value);
+
+                //var result = AsyncContext.RunTask(MyAsyncMethod).Result;
             }
         }
     }
+    
     [Parameter]
     public EventCallback<string> ValueChanged { get; set; }
 
@@ -50,7 +54,20 @@
     public void SetValueFromJS(string newValue)
     {
         Value = newValue;
+        //ValueChanged.InvokeAsync(Value);
+        //OnChange.InvokeAsync(Value);
+
         StateHasChanged();
+    }
+
+    public async Task SetValueFromCode(string newValue)
+    {
+
+        SmJsInterop = new SmBlazor.SmJsInterop(JsRuntime);
+
+        await SmJsInterop.SetValue(InputElementRef.Current, newValue);
+        Console.WriteLine("SetValueFromCode");
+
     }
 
     [JSInvokable("keyboardEventHandlerFromJs")]
@@ -90,5 +107,6 @@
             
         }
     }
+    
 
 }

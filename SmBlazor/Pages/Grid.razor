@@ -81,7 +81,7 @@
                     {
                         @foreach (var row in GridData.Rows)
                         {
-                            var rowIsCursorSelected = row.Index == Settings.Cursor;
+                            var rowIsCursorSelected = row.Index == State.Cursor;
                             var idx = row.Index.ToString();
                             <GridRow @ref=GridRows[idx] Row=row.Row RowIsCursorSelected="rowIsCursorSelected" Columns="Settings.Columns" RowClick="RowClick" />
                         }
@@ -100,6 +100,7 @@
     [EditorRequired]
     [Parameter]
     public SmGridSettings Settings { get; set; } = null!;
+    private SmGridState State { get; set; } = new();
 
     public GridData GridData { get; set; } = new GridData();
 
@@ -111,11 +112,11 @@
     public async Task ScrollToCursor()
     {
         await using var SmJsInterop = new SmJsInterop(Js);
-        if (Settings.Cursor > -1)
+        if (State.Cursor > -1)
         {
             try
             {
-                var curEl = GridRows.TryGetValue(Settings.Cursor.ToString(), out var val) ? val?.TrElement : null;
+                var curEl = GridRows.TryGetValue(State.Cursor.ToString(), out var val) ? val?.TrElement : null;
                 await SmJsInterop.ScrollToElement(curEl);
 
             }
@@ -136,7 +137,7 @@
         //await Task.Delay(1);
         var KeyPressed = "Key Pressed is " + value;
         //var cursor = Table.GetCursor();
-        var cursor = Settings.Cursor;
+        var cursor = State.Cursor;
         switch (value)
         {
             case "ArrowDown":
@@ -210,7 +211,7 @@
     {
         if (cursor == null)
             return;
-        if (Settings.Cursor != cursor)
+        if (State.Cursor != cursor)
         {
             if (cursor >= 0)
             {
@@ -218,16 +219,16 @@
                 GridRows[idx]?.SetCursor(true);
             }
 
-            if (Settings.Cursor >= 0)
+            if (State.Cursor >= 0)
             {
-                var idx2 = Settings.Cursor.ToString() ?? "";
+                var idx2 = State.Cursor.ToString() ?? "";
                 GridRows[idx2]?.SetCursor(false);
             }
 
-            Settings.Cursor = (int)cursor;
+            State.Cursor = (int)cursor;
             await ScrollToCursor();
         }
-        if (Settings.Cursor == GridData.Rows?.Count - 1 && Settings.Cursor > 0)
+        if (State.Cursor == GridData.Rows?.Count - 1 && State.Cursor > 0)
             await LoadMoreRecords();
 
     }
@@ -302,12 +303,12 @@
 
         GridRows = new Dictionary<string, GridRow?>();
         GridData.Rows = null;
-        Settings.Cursor = -1;
+        State.Cursor = -1;
         _myShouldRender = true;
         StateHasChanged();
 
         await GridData.ReQuery(Settings);
-        Settings.Cursor = -1;
+        State.Cursor = -1;
 
         _myShouldRender = true;
         StateHasChanged();

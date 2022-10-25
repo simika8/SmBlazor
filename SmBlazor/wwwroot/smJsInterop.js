@@ -41,4 +41,14 @@ export function subscribeToChange(componentRef, inputRef) {
     inputRef.onkeyup = function (event) {
         componentRef.invokeMethodAsync('setValueFromJS', inputRef.value);
     };
+    return true;
+}
+
+export function setValue(element, text) {
+    //console.info('setValue xxx: ', element, text);
+    if (!element) {
+        return false;
+    }
+    element.value = text;
+    return true;
 }

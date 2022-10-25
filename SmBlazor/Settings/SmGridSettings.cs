@@ -15,7 +15,7 @@ namespace SmBlazor
         public int FirstTopCount { get; set; } = 20;
         public int Height { get; set; } = 200;
         public string Search { get; set; } = "";
-        public int Cursor { get; set; } = 0;
+        //public int Cursor { get; set; } = 0;
         public Columns Columns { get; set; } = new Columns();
         public Order Order { get; set; } = new Order();
 

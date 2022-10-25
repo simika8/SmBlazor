@@ -56,13 +56,20 @@ namespace SmBlazor
             var module = await moduleTask.Value;
             return await module.InvokeAsync<bool>("focusToElement", element);
         }
+        public async ValueTask<bool> SetValue(ElementReference? element, string text)
+        {
+            if (element == null)
+                return false;
+            var module = await moduleTask.Value;
+            return await module.InvokeAsync<bool>("setValue", element, text);
+        }
 
         public async ValueTask<bool> SubscribeToChange(DotNetObjectReference<Input> inputComponentRef, ElementReference? InputElementRef)
         {
             if (InputElementRef == null)
                 return false;
             var module = await moduleTask.Value;
-            var a = await module.InvokeAsync<object>("subscribeToChange", new object[] { inputComponentRef, InputElementRef });
+            await module.InvokeAsync<bool>("subscribeToChange", new object[] { inputComponentRef, InputElementRef });
             return true;
         }
 
