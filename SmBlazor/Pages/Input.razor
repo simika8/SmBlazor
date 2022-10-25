@@ -18,8 +18,6 @@
             if (_value != value)
             {
                 _value = value;
-                ValueChanged.InvokeAsync(value);
-                OnChange.InvokeAsync(value);
                 var task = SetValueFromCode(value);
 
                 //var result = AsyncContext.RunTask(MyAsyncMethod).Result;
@@ -53,7 +51,14 @@
     [JSInvokable("setValueFromJS")]
     public void SetValueFromJS(string newValue)
     {
-        Value = newValue;
+        if (Value != newValue)
+        {
+            _value = newValue;
+            ValueChanged.InvokeAsync(_value);
+            OnChange.InvokeAsync(_value);
+        }
+
+
         //ValueChanged.InvokeAsync(Value);
         //OnChange.InvokeAsync(Value);
 
@@ -62,7 +67,6 @@
 
     public async Task SetValueFromCode(string newValue)
     {
-
         SmJsInterop = new SmBlazor.SmJsInterop(JsRuntime);
 
         await SmJsInterop.SetValue(InputElementRef.Current, newValue);
