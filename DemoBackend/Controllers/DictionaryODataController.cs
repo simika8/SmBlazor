@@ -29,6 +29,8 @@ namespace Controllers
         {
             try
             {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+
                 var query = Table.Select(x => x.Value).AsQueryable();
 
                 //apply model specific server side $search filter
@@ -50,6 +52,22 @@ namespace Controllers
 
                 //Extracts Data from MS.odada shits. If we return untyped queryResult, then api result will not contain "@odata.context and "value" parts
                 var typedQueryResult = queryResult.ToTypedCollection<T>();
+
+
+
+
+                sw.Stop();
+
+
+
+                var queryOptionsJson = System.Text.Json.JsonSerializer.Serialize(queryOptions);
+                var rndTime = new Random(queryOptionsJson.GetHashCode());
+                var timeMs = (int)(Math.Pow(rndTime.NextDouble(), 4) * (AdminController.MaxQueryMilliseconds - AdminController.MinQueryMilliseconds) + AdminController.MinQueryMilliseconds);
+
+                if (timeMs - (int)sw.ElapsedMilliseconds > 0)
+                    await Task.Delay(timeMs - (int)sw.ElapsedMilliseconds);
+
+
                 return typedQueryResult;
 
             }

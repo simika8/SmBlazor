@@ -28,6 +28,8 @@ namespace Controllers
         [HttpGet()]
         public async Task<ActionResult> Get([ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder.SmQueryOptionsUrlBinder))]SmQueryOptionsUrl smQueryOptionsUrl)
         {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
             var smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             var query = Table.Select(x => x.Value).AsQueryable();
             Type elementType = typeof(DemoModels.Product);
@@ -39,8 +41,23 @@ namespace Controllers
             query = smQueryOptions.Apply(query);
             var res = query.ToList();
             ;
-            await Task.Delay(0);
+
+            sw.Stop();
+
+
+
+            var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptionsUrl);
+            var rndTime = new Random(smQueryOptionsUrlJson.GetHashCode());
+            var timeMs = (int)(Math.Pow(rndTime.NextDouble(), 4) * (AdminController.MaxQueryMilliseconds - AdminController.MinQueryMilliseconds) + AdminController.MinQueryMilliseconds);
+
+            if (timeMs - (int)sw.ElapsedMilliseconds > 0)
+                await Task.Delay(timeMs - (int)sw.ElapsedMilliseconds);
+
+
+
             return Ok(res);
+
+
         }
 
         [HttpGet("{id:Guid}")]
