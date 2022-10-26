@@ -12,6 +12,7 @@ namespace SmBlazor
         public List<(int Index, dynamic? Row)>? Rows { get; set; }
         public DataSourceSettings DataSourceSettings { get; set; }
         public IDataSource DataSource { get; set; }
+        private int _queryIdGenerator = 0;
 
         private void InitDataSource(DataSourceSettings dataSourceSettings)
         {
@@ -36,6 +37,9 @@ namespace SmBlazor
             var top = settings.FirstTopCount;
             Rows = null;
             var newRows = await GetRows(settings, top);
+            if (newRows == null)
+                return;
+
             Rows = null;
             AddToRows(newRows);
         }
@@ -59,6 +63,9 @@ namespace SmBlazor
             var skip = origRecCount - redundantRecordCount;
 
             var newRows = await GetRows(settings, top, skip);
+            if (newRows == null)
+                return;
+
 
 
             if (CanMerge(Rows, newRows, redundantRecordCount, settings.IdFieldName, out var trueRedundantsCount))
@@ -75,14 +82,25 @@ namespace SmBlazor
                 //ha nem találtam redundáns sorokat a régi, és az új lista között,akkor túl sokat változott a lista, letöltöm az egészet újból.
                 Rows = null;
                 var newRows2 = await GetRows(settings, NeededNewLines + origRecCount);
+                if (newRows2 == null)
+                    return;
+
                 AddToRows(newRows2);
             }
            
         }
-        private async Task<List<dynamic?>> GetRows(SmGridSettings settings, int top, int? skip = null)
+        private async Task<List<dynamic?>?> GetRows(SmGridSettings settings, int top, int? skip = null)
         {
+            int queryId = Interlocked.Increment(ref _queryIdGenerator);
+
             var qo = SmQueryOptionsHelper.CreateSmQueryOptions(settings, top, skip);
             var res = await DataSource.GetRows(qo);
+
+            var queryIsObsolete = !Equals(_queryIdGenerator, queryId);
+            if (queryIsObsolete)
+                return null;
+
+
             return res;
         }
 
