@@ -21,4 +21,10 @@
     <ProjectReference Include="..\SmQueryOptions\SmQueryOptions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\smJsInterop.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
