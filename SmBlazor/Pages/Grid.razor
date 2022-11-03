@@ -106,8 +106,12 @@
 
     public Dictionary<string, Input?> FilterInputs { get; set; } = new Dictionary<string, Input?>(StringComparer.OrdinalIgnoreCase);
     public ElementReference? GridBodyDivRef { get; set; }
+    public ElementReference? GridDivRef { get; set; }
+    public ElementReference? GridTableRef { get; set; }
+    
     private Input? Input { get; set; }
     public Dictionary<string, GridRow?> GridRows { get; set; } = new Dictionary<string, GridRow?>(StringComparer.OrdinalIgnoreCase);
+    private int? _rowHeight = null;
 
     public async Task ScrollToCursor()
     {
@@ -118,7 +122,7 @@
             {
                 var curEl = GridRows.TryGetValue(State.Cursor.ToString(), out var val) ? val?.TrElement : null;
                 await SmJsInterop.ScrollToElement(curEl);
-
+                var sct = await SmJsInterop.GetScrollTop(GridBodyDivRef);
             }
             catch (Exception e)
             {
@@ -155,11 +159,11 @@
             case "PageUp":
                 //var gr = GridRows.Select(x => x.Value?.TrElement).ToArray();
                 //var heights =
-                cursor = CursorPageUpDown(cursor, await GetHeights(GridRows, ExampleJsInterop), await ExampleJsInterop.ClientHeight(GridBodyDivRef), -1);
+                cursor = CursorPageUpDown(cursor, await GetRowHeight(GridRows, ExampleJsInterop), await ExampleJsInterop.ClientHeight(GridBodyDivRef), -1);
                 //cursor -= 10;
                 break;
             case "PageDown":
-                cursor = CursorPageUpDown(cursor, await GetHeights(GridRows, ExampleJsInterop), await ExampleJsInterop.ClientHeight(GridBodyDivRef), 1);
+                cursor = CursorPageUpDown(cursor, await GetRowHeight(GridRows, ExampleJsInterop), await ExampleJsInterop.ClientHeight(GridBodyDivRef), 1);
                 break;
             case "+":
                 break;
@@ -169,10 +173,10 @@
             return Math.Max(Math.Min(actvalue, maxvalue ?? int.MaxValue), minvalue ?? int.MinValue);
         }
 
-        int CursorPageUpDown(int cursor, List<int> heights, int gridBodyDivHeight, int direction)
+        int CursorPageUpDown(int cursor, int rowHeight, int gridBodyDivHeight, int direction)
         {
             var mincursor = 0;
-            var maxcursor = Math.Min(GridData.Rows?.Count ?? 1 - 1, heights.Count - 1);
+            var maxcursor = GridData.Rows?.Count ?? 1 - 1;
 
             //ha az adott irányba már nem tudok tovább mozogni, akkor visszadom a régi cursort
             if (cursor + direction != ToRange(cursor + direction, mincursor, maxcursor))
@@ -189,7 +193,7 @@
                 nextCursor += direction;
                 if (nextCursor != ToRange(nextCursor, mincursor, maxcursor))
                     break;
-                jumpheight += heights[nextCursor];
+                jumpheight += rowHeight;
             }
             //kettőt visszaugrok, hogy az ugrás csak akkora legyen, hogy az előző kurzoros sor is látszódjon
             nextCursor -= 2 * direction;
@@ -233,7 +237,7 @@
 
     }
 
-    private async Task<List<int>> GetHeights(Dictionary<string, GridRow?> gridRows, SmJsInterop exampleJsInterop)
+    /*private async Task<List<int>> GetHeights(Dictionary<string, GridRow?> gridRows, SmJsInterop exampleJsInterop)
     {
         var res = new List<int>();
         for (var i = 0; i < gridRows.Count(); i++)
@@ -250,11 +254,32 @@
                 res.Add(ch);
             }
         }
-
-        //Console.WriteLine(res.Sum());
         return res;
-    }
+    }*/
 
+    private async Task<int> GetRowHeight(Dictionary<string, GridRow?> gridRows, SmJsInterop exampleJsInterop)
+    {
+        if (_rowHeight != null)
+        {
+            return (int)_rowHeight;
+        }
+
+        if (gridRows.Count() == 0)
+        {
+            return 50;
+        }
+        var row = gridRows["0"];
+
+        var gr = row?.TrElement;
+        int ch;
+        if (gr != null)
+            ch = await exampleJsInterop.ClientHeight(gr);
+        else
+            ch = 0;
+
+        _rowHeight = ch;
+        return (int)_rowHeight;
+    }
     private async Task ChangeOrderClick(string fieldName, MouseEventArgs args)
     {
         Settings.Order.SetOrder(fieldName, args.ShiftKey);

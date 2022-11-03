@@ -49,6 +49,22 @@ namespace SmBlazor
                 return 0;
             }
         }
+        public async ValueTask<int> GetScrollTop(ElementReference? element)
+        {
+            if (element == null)
+                return 0;
+            var module = await moduleTask.Value;
+            try
+            {
+                var res = await module.InvokeAsync<int>("GetScrollTop", element);
+                return res;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
         public async ValueTask<bool> FocusToElement(ElementReference? element)
         {
             if (element == null)

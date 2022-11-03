@@ -13,6 +13,7 @@ namespace SmBlazor
         public DataSourceSettings DataSourceSettings { get; set; }
         public IDataSource DataSource { get; set; }
         private int _queryIdGenerator = 0;
+        private bool _moreRecordsLoading = false;
 
         private void InitDataSource(DataSourceSettings dataSourceSettings)
         {
@@ -56,36 +57,50 @@ namespace SmBlazor
         }
         public async Task LoadMoreRecords(SmGridSettings settings)
         {
-            var origRecCount = Rows?.Count??0;
-            var redundantRecordCount = Math.Max((int)(origRecCount * 0.03), 1);
-            var NeededNewLines = Math.Max(origRecCount, 1);
-            var top = NeededNewLines + redundantRecordCount;
-            var skip = origRecCount - redundantRecordCount;
-
-            var newRows = await GetRows(settings, top, skip);
-            if (newRows == null)
+            if (_moreRecordsLoading)
+            {
+                await Task.Delay(1);
                 return;
 
-
-
-            if (CanMerge(Rows, newRows, redundantRecordCount, settings.IdFieldName, out var trueRedundantsCount))
-            {
-                var nonRedundantNewRows = newRows.Skip(trueRedundantsCount);
-                AddToRows(nonRedundantNewRows.ToList());
-                /*if (Rows == null)
-                    Rows = nonRedundantNewRows.ToList();
-                else
-                    Rows.AddRange(nonRedundantNewRows);*/
             }
-            else
+
+            try
             {
-                //ha nem találtam redundáns sorokat a régi, és az új lista között,akkor túl sokat változott a lista, letöltöm az egészet újból.
-                Rows = null;
-                var newRows2 = await GetRows(settings, NeededNewLines + origRecCount);
-                if (newRows2 == null)
+                _moreRecordsLoading = true;
+                var origRecCount = Rows?.Count ?? 0;
+                var redundantRecordCount = Math.Max((int)(origRecCount * 0.03), 1);
+                var NeededNewLines = (int)(Math.Max(origRecCount, 1)*0.2+ settings.FirstTopCount);
+                var top = NeededNewLines + redundantRecordCount;
+                var skip = origRecCount - redundantRecordCount;
+
+                var newRows = await GetRows(settings, top, skip);
+                if (newRows == null)
                     return;
 
-                AddToRows(newRows2);
+
+
+                if (CanMerge(Rows, newRows, redundantRecordCount, settings.IdFieldName, out var trueRedundantsCount))
+                {
+                    var nonRedundantNewRows = newRows.Skip(trueRedundantsCount);
+                    AddToRows(nonRedundantNewRows.ToList());
+                    /*if (Rows == null)
+                        Rows = nonRedundantNewRows.ToList();
+                    else
+                        Rows.AddRange(nonRedundantNewRows);*/
+                }
+                else
+                {
+                    //ha nem találtam redundáns sorokat a régi, és az új lista között,akkor túl sokat változott a lista, letöltöm az egészet újból.
+                    Rows = null;
+                    var newRows2 = await GetRows(settings, NeededNewLines + origRecCount);
+                    if (newRows2 == null)
+                        return;
+
+                    AddToRows(newRows2);
+                }
+            } finally
+            {
+                _moreRecordsLoading = false;
             }
            
         }
@@ -122,11 +137,11 @@ namespace SmBlazor
             trueRedundantsCount = 0;
             foreach (var orow in origRedundantRows)
             {
-                Console.WriteLine(orow);
+                //Console.WriteLine(orow);
 
                 foreach (var nrow in origRedundantRows)
                 {
-                    Console.WriteLine(nrow);
+                    //Console.WriteLine(nrow);
                     if (orow.Equals(nrow))
                         trueRedundantsCount++;
                 }

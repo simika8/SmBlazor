@@ -52,3 +52,11 @@ export function setValue(element, text) {
     element.value = text;
     return true;
 }
+
+export function GetScrollTop(element) {
+    if (!element) {
+        return -1;
+    }
+    let scroll = element.scrollTop;
+    return scroll;
+}
