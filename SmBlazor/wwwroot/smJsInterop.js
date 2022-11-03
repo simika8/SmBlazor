@@ -44,6 +44,17 @@ export function subscribeToChange(componentRef, inputRef) {
     return true;
 }
 
+export function addEventListenerScroll(dotnetComponentRef, htmlElementRef) {
+
+    htmlElementRef.addEventListener("scroll", event => {
+        let scrollTop = htmlElementRef.scrollTop;
+        //console.info(scrollTop);
+        dotnetComponentRef.invokeMethodAsync('scrollEvent', scrollTop);
+
+    }, { passive: true });
+    return true;
+}
+
 export function setValue(element, text) {
     //console.info('setValue xxx: ', element, text);
     if (!element) {
@@ -57,6 +68,6 @@ export function GetScrollTop(element) {
     if (!element) {
         return -1;
     }
-    let scroll = element.scrollTop;
-    return scroll;
+    let st = element.scrollTop;
+    return st;
 }

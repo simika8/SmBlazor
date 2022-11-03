@@ -14,6 +14,7 @@ namespace SmBlazor
         public IDataSource DataSource { get; set; }
         private int _queryIdGenerator = 0;
         private bool _moreRecordsLoading = false;
+        private bool _noMoreRecords = false;
 
         private void InitDataSource(DataSourceSettings dataSourceSettings)
         {
@@ -34,6 +35,8 @@ namespace SmBlazor
 
         public async Task ReQuery(SmGridSettings settings)
         {
+            _moreRecordsLoading = false;
+            _noMoreRecords = false;
             InitDataSource(settings.DataSourceSettings);
             var top = settings.FirstTopCount;
             Rows = null;
@@ -64,6 +67,9 @@ namespace SmBlazor
 
             }
 
+            if (_noMoreRecords)
+                return;
+
             try
             {
                 _moreRecordsLoading = true;
@@ -74,8 +80,12 @@ namespace SmBlazor
                 var skip = origRecCount - redundantRecordCount;
 
                 var newRows = await GetRows(settings, top, skip);
+
                 if (newRows == null)
                     return;
+
+                if (newRows.Count < top)
+                    _noMoreRecords = true;
 
 
 

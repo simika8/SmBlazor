@@ -70,7 +70,7 @@
         </table>
     </div>
     <div class="GridBodyDiv" @ref="GridBodyDivRef" >
-        <table>
+        <table @ref="GridTableRef">
             <tbody>
                 @{
                     if (GridData.Rows == null)
@@ -108,10 +108,13 @@
     public ElementReference? GridBodyDivRef { get; set; }
     public ElementReference? GridDivRef { get; set; }
     public ElementReference? GridTableRef { get; set; }
-    
+
     private Input? Input { get; set; }
     public Dictionary<string, GridRow?> GridRows { get; set; } = new Dictionary<string, GridRow?>(StringComparer.OrdinalIgnoreCase);
     private int? _rowHeight = null;
+
+
+
 
     public async Task ScrollToCursor()
     {
@@ -238,21 +241,21 @@
     }
 
     /*private async Task<List<int>> GetHeights(Dictionary<string, GridRow?> gridRows, SmJsInterop exampleJsInterop)
-    {
-        var res = new List<int>();
-        for (var i = 0; i < gridRows.Count(); i++)
-        {
-            if (gridRows.TryGetValue(i.ToString(), out var row))
             {
-                var gr = row?.TrElement;
-                int ch;
-                if (gr != null)
+            var res = new List<int>();
+            for (var i = 0; i < gridRows.Count(); i++)
+            {
+            if (gridRows.TryGetValue(i.ToString(), out var row))
+                {
+                    var gr = row?.TrElement;
+                    int ch;
+                    if (gr != null)
                     ch = await exampleJsInterop.ClientHeight(gr);
-                else
-                    ch = 0;
+            else
+        ch = 0;
 
-                res.Add(ch);
-            }
+        res.Add(ch);
+        }
         }
         return res;
     }*/
@@ -391,7 +394,32 @@
         //Console.WriteLine(this.GetType().Name + " OnAfterRenderAsync");
         var a = Input?.InputElementRef;
         if (firstRender)
-            Input?.InputElementRef.Current?.FocusAsync();
+        {
+            Input?.InputElementRef.Current?.FocusAsync();  
+
+            var dotnetComponentRef = DotNetObjectReference.Create(this);
+
+            await using var SmJsInterop = new SmJsInterop(Js);
+
+            await SmJsInterop.AddEventListenerScroll(dotnetComponentRef, GridBodyDivRef);
+
+        }
+
+    }
+
+    [JSInvokable("scrollEvent")]
+    public async Task ScrollEvent(int scrollTop)
+    {
+        await using var SmJsInterop = new SmJsInterop(Js);
+        var outerHeight = await SmJsInterop.ClientHeight(GridBodyDivRef);
+        var innerHeight = await SmJsInterop.ClientHeight(GridTableRef);
+
+        if (scrollTop + outerHeight > innerHeight*0.9 - 100)
+            await LoadMoreRecords();
+
+        ;
+        //await CursorEvent.InvokeAsync(code);
+        //StateHasChanged();
     }
     
 }

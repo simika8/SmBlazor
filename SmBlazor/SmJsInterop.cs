@@ -89,6 +89,15 @@ namespace SmBlazor
             return true;
         }
 
+        public async ValueTask<bool> AddEventListenerScroll(DotNetObjectReference<Grid> dotnetComponentRef, ElementReference? htmlElementRef)
+        {
+            if (htmlElementRef == null)
+                return false;
+            var module = await moduleTask.Value;
+            await module.InvokeVoidAsync("addEventListenerScroll", new object[] { dotnetComponentRef, htmlElementRef });
+            return true;
+        }
+
         public async ValueTask DisposeAsync()
         {
             if (moduleTask.IsValueCreated)
