@@ -41,8 +41,8 @@ namespace Controllers
             SmQueryOptions? smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             
             var filteredQuery = GetFilteredQuery(smQueryOptions);
-            var query3 = filteredQuery.Limit(10);
-            var res = await query3.ToListAsync();
+            var query = filteredQuery.Limit(10);
+            var res = await query.ToListAsync();
 
             #region delay
             sw.Stop();

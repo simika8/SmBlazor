@@ -94,8 +94,8 @@ namespace Common
             }
             if (productNumber % 7 == 6)
             {
-                p.Name = null;
-                p.Rating = null;
+                //p.Name = null;
+                //p.Rating = null;
             }
 
             bool IsPrime(int candidate)

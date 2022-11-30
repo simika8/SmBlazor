@@ -24,6 +24,12 @@ namespace Controllers
     {
         protected Dictionary<Guid, T> Table { get; set; } = new Dictionary<Guid, T> { };
 
+        protected virtual IEnumerable<T> GetFilteredQuery(SmQueryOptions? smQueryOptions)
+        {
+            var res = Table.Select(x => x.Value).Where(x => true);
+            return res;
+        }
+
         //[ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder))]
         [HttpGet()]
         public async Task<ActionResult> Get([ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder.SmQueryOptionsUrlBinder))]SmQueryOptionsUrl smQueryOptionsUrl)

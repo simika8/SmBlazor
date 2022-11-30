@@ -21,18 +21,8 @@ namespace Controllers
         {
             DemoModels.DataTables.InitRandomData();
             Table = DemoModels.DataTables.Products;
-            int? r = 5;
-            var iii1 = NullableTypeHelper.ParseNullable<int?>("3");
-            var iii3 = NullableTypeHelper.ParseNullable<int?>(null);
-            var iii4 = NullableTypeHelper.ParseNullable<int?>("");
-            var iii2 = NullableTypeHelper.ParseNullable<int?>("null");
-            ;
 
-            string? ss = null;
-            
-            //int?.ParseNullableInt(r.ToString());
-            var ty = r.GetType();
-            //var a = typeof(int).Parse("3");
+            var query = Table.AsQueryable().Select(x=>x.Value).Where(x => true);
 
         }
 
@@ -52,14 +42,18 @@ namespace Controllers
             return aggregatedExpression;
         }
 
-        /*[HttpGet("test")]
-        public async Task<ActionResult> test(SmQueryOptionsNs.SmQueryOptionsUrl smQueryOptionsUrl)
+        protected override IEnumerable<DemoModels.Product> GetFilteredQuery(SmQueryOptions? smQueryOptions)
         {
-            var smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
-            var res = SmQueryOptionsUrl.Parse(smQueryOptions);
+            if (smQueryOptions.Search == null)
+                return Table.Select(x => x.Value).Where(x => true);
+            var res = Table.Select(x => x.Value).Where(x =>
+                    x.Name.ToLowerInvariant().Contains(smQueryOptions.Search.ToLowerInvariant())
+                    || x.Code.ToLowerInvariant().StartsWith(smQueryOptions.Search.ToLowerInvariant())
+                );
 
-            return Ok(res);
-        }*/
-        
+
+            return res;
+        }
+
     }
 }

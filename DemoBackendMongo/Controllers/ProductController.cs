@@ -21,19 +21,6 @@ namespace Controllers
         {
             DemoModels.MongoDatabase.InitRandomData();
             Table = DemoModels.MongoDatabase.Products;
-            int? r = 5;
-            var iii1 = NullableTypeHelper.ParseNullable<int?>("3");
-            var iii3 = NullableTypeHelper.ParseNullable<int?>(null);
-            var iii4 = NullableTypeHelper.ParseNullable<int?>("");
-            var iii2 = NullableTypeHelper.ParseNullable<int?>("null");
-            ;
-
-            string? ss = null;
-            
-            //int?.ParseNullableInt(r.ToString());
-            var ty = r.GetType();
-            //var a = typeof(int).Parse("3");
-
         }
 
         /*protected override IFindFluent<DemoModels.Product, DemoModels.Product> GetFilteredQuery(SmQueryOptions? smQueryOptions)
