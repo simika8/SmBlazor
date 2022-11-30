@@ -14,7 +14,6 @@ namespace SmBlazor
         private string[] splittedFieldName;
         private string? propertyTypeName;
         private bool? rightAligned;
-        private FilterType? filterType;
         private Func<object?, object?>? cellFormatter;
 
         internal string[] SplittedFieldName { get => splittedFieldName; }
@@ -35,7 +34,6 @@ namespace SmBlazor
             {
                 propertyTypeName = value;
                 rightAligned = rightAligned ?? ColumnHelper.DefaultRightAligned(propertyTypeName);
-                FilterType = filterType ?? (propertyTypeName == "string" ? FilterType.StartsWithCaseInsensitive : FilterType.Equals);
                 CellFormatter = ColumnHelper.DefaultCellFormatter(propertyTypeName);
             }
         }
@@ -43,7 +41,6 @@ namespace SmBlazor
         public int Width { get; set; } = 100;
         public bool Visible { get; set; } = true;
         public bool RightAligned { get => rightAligned ?? false; set => rightAligned = value; }
-        public FilterType FilterType { get => filterType ?? FilterType.Equals; set => filterType = value; }
         [System.Text.Json.Serialization.JsonIgnore]
         internal Func<object?, object?> CellFormatter { get => cellFormatter?? ColumnHelper.DefaultCellFormatter(PropertyTypeName); set => cellFormatter = value; }
         public SmColumn(string fieldName, string propertyTypeName)

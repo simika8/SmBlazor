@@ -58,11 +58,14 @@ namespace Controllers
             return query;
         }
 
-        protected override DemoModels.ProductDto ProjectResultItem(DemoModels.Product x, SmQueryOptions? smQueryOptions)
+        protected override DemoModels.ProductDto ProjectResultItem(DemoModels.Product x, SmQueryOptions smQueryOptions)
         {
             var res = new DemoModels.ProductDto();
             SmQueryOptionsNs.Mapper.CopyProperties(x, res, false, false, smQueryOptions.Select);
-            res.StockSumQuantity = x.Stocks?.Sum(x => x.Quantity);
+            if (smQueryOptions.Select?.Contains("StockSumQuantity".ToLower()) ?? true)
+                res.StockSumQuantity = x.Stocks?.Sum(x => x.Quantity);
+            if (smQueryOptions.Select?.Contains("Description".ToLower()) ?? true)
+                res.Description = x.Ext?.Description;
             return res;
         }
 

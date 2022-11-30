@@ -18,8 +18,6 @@ namespace SmBlazor
         //public int Cursor { get; set; } = 0;
         public Columns Columns { get; set; } = new Columns();
         public Order Order { get; set; } = new Order();
-
-        public Dictionary<string, string?> FilterValues { get; set; } = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         public StyleSettings StyleSettings { get; set; } = StyleSettingsHelper.GetDefaultStyleSettings();
         public DataSourceSettings DataSourceSettings { get; set; }
         public string IdFieldName { get; set; } = "Id";

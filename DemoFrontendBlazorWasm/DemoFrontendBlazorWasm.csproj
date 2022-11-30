@@ -18,4 +18,10 @@
     <ProjectReference Include="..\SmBlazor\SmBlazor.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\sample-data\SmGridSettings4.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

@@ -43,10 +43,10 @@ namespace Controllers
 
             var query = GetFilteredQuery(smQueryOptions);
 
+            if (smQueryOptions.Skip > 0)
+                query = query.Skip(smQueryOptions.Skip ?? 0);
             if (smQueryOptions.Top > 0)
                 query = query.Take(smQueryOptions.Top ?? 1);
-            if (smQueryOptions.Skip > 0)
-                query = query.Skip(smQueryOptions.Skip ?? 1);
             var queryResult = query.ToList();
             var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
 

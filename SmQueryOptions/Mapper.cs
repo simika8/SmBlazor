@@ -18,7 +18,7 @@ namespace SmQueryOptionsNs
 
             foreach (var sourceProp in sourceProps)
             {
-                var toCopy = fieldnames?.Contains(sourceProp.Name.ToLower()) ?? false;
+                var toCopy = (fieldnames?.Contains(sourceProp.Name.ToLower()) ?? true);
                 if (toCopy && destProps.Any(x => x.Name == sourceProp.Name))
                 {
                     //var isCollection = sourceProp.PropertyType.Name.Contains("ICollection");
@@ -30,7 +30,12 @@ namespace SmQueryOptionsNs
                     var sourceValue = sourceProp.GetValue(source, null);
                     var destValue = destProp.GetValue(dest, null);
                     var propty = destProp.PropertyType;
-                    if (destProp.PropertyType != sourceProp.PropertyType)
+
+                    var ut1 = destProp.PropertyType.IsNullableType() ? Nullable.GetUnderlyingType(destProp.PropertyType): destProp.PropertyType;
+                    var ut2 = sourceProp.PropertyType.IsNullableType() ? Nullable.GetUnderlyingType(sourceProp.PropertyType) : sourceProp.PropertyType;
+
+                    //if (destProp.PropertyType != sourceProp.PropertyType)
+                    if (ut1 != ut2)
                     {
                         CopyProperties(sourceProp, destProp, copyOnlyNonNullFields, copyCollections);
                     }

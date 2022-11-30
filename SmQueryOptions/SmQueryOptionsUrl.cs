@@ -20,8 +20,6 @@ public class SmQueryOptionsUrl
     public int? Skip { get; set; }
     [DefaultValue("prod")]
     public string? Search { get; set; }
-    [DefaultValue("Name startswith 'Product, with spec chars:('', &?) in it''s name, asdf.', Rating eq 2, Code eq 'c0000001', Price between 123.4 and 1234.5")]
-    public string? Filter { get; set; }
     [DefaultValue("Price desc, Name")]
     public string? Orderby { get; set; }
     [DefaultValue("Id, Code, Name, Price, Stocks, Rating")]
@@ -67,59 +65,6 @@ public class SmQueryOptionsUrl
         return res2.ToList();
 
     }
-    private static RowFilter? ParseRowFilter(string data)
-    {
-        var res = new RowFilter();
-        var pos = data.IndexOf(' ');
-        if (pos == -1)
-            return null;
-        var fieldName = data.Substring(0, pos);
-        var pos2 = data.IndexOf(' ', pos + 1);
-        var filterType = data.Substring(pos + 1, pos2 - pos).Trim();
-        var value = data.Substring(pos2 + 1, data.Length - (pos2 + 1)).Trim();
-
-        res.FieldName = fieldName;
-        
-        switch (filterType.ToLower())
-        {
-            case "startswith":
-            case "sw":
-                res.FilterType = FilterType.StartsWithCaseInsensitive;
-                break;
-            case "equals":
-            case "eq":
-                res.FilterType = FilterType.Equals;
-                break;
-            case "between":
-            case "bw":
-                res.FilterType = FilterType.Between;
-                break;
-            default:
-                return null;
-        }
-        if (res.FilterType == FilterType.StartsWithCaseInsensitive || res.FilterType == FilterType.Equals)
-        {
-            if (value == "null")
-                res.FilterValue = null!;
-            else if (value.IndexOf('\'') == 0)
-            {
-                value = value.Trim('\'');
-                value = value.Replace("''", "'");
-                res.FilterValue = value;
-            } else 
-                res.FilterValue = value;
-        }
-        if (res.FilterType == FilterType.Between)
-        {
-            var values = value.Split(" and ");
-            if (values.Count() != 2)
-                return null;
-            res.FilterValue = values[0];
-            res.FilterValue2 = values[1];
-        }
-
-        return res;
-    }
     private static OrderField? ParseOrderField(string data)
     {
         var res = new OrderField();
@@ -148,16 +93,6 @@ public class SmQueryOptionsUrl
         res.Skip = queryOptionsUrl.Skip;
         res.Search = queryOptionsUrl.Search;
 
-        //queryOptionsUrl.Filter = "Name startswith 'Product, with spec chars ('',&?) in it''s name, asdf.', Id eq 3, Price between 12.2 and 323.2";
-        var filters = SmSplit(queryOptionsUrl.Filter);
-        foreach (var filterstr in filters)
-        {
-            var rf = ParseRowFilter(filterstr);
-            if (rf != null)
-                res.Filters.Add(rf);
-        }
-
-
         //queryOptionsUrl.Orderby = "Rating desc, Name"
         var orders = SmSplit(queryOptionsUrl.Orderby);
         foreach (var orderbystr in orders)
@@ -168,10 +103,14 @@ public class SmQueryOptionsUrl
         }
 
         //queryOptionsUrl.Select = "Id, Name, Price, Rating"
-        var selects = SmSplit(queryOptionsUrl.Select);
-        foreach (var select in selects)
+        if (queryOptionsUrl.Select != null)
         {
-            res.Select.Add(select.ToLowerInvariant().Trim());
+            res.Select = new();
+            var selects = SmSplit(queryOptionsUrl.Select);
+            foreach (var select in selects)
+            {
+                res.Select.Add(select.ToLowerInvariant().Trim());
+            }
         }
 
         return res;
@@ -185,38 +124,13 @@ public class SmQueryOptionsUrl
         res.Skip = queryOptions.Skip;
         res.Search = queryOptions.Search;
 
-        var stringfilters = new List<string>();
-        //queryOptionsUrl.Filter = "Name startswith 'Product, with spec chars ('',&?) in it''s name, asdf.', Id eq 3, Price between 12.2 and 323.2";
-        if (queryOptions.Filters != null)
-        {
-            foreach (var filter in queryOptions.Filters)
-            {
-                switch (filter.FilterType)
-                {
-                    case FilterType.Between:
-                        stringfilters.Add($"{filter.FieldName} between {filter.FilterValue} and {filter.FilterValue2}");
-                        break;
-                    case FilterType.Equals:
-                        stringfilters.Add($"{filter.FieldName} equals '{filter.FilterValue}'");
-                        break;
-                    case FilterType.StartsWithCaseInsensitive:
-                        stringfilters.Add($"{filter.FieldName} startswith '{filter.FilterValue}'");
-                        break;
-                    default:
-                        break;
-                }
-
-            }
-        }
-        res.Filter = string.Join(", ", stringfilters);
-
         if (queryOptions.OrderFields != null)
         {
             res.Orderby = string.Join(", ", queryOptions.OrderFields.Select(x => x.FieldName + (x.Descending ? " desc" : "")));
         } else
             res.Orderby = null;
-
-        res.Select = string.Join(", ", queryOptions.Select);
+        if (queryOptions.Select != null)
+            res.Select = string.Join(", ", queryOptions.Select);
         return res;
     }
 
@@ -232,7 +146,6 @@ public class SmQueryOptionsUrl
         urlParams["top"] = qou.Top?.ToString();
         urlParams["skip"] = qou.Skip?.ToString();
         urlParams["select"] = qou.Select;
-        urlParams["filter"] = qou.Filter;
         urlParams["orderby"] = qou.Orderby;
         
 

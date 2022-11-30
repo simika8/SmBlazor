@@ -6,31 +6,12 @@
   "Cursor": -1,
   "Columns": [
     {
-      "FieldName": "Ext.ProbaList",
-      "PropertyTypeName": "List<string>",
-      "Title": "Ext.ProbaList",
-      "Width": 60,
-      "Visible": false,
-      "RightAligned": false,
-      "FilterType": "StartsWithCaseInsensitive"
-    },
-    {
-      "FieldName": "Ext.Aa.Proba",
-      "PropertyTypeName": "string",
-      "Title": "Ext.Aa.Proba",
-      "Width": 60,
-      "Visible": false,
-      "RightAligned": false,
-      "FilterType": 0
-    },
-    {
       "FieldName": "Id",
       "PropertyTypeName": "Guid",
       "Title": "Id",
       "Width": 150,
       "Visible": true,
-      "RightAligned": false,
-      "FilterType": 0
+      "RightAligned": false
     },
     {
       "FieldName": "Code",
@@ -38,8 +19,7 @@
       "Title": "Code",
       "Width": 60,
       "Visible": true,
-      "RightAligned": false,
-      "FilterType": 0
+      "RightAligned": false
     },
     {
       "FieldName": "Name",
@@ -47,8 +27,7 @@
       "Title": "Név",
       "Width": 170,
       "Visible": true,
-      "RightAligned": false,
-      "FilterType": 0
+      "RightAligned": false
     },
     {
       "FieldName": "Active",
@@ -56,8 +35,7 @@
       "Title": "Aktív",
       "Width": 20,
       "Visible": true,
-      "RightAligned": false,
-      "FilterType": 0
+      "RightAligned": false
     },
     {
       "FieldName": "Price",
@@ -65,8 +43,7 @@
       "Title": "Ár",
       "Width": 40,
       "Visible": true,
-      "RightAligned": false,
-      "FilterType": 0
+      "RightAligned": false
     },
     {
       "FieldName": "Rating",
@@ -74,8 +51,15 @@
       "Title": "Rating",
       "Width": 20,
       "Visible": true,
-      "RightAligned": false,
-      "FilterType": 0
+      "RightAligned": false
+    },
+    {
+      "FieldName": "StockSumQuantity",
+      "PropertyTypeName": "double",
+      "Title": "StockSumQuantity",
+      "Width": 20,
+      "Visible": true,
+      "RightAligned": true
     },
     {
       "FieldName": "ReleaseDate",
@@ -83,8 +67,7 @@
       "Title": "ReleaseDate",
       "Width": 90,
       "Visible": true,
-      "RightAligned": false,
-      "FilterType": 0
+      "RightAligned": false
     },
     {
       "FieldName": "Type",
@@ -92,17 +75,15 @@
       "Title": "Type",
       "Width": 40,
       "Visible": true,
-      "RightAligned": false,
-      "FilterType": 0
+      "RightAligned": false
     },
     {
-      "FieldName": "Ext.Description",
+      "FieldName": "Description",
       "PropertyTypeName": "string",
-      "Title": "Ext.Description",
+      "Title": "Description",
       "Width": 60,
       "Visible": true,
-      "RightAligned": false,
-      "FilterType": 0
+      "RightAligned": false
     }
   ],
   "Order": {

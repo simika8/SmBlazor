@@ -85,7 +85,7 @@
     protected override async Task OnInitializedAsync()
     {
         //Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
-        Settings = await Common.GetFromJsonAsync<SmGridSettings>(JsRuntime, Http, "sample-data/SmGridSettings.json");
+        Settings = await Common.GetFromJsonAsync<SmGridSettings>(JsRuntime, Http, "sample-data/SmGridSettings4.json");
     }
 
 

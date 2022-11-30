@@ -68,7 +68,6 @@ namespace SmBlazor
             odataParams["$top"] = qo.Top?.ToString();
             odataParams["$skip"] = qo.Skip?.ToString();
             odataParams["$select"] = CalculateSelectString(qo.Select);
-            odataParams["$filter"] = CalculateFilterString(qo);
             odataParams["$orderby"] = CalculateOrderString(qo.OrderFields);
             odataParams["$expand"] = CalculateExpand(qo, Expand);
 
@@ -78,26 +77,6 @@ namespace SmBlazor
             if (!string.IsNullOrEmpty(url))
                 url = "?" + url;
             return url;
-        }
-        private static string CalculateFilterString(SmQueryOptions qo)
-        {
-            var res = "";
-            qo.Filters?.ForEach(filter =>
-            {
-                var filterValueString = filter.FilterValue;
-
-
-                if (!string.IsNullOrEmpty(filterValueString))
-                {
-                    if (!string.IsNullOrEmpty(res))
-                        res += $" and ";
-                    if (filter.FilterType == FilterType.StartsWithCaseInsensitive)
-                        res += $"startswith(tolower({filter.FieldName}),'{filterValueString.ToLowerInvariant()}')";
-                    else
-                        res += $"{filter.FieldName} eq {filterValueString}";
-                }
-            });
-            return res;
         }
 
 
@@ -110,8 +89,10 @@ namespace SmBlazor
             return res;
         }
 
-        private static string CalculateSelectString(HashSet<string>? columFieldNames)
+        private static string? CalculateSelectString(HashSet<string>? columFieldNames)
         {
+            if (columFieldNames == null)
+                return null;
             var res = string.Join(",", (columFieldNames??new HashSet<string>()).Where(x => !x.Contains(".")));
             return res;
         }

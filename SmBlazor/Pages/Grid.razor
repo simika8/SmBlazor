@@ -54,18 +54,6 @@
                     }
 
                 </tr>
-                <tr>
-
-                    @foreach (var col in Settings.Columns.VisibleColumns())
-                    {
-                        if (!Settings.FilterValues.ContainsKey(col.FieldName))
-                            Settings.FilterValues[col.FieldName] = "";
-                        <th>
-                            <Input @ref=FilterInputs[col.FieldName] @bind-Value=@Settings.FilterValues[col.FieldName] CursorEvent=@CursorEvent OnChange=@SearchChanged />
-                        </th>
-                    }
-
-                </tr>
             </thead>
         </table>
     </div>

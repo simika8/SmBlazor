@@ -24,7 +24,6 @@ public class SmQueryOptionsUrlBinder : IModelBinder
         queryOptionsUrl.Top = Convert.ToInt32(bindingContext.ValueProvider.GetValue("Top").FirstOrDefault());
         queryOptionsUrl.Skip = Convert.ToInt32(bindingContext.ValueProvider.GetValue("Skip").FirstOrDefault());
         queryOptionsUrl.Search = bindingContext.ValueProvider.GetValue("Search").FirstOrDefault();
-        queryOptionsUrl.Filter = bindingContext.ValueProvider.GetValue("Filter").FirstOrDefault();
         queryOptionsUrl.Orderby = bindingContext.ValueProvider.GetValue("Orderby").FirstOrDefault();
         queryOptionsUrl.Select = bindingContext.ValueProvider.GetValue("Select").FirstOrDefault();
 

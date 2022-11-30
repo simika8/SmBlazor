@@ -18,28 +18,6 @@ namespace SmBlazor
             res.Skip = skip > 0 ? skip : null;
             res.Search = settings.Search;
 
-            if (settings.FilterValues != null)
-            {
-                res.Filters = new List<RowFilter>();
-                foreach (var filtervalue in settings.FilterValues)
-                {
-                    var filterValueString = filtervalue.Value;
-                    var column = settings.Columns.GetColumn(filtervalue.Key);
-                    if (!string.IsNullOrEmpty(filterValueString) && column != null)
-                    {
-                        var rowfilter = new RowFilter()
-                        {
-                            FieldName = filtervalue.Key,
-                            FilterValue = filterValueString,
-                            FilterType = column.FilterType,
-                        };
-                        res.Filters.Add(rowfilter);
-                    }
-                }
-                if (res.Filters.Count == 0)
-                    res.Filters = null;
-            }
-
             res.OrderFields = settings.Order.OrderFields;
 
             res.Select = new ();

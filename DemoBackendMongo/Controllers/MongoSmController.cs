@@ -42,10 +42,10 @@ namespace Controllers
             SmQueryOptions? smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             
             var query = GetFilteredQuery(smQueryOptions);
+            if (smQueryOptions.Skip > 0)
+                query = query.Skip(smQueryOptions.Skip ?? 0);
             if (smQueryOptions.Top > 0)
                 query = query.Limit(smQueryOptions.Top ?? 1);
-            if (smQueryOptions.Skip > 0)
-                query = query.Skip(smQueryOptions.Skip ?? 1);
             var queryResult = await query.ToListAsync();
             var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
 
