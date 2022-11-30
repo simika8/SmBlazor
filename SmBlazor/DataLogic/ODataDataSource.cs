@@ -110,9 +110,9 @@ namespace SmBlazor
             return res;
         }
 
-        private static string CalculateSelectString(List<string>? columFieldNames)
+        private static string CalculateSelectString(HashSet<string>? columFieldNames)
         {
-            var res = string.Join(",", (columFieldNames??new List<string>()).Where(x => !x.Contains(".")));
+            var res = string.Join(",", (columFieldNames??new HashSet<string>()).Where(x => !x.Contains(".")));
             return res;
         }
         private static string CalculateExpand(SmQueryOptions qo, List<string> expand)

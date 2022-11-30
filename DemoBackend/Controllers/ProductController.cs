@@ -15,7 +15,7 @@ namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductController : DictionarySmController<DemoModels.Product>
+    public class ProductController : DictionarySmController<DemoModels.Product, DemoModels.ProductDto>
     {
         public ProductController()
         {
@@ -26,7 +26,7 @@ namespace Controllers
 
         }
 
-        protected override Expression? SearchExpression<T>(ParameterExpression parameterExpression, string? search)
+        /*protected override Expression? SearchExpression<T>(ParameterExpression parameterExpression, string? search)
         {
             if (string.IsNullOrWhiteSpace(search))
                 return null;
@@ -40,20 +40,32 @@ namespace Controllers
 
 
             return aggregatedExpression;
-        }
+        }*/
 
         protected override IEnumerable<DemoModels.Product> GetFilteredQuery(SmQueryOptions? smQueryOptions)
         {
             if (smQueryOptions.Search == null)
                 return Table.Select(x => x.Value).Where(x => true);
-            var res = Table.Select(x => x.Value).Where(x =>
-                    x.Name.ToLowerInvariant().Contains(smQueryOptions.Search.ToLowerInvariant())
-                    || x.Code.ToLowerInvariant().StartsWith(smQueryOptions.Search.ToLowerInvariant())
+            var query = Table.Select(x => x.Value).Where(x =>
+                    (x.Name != null && x.Name.ToLowerInvariant().Contains(smQueryOptions.Search.ToLowerInvariant()))
+                    ||
+                    (x.Code != null && x.Code.ToLowerInvariant().StartsWith(smQueryOptions.Search.ToLowerInvariant()))
+
                 );
 
+            var query2 = query.Select(x => new DemoModels.Product() { Name = x.Name });
 
+            return query;
+        }
+
+        protected override DemoModels.ProductDto ProjectResultItem(DemoModels.Product x, SmQueryOptions? smQueryOptions)
+        {
+            var res = new DemoModels.ProductDto();
+            SmQueryOptionsNs.Mapper.CopyProperties(x, res, false, false, smQueryOptions.Select);
+            res.StockSumQuantity = x.Stocks?.Sum(x => x.Quantity);
             return res;
         }
+
 
     }
 }

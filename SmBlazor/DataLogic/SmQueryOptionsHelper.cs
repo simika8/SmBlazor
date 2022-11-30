@@ -42,7 +42,7 @@ namespace SmBlazor
 
             res.OrderFields = settings.Order.OrderFields;
 
-            res.Select = new List<string>();
+            res.Select = new ();
             foreach (var column in settings.Columns)
             {
                 res.Select.Add(column.FieldName);

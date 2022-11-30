@@ -20,7 +20,7 @@ namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DictionarySmController<T> : ControllerBase where T : class
+    public abstract class DictionarySmController<T, TDto> : ControllerBase where T : class
     {
         protected Dictionary<Guid, T> Table { get; set; } = new Dictionary<Guid, T> { };
 
@@ -29,39 +29,37 @@ namespace Controllers
             var res = Table.Select(x => x.Value).Where(x => true);
             return res;
         }
+        protected abstract TDto ProjectResultItem(T x, SmQueryOptions? smQueryOptions);
 
         //[ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder))]
         [HttpGet()]
         public async Task<ActionResult> Get([ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder.SmQueryOptionsUrlBinder))]SmQueryOptionsUrl smQueryOptionsUrl)
         {
+            #region delay
             var sw = System.Diagnostics.Stopwatch.StartNew();
+            #endregion
 
             var smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
-            var query = Table.Select(x => x.Value).AsQueryable();
-            Type elementType = typeof(DemoModels.Product);
-            ParameterExpression parameterExpression = Expression.Parameter(elementType);
 
-            query = smQueryOptions.ApplySearch(parameterExpression, query, SearchExpression<T>(parameterExpression, smQueryOptions.Search));
-            
-            //query = smQueryOptions.ApplySearch(parameterExpression, query, null);
+            var query = GetFilteredQuery(smQueryOptions);
 
-            query = smQueryOptions.Apply(query);
-            var res = query.ToList();
-            ;
+            if (smQueryOptions.Top > 0)
+                query = query.Take(smQueryOptions.Top ?? 1);
+            if (smQueryOptions.Skip > 0)
+                query = query.Skip(smQueryOptions.Skip ?? 1);
+            var queryResult = query.ToList();
+            var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
 
+
+            #region delay
             sw.Stop();
-
-
-
             var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptionsUrl);
             var rndTime = new Random(smQueryOptionsUrlJson.GetHashCode());
             var timeMs = (int)(Math.Pow(rndTime.NextDouble(), 4) * (AdminController.MaxQueryMilliseconds - AdminController.MinQueryMilliseconds) + AdminController.MinQueryMilliseconds);
 
             if (timeMs - (int)sw.ElapsedMilliseconds > 0)
                 await Task.Delay(timeMs - (int)sw.ElapsedMilliseconds);
-
-
-
+            #endregion
             return Ok(res);
 
 
@@ -96,7 +94,7 @@ namespace Controllers
             return NoContent();
         }
 
-        [HttpPatch]
+       [HttpPatch]
         public IActionResult Patch(Guid id, [FromBody] JsonPatchDocument<T> patch)
         {
             if (!ModelState.IsValid)
@@ -159,7 +157,7 @@ namespace Controllers
         }
 
 
-        protected virtual Expression? SearchExpression<T>(ParameterExpression parameterExpression, string? search)
+        /*protected virtual Expression? SearchExpression<T>(ParameterExpression parameterExpression, string? search)
         {
             const string defaultSearchPropertyName = "Name";
 
@@ -180,7 +178,7 @@ namespace Controllers
             Expression aggregatedExpression = expressions.Aggregate((prev, current) => Expression.Or(prev, current));
 
             return aggregatedExpression;
-        }
+        }*/
 
         protected void AddExpressionIfNotNull(List<Expression> list, Expression? item)
         {

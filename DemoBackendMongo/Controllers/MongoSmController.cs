@@ -21,15 +21,16 @@ namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class MongoSmController<T> : ControllerBase where T : class
+    public abstract class MongoSmController<T, TDto> : ControllerBase where T : class
     {
-        protected IMongoCollection<T> Table { get; set; }
+        protected IMongoCollection<T> Table { get; set; } = null!;
 
         protected virtual IFindFluent<T, T>? GetFilteredQuery(SmQueryOptions? smQueryOptions)
         {
             var res = Table.Find(x => true);
             return res;
         }
+        protected abstract TDto ProjectResultItem(T x, SmQueryOptions? smQueryOptions);
 
         [HttpGet()]
         public virtual async Task<ActionResult> Get([ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder.SmQueryOptionsUrlBinder))] SmQueryOptionsUrl smQueryOptionsUrl)
@@ -40,10 +41,15 @@ namespace Controllers
 
             SmQueryOptions? smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             
-            var filteredQuery = GetFilteredQuery(smQueryOptions);
-            var query = filteredQuery.Limit(10);
-            var res = await query.ToListAsync();
+            var query = GetFilteredQuery(smQueryOptions);
+            if (smQueryOptions.Top > 0)
+                query = query.Limit(smQueryOptions.Top ?? 1);
+            if (smQueryOptions.Skip > 0)
+                query = query.Skip(smQueryOptions.Skip ?? 1);
+            var queryResult = await query.ToListAsync();
+            var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
 
+            ;
             #region delay
             sw.Stop();
             var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptionsUrl);

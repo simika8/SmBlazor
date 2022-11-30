@@ -171,7 +171,7 @@ public class SmQueryOptionsUrl
         var selects = SmSplit(queryOptionsUrl.Select);
         foreach (var select in selects)
         {
-            res.Select.Add(select.Trim());
+            res.Select.Add(select.ToLowerInvariant().Trim());
         }
 
         return res;

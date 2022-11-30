@@ -40,7 +40,7 @@ public class SmQueryOptions
     public string? Search { get; set; }
     public List<RowFilter> Filters { get; set; } = new List<RowFilter>();
     public List<OrderField> OrderFields { get; set; } = new List<OrderField>();
-    public List<string> Select { get; set; } = new List<string>();
+    public HashSet<string>? Select { get; set; } = new();
 
     public IQueryable<T> Apply<T>(IQueryable<T> sourceQuery)
     {
