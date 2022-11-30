@@ -38,6 +38,8 @@ namespace Controllers
 
         /*protected override IFindFluent<DemoModels.Product, DemoModels.Product> GetFilteredQuery(SmQueryOptions? smQueryOptions)
         {
+            if (smQueryOptions.Search == null)
+                return Table.Find(x => true);
             var fo = new FindOptions() { Collation = new Collation("hu", strength: CollationStrength.Primary) };
             var filterbuilder = Builders<DemoModels.Product>.Filter;
             var searchFilter =
@@ -52,8 +54,8 @@ namespace Controllers
         }*/
         protected override IFindFluent<DemoModels.Product, DemoModels.Product> GetFilteredQuery(SmQueryOptions? smQueryOptions)
         {
-   
-
+            if (smQueryOptions.Search == null)
+                return Table.Find(x => true);
             var res = Table.Find(x => 
                     x.Name.ToLowerInvariant().Contains(smQueryOptions.Search.ToLowerInvariant()) 
                     || x.Code.ToLowerInvariant().StartsWith(smQueryOptions.Search.ToLowerInvariant())

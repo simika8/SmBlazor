@@ -40,17 +40,6 @@ namespace Controllers
 
             SmQueryOptions? smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
             
-            var filterbuilder = Builders<Product>.Filter;
-
-            var searchFilter =
-                filterbuilder.Gte(x => x.Name, smQueryOptions.Search)
-                & filterbuilder.Lte(x => x.Name, smQueryOptions.Search + "zzzz")
-                ;
-
-
-            var fo = new FindOptions() { Collation = new Collation("hu", strength: CollationStrength.Primary) };
-
-
             var filteredQuery = GetFilteredQuery(smQueryOptions);
             var query3 = filteredQuery.Limit(10);
             var res = await query3.ToListAsync();
