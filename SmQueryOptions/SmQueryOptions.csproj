@@ -4,5 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="MongoDB.Driver" Version="2.18.0" />
+	</ItemGroup>
 
 </Project>

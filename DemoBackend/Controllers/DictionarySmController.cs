@@ -36,6 +36,7 @@ namespace Controllers
             ParameterExpression parameterExpression = Expression.Parameter(elementType);
 
             query = smQueryOptions.ApplySearch(parameterExpression, query, SearchExpression<T>(parameterExpression, smQueryOptions.Search));
+            
             //query = smQueryOptions.ApplySearch(parameterExpression, query, null);
 
             query = smQueryOptions.Apply(query);

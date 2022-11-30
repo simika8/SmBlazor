@@ -72,6 +72,7 @@ public class SmQueryOptions
             }
             if (filter.FilterType == FilterType.Equals)
             {
+                //var expression = NullableTypeHelper.BuildWhereExpression<T>(filter.FieldName + "=" + filter.FilterValue);
                 var expression = Equals<T>(parameterExpression, filter.FieldName, filter.FilterValue);
                 expressions.Add(expression);
             }
@@ -132,6 +133,27 @@ public class SmQueryOptions
         var res = sourceQuery.Where(lambda);
         return res;
     }
+    public IQueryable<T> ApplySearchMongo<T>(ParameterExpression parameterExpression, MongoDB.Driver.Linq.IMongoQueryable<T> sourceQuery, Expression searchExpression)
+    {
+        if (string.IsNullOrWhiteSpace(Search))
+            return sourceQuery;
+
+        Expression expression;
+        if (searchExpression != null)
+            expression = searchExpression;
+        else
+            expression = DefaultSearchExpression<T>(parameterExpression, Search);
+        if (expression == null)
+            return sourceQuery;
+
+        //var expression = DefaultSearchExpression<T>(parameterExpression, Search);
+
+        Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(expression, parameterExpression);
+
+        var res = sourceQuery.Where(lambda);
+        return res;
+    }
+
     private IQueryable<T> ApplyOrders<T>(IQueryable<T> sourceQuery)
     {
         if (!OrderFields.Any())
@@ -228,8 +250,13 @@ public class SmQueryOptions
 
         return res;
     }
+    public bool StringIsNull(string? s)
+    {
+        return s == null;
+    }
 
-    public Expression? Equals<T>(ParameterExpression parameterExpression, string propertyName, string constant)
+
+    public Expression? Equals<T>(ParameterExpression parameterExpression, string propertyName, string? constant)
     {
         PropertyInfo? propertyInfo = GetPropertyInfo<T>(propertyName);
         if (propertyInfo == null)
@@ -242,22 +269,34 @@ public class SmQueryOptions
 
         if (ty == typeof(string))
         {
-            var equalsMethod = typeof(string).GetMethod("Equals", new[] { typeof(string), typeof(StringComparison) });
-            if (equalsMethod == null)
-                throw new NotSupportedException("Not supported data type");
-            var res = Expression.Call(
-                Expression.Property(parameterExpression, propertyInfo)
-                , equalsMethod
-                , Expression.Constant(constant)
-                , Expression.Constant(StringComparison.InvariantCultureIgnoreCase)
-                );
-            return res;
+            /*if (constant != null) { 
+                var equalsMethod = typeof(string).GetMethod("Equals", new[] { typeof(string), typeof(StringComparison) });
+                if (equalsMethod == null)
+                    throw new NotSupportedException("equalsMethod nof found");
+                var res = Expression.Call(
+                    Expression.Property(parameterExpression, propertyInfo)
+                    , equalsMethod
+                    , Expression.Constant(constant, ty)
+                    , Expression.Constant(StringComparison.InvariantCultureIgnoreCase)
+                    );
+                return res;
+            } else
+            {*/
+                var StringEqualsMethod = typeof(NullableTypeHelper).GetMethod("StringEquals", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+                if (StringEqualsMethod == null)
+                    throw new NotSupportedException("StringEqualsMethod not found");
+                var res = Expression.Call(
+                   StringEqualsMethod
+                   , Expression.Property(parameterExpression, propertyInfo)
+                   , Expression.Constant(constant, ty)
+                   );
+                return res;
+            /*}*/
+
         }
         else
         {
-            //ty = Nullable.GetUnderlyingType(ty);
-            var equalsMethod = ty.GetMethod("Equals", new[] { ty });
-            var parseMethod = ty.GetMethod("Parse", new[] { typeof(string), typeof(CultureInfo) });
+            /*var parseMethod = ty.GetMethod("Parse", new[] { typeof(string), typeof(CultureInfo) });
             if (parseMethod == null)
             {
                 var uty = Nullable.GetUnderlyingType(ty);
@@ -267,8 +306,14 @@ public class SmQueryOptions
             if (parseMethod == null)
                 throw new NotSupportedException("Not supported data type");
             dynamic? typedConsant = parseMethod.Invoke(ty, new object[] { constant, CultureInfo.InvariantCulture });
-            var res = Expression.Equal(Expression.Property(parameterExpression, propertyInfo), Expression.Constant(typedConsant));
-            /*var res = Expression.Call(
+            typedConsant = null;
+            MemberExpression expressionProperty = Expression.Property(parameterExpression, propertyInfo);*/
+            var expressionConstant = NullableTypeHelper.GetExpressionConstant(ty, constant);
+            var res = Expression.Equal(Expression.Property(parameterExpression, propertyInfo), expressionConstant);
+            
+            /*ty = Nullable.GetUnderlyingType(ty);
+            var equalsMethod = ty.GetMethod("Equals", new[] { ty });
+            var res = Expression.Call(
                 Expression.Property(parameterExpression, propertyInfo)
                 , equalsMethod
                 , Expression.Constant(typedConsant)

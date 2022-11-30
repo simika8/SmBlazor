@@ -99,12 +99,15 @@ public class SmQueryOptionsUrl
         }
         if (res.FilterType == FilterType.StartsWithCaseInsensitive || res.FilterType == FilterType.Equals)
         {
-            if (value.IndexOf('\'') == 0)
+            if (value == "null")
+                res.FilterValue = null!;
+            else if (value.IndexOf('\'') == 0)
             {
                 value = value.Trim('\'');
                 value = value.Replace("''", "'");
-            }
-            res.FilterValue = value;
+                res.FilterValue = value;
+            } else 
+                res.FilterValue = value;
         }
         if (res.FilterType == FilterType.Between)
         {
