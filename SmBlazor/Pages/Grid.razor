@@ -3,7 +3,7 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime Js
 
-<div class="Grid @Settings.Name @StyleSettingsHelper.GetStyleClasses(Settings.StyleSettings)">
+<div class="Grid @Settings.Name @StyleSettingsHelper.GetStyleClasses(Settings.StyleSettings)" translate="no" spellcheck="false">
 
 
     @if (Settings.StyleSettings.HasFlag(StyleSettings.GridHeight)){

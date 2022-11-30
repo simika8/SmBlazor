@@ -1,5 +1,6 @@
 ﻿@using System.Text.Json.Serialization
 @using SmBlazor
+@using System.Text.Json
 @inject HttpClient Http
 @inject IJSRuntime JsRuntime
 
@@ -9,7 +10,7 @@
 <Modal @ref="modalRef">
     <ModalContent Centered>
         <ModalHeader>
-            <ModalTitle>Employee edit</ModalTitle>
+            <ModalTitle>Grid setup</ModalTitle>
             <CloseButton />
         </ModalHeader>
         <ModalBody>
@@ -27,17 +28,20 @@
 </Modal>
 
 @code {
+
+
     private Modal modalRef;
 
     private Task ShowModal()
     {
-        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping} );
+
+        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
         return modalRef.Show();
     }
 
     private Task Ok()
     {
-        Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson);
+        Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
         return modalRef.Hide();
     }
 

@@ -12,7 +12,7 @@
       "Width": 60,
       "Visible": false,
       "RightAligned": false,
-      "FilterType": 0
+      "FilterType": "StartsWithCaseInsensitive"
     },
     {
       "FieldName": "Ext.Aa.Proba",

@@ -239,6 +239,7 @@ public class SmQueryOptions
 
 
 
+
         if (ty == typeof(string))
         {
             var equalsMethod = typeof(string).GetMethod("Equals", new[] { typeof(string), typeof(StringComparison) });
@@ -254,16 +255,24 @@ public class SmQueryOptions
         }
         else
         {
+            //ty = Nullable.GetUnderlyingType(ty);
             var equalsMethod = ty.GetMethod("Equals", new[] { ty });
             var parseMethod = ty.GetMethod("Parse", new[] { typeof(string), typeof(CultureInfo) });
             if (parseMethod == null)
+            {
+                var uty = Nullable.GetUnderlyingType(ty);
+                if (uty != null)
+                    parseMethod = uty.GetMethod("Parse", new[] { typeof(string), typeof(CultureInfo) });
+            }
+            if (parseMethod == null)
                 throw new NotSupportedException("Not supported data type");
             dynamic? typedConsant = parseMethod.Invoke(ty, new object[] { constant, CultureInfo.InvariantCulture });
-            var res = Expression.Call(
+            var res = Expression.Equal(Expression.Property(parameterExpression, propertyInfo), Expression.Constant(typedConsant));
+            /*var res = Expression.Call(
                 Expression.Property(parameterExpression, propertyInfo)
                 , equalsMethod
                 , Expression.Constant(typedConsant)
-                );
+                );*/
             return res;
 
         }
@@ -275,8 +284,6 @@ public class SmQueryOptions
             return null;
 
         var ty = propertyInfo.PropertyType;
-
-
 
         if (ty == typeof(string))
             throw new NotSupportedException("Not supported data type");
