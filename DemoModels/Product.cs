@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace DemoModels
 {
@@ -32,6 +33,7 @@ namespace DemoModels
     public class ProductExt
     {
         [Key]
+        [BsonIgnore]
         public Guid ProductId { get; set; }
         public string? Description { get; set; }
         public double? MinimumStock { get; set; }
@@ -39,7 +41,9 @@ namespace DemoModels
 
     public class InventoryStock
     {
+        [BsonIgnore]
         public Guid Id { get; set; }
+        [BsonIgnore]
         public Guid ProductId { get; set; }
         public Guid StoreId { get; set; }
         public double Quantity { get; set; }

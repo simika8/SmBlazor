@@ -15,45 +15,47 @@ using MongoDB.Driver.Core.Events;
 
 namespace Database
 {
-    public static class MongoDatabase
+    public static class SmDemoProductMongoDatabase
     {
         private static Dictionary<Guid, Product> ProductsDict { get; set; } = new Dictionary<Guid, Product>();
-        public static IMongoCollection<Product> Products { get; set; }
-        public static bool Initielized { get; set; }
+        public static IMongoCollection<Product> Product { get; set; }
+        public static bool Initialized { get; set; }
 
         public static void InitRandomData()
         {
-            if (Initielized)
+            if (Initialized)
                 return;
-            Initielized = true;
+            Initialized = true;
 
             var db = GetDb();
-            Products = GetCollection<Product>(db);
+            Product = GetCollection<Product>(db);
 
-            var prodcount = 100000;
-            
-            if ((Products?.CountDocuments(new MongoDB.Bson.BsonDocument()) ?? 0 ) == prodcount)
+            var prodCount = 100000;
+
+            var oldcount = Product?.CountDocuments(new MongoDB.Bson.BsonDocument()) ?? 0;
+            if (oldcount == prodCount)
                 return;
 
             db.DropCollection("Product");
 
-            Products = GetCollection<Product>(db);
+            Product = GetCollection<Product>(db);
 
-            for (int i = 1; i <= prodcount; i++)
+            var inmem = DictionaryDatabase.GetProductDict(prodCount).Select(x => x.Value).ToList();
+            var inmemchunked = inmem.ChunkBy(1000);
+            foreach (var chunk in inmemchunked)
             {
-                var p = RandomProduct.GenerateProduct(i, prodcount);
-                if (i == 1)
-                    p.Name = "Product, with spec chars:(', &?) in it's name, asdf. fdsafasdf sadfasd .";
-                if (i == 2)
-                    p.Code = "Prod C0000002";
-                ProductsDict.Add(p.Id, p);
-
+                Product.InsertMany(chunk);
             }
-            var inmem = ProductsDict.Select(x => x.Value).AsEnumerable();
-            Products.InsertMany(inmem);
-            ;
         }
 
+        public static List<List<T>> ChunkBy<T>(this List<T> source, int chunkSize)
+        {
+            return source
+                .Select((x, i) => new { Index = i, Value = x })
+                .GroupBy(x => x.Index / chunkSize)
+                .Select(x => x.Select(v => v.Value).ToList())
+                .ToList();
+        }
 
         private static MongoClient GetClient()
         {
@@ -75,8 +77,10 @@ namespace Database
         }
         public static IMongoDatabase GetDb()
         {
-            var dbName = "SmDemoData";
-            var res = GetClient().GetDatabase(dbName);
+            var contextName = nameof(SmDemoProductMongoDatabase);
+            var databaseName = contextName.Remove(contextName.Length - "MongoDatabase".Length);
+
+            var res = GetClient().GetDatabase(databaseName);
             return res;
         }
         public static IMongoCollection<T> GetCollection<T>(IMongoDatabase? db = null)

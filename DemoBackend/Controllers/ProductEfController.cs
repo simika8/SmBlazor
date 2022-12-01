@@ -15,12 +15,12 @@ namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductMongoController : MongoSmController<DemoModels.Product, DemoModels.ProductDto>
+    public class ProductEfController : EfSmController<DemoModels.Product, DemoModels.ProductDto>
     {
-        public ProductMongoController()
+        public ProductEfController()
         {
-            Database.SmDemoProductMongoDatabase.InitRandomData();
-            Table = Database.SmDemoProductMongoDatabase.Product;
+            Database.SmDemoProductContext.InitRandomData();
+            //using var db = new Database.SmDemoProductContext();
         }
 
         /*protected override IFindFluent<DemoModels.Product, DemoModels.Product> GetFilteredQuery(SmQueryOptions? smQueryOptions)
@@ -39,11 +39,12 @@ namespace Controllers
 
             return res;
         }*/
-        protected override IFindFluent<DemoModels.Product, DemoModels.Product> GetFilteredQuery(SmQueryOptions? smQueryOptions)
+        protected override IQueryable<DemoModels.Product> GetFilteredQuery(Database.SmDemoProductContext db, SmQueryOptions? smQueryOptions)
         {
+            var table = db.Product;
             if (smQueryOptions?.Search == null)
-                return Table.Find(x => true);
-            var res = Table.Find(x =>
+                return table.Where(x => true);
+            var res = table.Where(x =>
                     (x.Name != null && x.Name.ToLowerInvariant().Contains(smQueryOptions.Search.ToLowerInvariant()))
                     || 
                     (x.Code != null && x.Code.ToLowerInvariant().StartsWith(smQueryOptions.Search.ToLowerInvariant()))
