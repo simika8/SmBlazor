@@ -27,6 +27,7 @@ builder.Services.AddControllers(options =>
     {
         opt.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
         opt.UseMemberCasing();
+        opt.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
     })
     .AddOData(opt => opt.AddRouteComponents("odata",
                         DemoModels.ProductODataEdmModel.GetEdmModel()).Filter().Expand().Select().Count().SkipToken().OrderBy().SetMaxTop(500))
