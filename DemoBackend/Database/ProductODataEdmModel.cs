@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DemoModels
+namespace Database
 {
     public static class ProductODataEdmModel
     {

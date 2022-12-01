@@ -20,8 +20,8 @@ namespace ProductApi
     {
         public ProductOdataController()
         {
-            DemoModels.DataTables.InitRandomData();
-            Table = DemoModels.DataTables.Products;
+            Database.DictionaryDatabase.InitRandomData();
+            Table = Database.DictionaryDatabase.Products;
         }
 
         protected override IQueryable<DemoModels.Product> ApplySearchFilter(IQueryable<DemoModels.Product> q1, string keywords)

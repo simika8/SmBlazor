@@ -19,8 +19,8 @@ namespace Controllers
     {
         public ProductController()
         {
-            DemoModels.DataTables.InitRandomData();
-            Table = DemoModels.DataTables.Products;
+            Database.DictionaryDatabase.InitRandomData();
+            Table = Database.DictionaryDatabase.Products;
 
             var query = Table.AsQueryable().Select(x=>x.Value).Where(x => true);
 

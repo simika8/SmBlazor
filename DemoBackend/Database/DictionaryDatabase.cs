@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Common;
+using DemoModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Logging;
 
-namespace DemoModels
+namespace Database
 {
-    public static class DataTables
+    public static class DictionaryDatabase
     {
         public static Dictionary<Guid, Product> Products { get; set; } = new Dictionary<Guid, Product>();
         public static bool Initielized { get; set; }

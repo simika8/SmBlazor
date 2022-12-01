@@ -15,12 +15,12 @@ namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductController : MongoSmController<DemoModels.Product, DemoModels.ProductDto>
+    public class ProductMongoController : MongoSmController<DemoModels.Product, DemoModels.ProductDto>
     {
-        public ProductController()
+        public ProductMongoController()
         {
-            DemoModels.MongoDatabase.InitRandomData();
-            Table = DemoModels.MongoDatabase.Products;
+            Database.MongoDatabase.InitRandomData();
+            Table = Database.MongoDatabase.Products;
         }
 
         /*protected override IFindFluent<DemoModels.Product, DemoModels.Product> GetFilteredQuery(SmQueryOptions? smQueryOptions)

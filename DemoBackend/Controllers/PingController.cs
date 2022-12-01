@@ -19,7 +19,7 @@ public class PingController : ControllerBase
     [HttpGet()]
     public async Task<ActionResult> Ping()
     {
-        DemoModels.DataTables.InitRandomData();
+        Database.DictionaryDatabase.InitRandomData();
         await Task.Delay(0);
 
         var col1 = new SmColumn2() { FieldName = "a" };
