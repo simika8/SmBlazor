@@ -43,21 +43,21 @@ namespace Controllers
         {
             if (smQueryOptions?.Search == null)
                 return Table.Find(x => true);
-            var res = Table.Find(x =>
-                    (x.Name != null && x.Name.ToLowerInvariant().Contains(smQueryOptions.Search.ToLowerInvariant()))
-                    || 
-                    (x.Code != null && x.Code.ToLowerInvariant().StartsWith(smQueryOptions.Search.ToLowerInvariant()))
+            var query = Table.Find(x =>
+                    (x.Name != null && x.Name.ToLower().Contains(smQueryOptions.Search.ToLower()))
+                    ||
+                    (x.Code != null && x.Code.ToLower().StartsWith(smQueryOptions.Search.ToLower()))
                 );
 
-            return res;
+            return query;
         }
 
         protected override DemoModels.ProductDto ProjectResultItem(DemoModels.Product x, SmQueryOptions smQueryOptions)
         {
             var res = new DemoModels.ProductDto();
             SmQueryOptionsNs.Mapper.CopyProperties(x, res, false, false, smQueryOptions.Select);
-            if (smQueryOptions.Select?.Contains("StockSumQuantity".ToLower())??true)
-                res.StockSumQuantity = x.Stocks?.Sum(x => x.Quantity);
+            if (smQueryOptions.Select?.Contains("StockSumQuantity".ToLower()) ?? true)
+                res.StockSumQuantity = (x.Stocks?.Count() > 0) ? x.Stocks?.Sum(x => x.Quantity) : null;
             if (smQueryOptions.Select?.Contains("Description".ToLower()) ?? true)
                 res.Description = x.Ext?.Description;
             return res;

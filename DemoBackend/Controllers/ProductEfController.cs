@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using SmQueryOptionsNs;
@@ -41,16 +42,19 @@ namespace Controllers
         }*/
         protected override IQueryable<DemoModels.Product> GetFilteredQuery(Database.SmDemoProductContext db, SmQueryOptions? smQueryOptions)
         {
-            var table = db.Product;
+            var table = db.Product
+                .Include(x => x.Stocks)
+                .Include(x => x.Ext)
+                .OrderBy(x => x.Id);
             if (smQueryOptions?.Search == null)
                 return table.Where(x => true);
-            var res = table.Where(x =>
-                    (x.Name != null && x.Name.ToLowerInvariant().Contains(smQueryOptions.Search.ToLowerInvariant()))
-                    || 
-                    (x.Code != null && x.Code.ToLowerInvariant().StartsWith(smQueryOptions.Search.ToLowerInvariant()))
+            var query = table.Where(x =>
+                    (x.Name != null && x.Name.ToLower().Contains(smQueryOptions.Search.ToLower()))
+                    ||
+                    (x.Code != null && x.Code.ToLower().StartsWith(smQueryOptions.Search.ToLower()))
                 );
 
-            return res;
+            return query;
         }
 
         protected override DemoModels.ProductDto ProjectResultItem(DemoModels.Product x, SmQueryOptions smQueryOptions)
@@ -58,7 +62,7 @@ namespace Controllers
             var res = new DemoModels.ProductDto();
             SmQueryOptionsNs.Mapper.CopyProperties(x, res, false, false, smQueryOptions.Select);
             if (smQueryOptions.Select?.Contains("StockSumQuantity".ToLower())??true)
-                res.StockSumQuantity = x.Stocks?.Sum(x => x.Quantity);
+                res.StockSumQuantity = (x.Stocks?.Count() > 0) ? x.Stocks?.Sum(x => x.Quantity) : null;
             if (smQueryOptions.Select?.Contains("Description".ToLower()) ?? true)
                 res.Description = x.Ext?.Description;
             return res;

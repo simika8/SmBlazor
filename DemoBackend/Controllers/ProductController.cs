@@ -47,13 +47,11 @@ namespace Controllers
             if (smQueryOptions.Search == null)
                 return Table.Select(x => x.Value).Where(x => true);
             var query = Table.Select(x => x.Value).Where(x =>
-                    (x.Name != null && x.Name.ToLowerInvariant().Contains(smQueryOptions.Search.ToLowerInvariant()))
+                    (x.Name != null && x.Name.ToLower().Contains(smQueryOptions.Search.ToLower()))
                     ||
-                    (x.Code != null && x.Code.ToLowerInvariant().StartsWith(smQueryOptions.Search.ToLowerInvariant()))
+                    (x.Code != null && x.Code.ToLower().StartsWith(smQueryOptions.Search.ToLower()))
 
                 );
-
-            var query2 = query.Select(x => new DemoModels.Product() { Name = x.Name });
 
             return query;
         }
@@ -63,7 +61,7 @@ namespace Controllers
             var res = new DemoModels.ProductDto();
             SmQueryOptionsNs.Mapper.CopyProperties(x, res, false, false, smQueryOptions.Select);
             if (smQueryOptions.Select?.Contains("StockSumQuantity".ToLower()) ?? true)
-                res.StockSumQuantity = x.Stocks?.Sum(x => x.Quantity);
+                res.StockSumQuantity = (x.Stocks?.Count() > 0) ? x.Stocks?.Sum(x => x.Quantity) : null;
             if (smQueryOptions.Select?.Contains("Description".ToLower()) ?? true)
                 res.Description = x.Ext?.Description;
             return res;
