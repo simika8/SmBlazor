@@ -20,8 +20,13 @@
             <style> th:nth-child(@nthchild), td:nth-child(@nthchild) { text-align: @textAlign; width: @colWidth} </style>
         }
     }
-
-    <Input @ref="Input" @bind-Value=@Settings.Search CursorEvent=@CursorEvent OnChange=@SearchChanged />
+    <div class="GridToolbarDiv">
+        <div class="InputDiv">
+            <div class="Icon oi oi-magnifying-glass"/>
+            <Input @ref="Input" @bind-Value=@Settings.Search CursorEvent=@CursorEvent OnChange=@SearchChanged />
+        </div>
+        <button id="Button" @onclick="@SetupClickCallback" class="oi oi-cog"></button>
+    </div>
     <div class="GridHeadDiv">
         <table>
 
@@ -72,6 +77,10 @@
     [EditorRequired]
     [Parameter]
     public SmGridSettings Settings { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback SetupClickCallback { get; set; }
+
     private SmGridState State { get; set; } = new();
 
     public GridData GridData { get; set; } = new GridData();

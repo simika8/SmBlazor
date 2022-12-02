@@ -4,9 +4,8 @@
 @inject HttpClient Http
 @inject IJSRuntime JsRuntime
 
-<Grid @ref="Grid" Settings=@Settings/>
+<Grid @ref="Grid" Settings=@Settings SetupClickCallback="@ShowModalSetup"/>
 
-<Button Color="Color.Primary" Clicked="@ShowModal">Setup</Button>
 <Modal @ref="modalRef">
     <ModalContent Centered>
         <ModalHeader>
@@ -21,8 +20,8 @@
             </Field>
         </ModalBody>
         <ModalFooter>
-            <Button Color="Color.Primary" Clicked="@Ok">Ok</Button>
-            <Button Color="Color.Secondary" Clicked="@Cancel">Cancel</Button>
+            <Button Color="Color.Primary" Clicked="@SetupOk">Ok</Button>
+            <Button Color="Color.Secondary" Clicked="@SetupCancel">Cancel</Button>
         </ModalFooter>
     </ModalContent>
 </Modal>
@@ -32,20 +31,20 @@
 
     private Modal modalRef;
 
-    private Task ShowModal()
+    private Task ShowModalSetup()
     {
 
         SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
         return modalRef.Show();
     }
 
-    private Task Ok()
+    private Task SetupOk()
     {
         Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
         return modalRef.Hide();
     }
 
-    private Task Cancel()
+    private Task SetupCancel()
     {
         return modalRef.Hide();
     }

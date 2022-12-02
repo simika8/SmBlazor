@@ -2,6 +2,41 @@
     overflow: hidden;
 }
 
+/****************/
+.ES button {
+    border: 1px solid #ddd;
+    padding: 0px;
+    margin: 8px;
+    margin-right: 0px;
+    background-color: #FFFFFF;
+    width: 32px;
+    height: 32px;
+}
+
+.BS .InputDiv .Icon {
+    margin: 8px;
+}
+
+.BS .GridToolbarDiv {
+    display: flex;
+    flex-wrap: wrap;
+    /*align-items:center;*/
+    padding-bottom: 0px;
+}
+
+
+.BS .GridToolbarDiv .InputDiv {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    height: 32px;
+    border: 1px solid #ddd;
+    margin-top: 9px;
+    /*margin-right:5px;*/
+    /*padding: 7px;*/
+}
+/****************/
+
 .BS table {
     table-layout: fixed;
     width: 100%;
@@ -33,11 +68,11 @@
 }
 
 .ES table th {
-    padding: 7px;
-    padding-top: 7px;
-    padding-right: 7px;
-    padding-bottom: 7px;
-    padding-left: 7px;
+    padding: 8px;
+    padding-top: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
+    padding-left: 8px;
 }
 
 .ES .GridBodyDiv, .GridHeadDiv {

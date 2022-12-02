@@ -1,12 +1,13 @@
 .BS input {
-    width: 100%;
+    flex-grow:1;
 }
 
-.ES input{
+.ES input {
     font-family: "Helvetica Neue","Segoe UI",helvetica,verdana,sans-serif;
     font-weight: 400;
     font-size: 14px;
     border: none;
     padding: 0px;
     outline: none;
+    margin: 0px;
 }
