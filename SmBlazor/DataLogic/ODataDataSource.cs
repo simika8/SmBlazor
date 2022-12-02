@@ -68,7 +68,6 @@ namespace SmBlazor
             odataParams["$top"] = qo.Top?.ToString();
             odataParams["$skip"] = qo.Skip?.ToString();
             odataParams["$select"] = CalculateSelectString(qo.Select);
-            odataParams["$orderby"] = CalculateOrderString(qo.OrderFields);
             odataParams["$expand"] = CalculateExpand(qo, Expand);
 
 
@@ -77,16 +76,6 @@ namespace SmBlazor
             if (!string.IsNullOrEmpty(url))
                 url = "?" + url;
             return url;
-        }
-
-
-        /// <summary>
-        /// Returns order string. eg: "Price,Name desc,Id,")
-        /// </summary>
-        private static string CalculateOrderString(List<OrderField>? orderFields)
-        {
-            var res = string.Join(",", orderFields?.Select(x => x.FieldName + (x.Descending ? " desc" : "")) ?? new List<string>());
-            return res;
         }
 
         private static string? CalculateSelectString(HashSet<string>? columFieldNames)

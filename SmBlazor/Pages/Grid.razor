@@ -30,25 +30,9 @@
 
                     @foreach (var col in Settings.Columns.VisibleColumns())
                     {
-                        var columnOrderInfo = Settings.Order.ColumnOrderInfo(col.FieldName);
                         <th>
-                            <div @onclick="(mea) => ChangeOrderClick(col.FieldName, mea)">
+                            <div>
                                 @col.Title
-                                @if (columnOrderInfo != null)
-                                {
-                                    if (columnOrderInfo.Value.Descending)
-                                    {
-                                        <span class="oi oi-arrow-top"></span>
-                                        @:@columnOrderInfo.Value.Nth
-                                    }
-                                    else
-                                    {
-                                        <span class="oi oi-arrow-bottom"></span>
-                                        @:@columnOrderInfo.Value.Nth
-                                    }
-
-                                }
-
                             </div>
                         </th>
                     }
@@ -271,15 +255,6 @@
 
         _rowHeight = ch;
         return (int)_rowHeight;
-    }
-    private async Task ChangeOrderClick(string fieldName, MouseEventArgs args)
-    {
-        Settings.Order.SetOrder(fieldName, args.ShiftKey);
-        //Console.WriteLine("GetOrderString: " + GridData.GetOrderString());
-
-        Input?.InputElementRef.Current?.FocusAsync();
-        await ReQuery();
-        //Console.WriteLine("ChangeOrderClick: " + fieldName + "args.ShiftKey:" + args.ShiftKey);
     }
 
     private async Task RowClick((ElementReference? elementReference, MouseEventArgs args) data)

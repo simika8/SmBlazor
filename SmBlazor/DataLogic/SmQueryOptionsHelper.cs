@@ -18,8 +18,6 @@ namespace SmBlazor
             res.Skip = skip > 0 ? skip : null;
             res.Search = settings.Search;
 
-            res.OrderFields = settings.Order.OrderFields;
-
             res.Select = new ();
             foreach (var column in settings.Columns)
             {
