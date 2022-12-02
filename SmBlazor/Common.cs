@@ -56,6 +56,7 @@ namespace SmBlazor
             T? res;
             if (BlazorIsWasm(jsRuntime))
             {
+                http.DefaultRequestHeaders.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue{NoCache = true};
                 res = await http.GetFromJsonAsync<T>(pathFromWwwRoot, smJso);
             } else
             {
