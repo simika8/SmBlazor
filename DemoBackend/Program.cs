@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.OData;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -28,10 +27,7 @@ builder.Services.AddControllers(options =>
         opt.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
         opt.UseMemberCasing();
         opt.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-    })
-    .AddOData(opt => opt.AddRouteComponents("odata",
-                        Database.ProductODataEdmModel.GetEdmModel()).Filter().Expand().Select().Count().SkipToken().OrderBy().SetMaxTop(500))
-                ;
+    });
 
 
 builder.Services.AddSwaggerGen(c =>

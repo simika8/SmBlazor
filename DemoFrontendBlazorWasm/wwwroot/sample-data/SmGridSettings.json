@@ -99,7 +99,6 @@
   },
   "StyleSettings": 95,
   "DataSourceSettings": {
-    "DataSourceType": 0,
     "DataSourceApiBaseUri": "https://smdemobackend.azurewebsites.net",
     "DataSourceApiPathUri": "/api",
     "DataSourceApiNameUri": "Product",

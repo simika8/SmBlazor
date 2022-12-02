@@ -11,7 +11,7 @@ namespace SmBlazor
     {
         public List<(int Index, dynamic? Row)>? Rows { get; set; }
         public DataSourceSettings DataSourceSettings { get; set; }
-        public IDataSource DataSource { get; set; }
+        public SmDataSource DataSource { get; set; }
         private int _queryIdGenerator = 0;
         private bool _moreRecordsLoading = false;
         private bool _noMoreRecords = false;
@@ -19,18 +19,7 @@ namespace SmBlazor
         private void InitDataSource(DataSourceSettings dataSourceSettings)
         {
             DataSourceSettings = dataSourceSettings;
-            switch (DataSourceSettings.DataSourceType)
-            {
-                case DataSourceType.SmQueryOptions:
-                    DataSource = new SmQueryOptionsDataSource(DataSourceSettings.DataSourceApiBaseUri + DataSourceSettings.DataSourceApiPathUri, DataSourceSettings.DataSourceApiNameUri);
-                    break;
-                case DataSourceType.Odata:
-                    DataSource = new ODataDataSource(DataSourceSettings.DataSourceApiBaseUri + DataSourceSettings.DataSourceApiPathUri, DataSourceSettings.DataSourceApiNameUri, DataSourceSettings.DataSourceOdataExpand);
-                    break;
-                default:
-                    throw new NotSupportedException();
-
-            }
+            DataSource = new SmDataSource(DataSourceSettings.DataSourceApiBaseUri + DataSourceSettings.DataSourceApiPathUri, DataSourceSettings.DataSourceApiNameUri);
         }
 
         public async Task ReQuery(SmGridSettings settings)

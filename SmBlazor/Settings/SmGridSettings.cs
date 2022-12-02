@@ -25,16 +25,10 @@ namespace SmBlazor
 
     public class DataSourceSettings
     {
-        public DataSourceType DataSourceType { get; set; } = DataSourceType.SmQueryOptions;
         public string DataSourceApiBaseUri { get; set; } = null!;
         public string DataSourceApiPathUri { get; set; } = null!;
         public string DataSourceApiNameUri { get; set; } = null!;
         public List<string> DataSourceOdataExpand { get; set; } = new();
-    }
-    public enum DataSourceType
-    {
-        SmQueryOptions = 0,
-        Odata = 1,
     }
 
 }

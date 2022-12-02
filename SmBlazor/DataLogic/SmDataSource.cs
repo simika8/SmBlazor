@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace SmBlazor
 {
-    public class SmQueryOptionsDataSource : IDataSource
+    public class SmDataSource
     {
         private string ApiBaseUri { get; set; } = null!;
         private string ApiNameUri { get; set; } = null!;
 
         private CancellationTokenSource cts = new CancellationTokenSource();
 
-        public SmQueryOptionsDataSource(string apiBaseUri, string apiNameUri)
+        public SmDataSource(string apiBaseUri, string apiNameUri)
         {
             ApiBaseUri = apiBaseUri;
             ApiNameUri = apiNameUri;
