@@ -20,7 +20,7 @@ public class SmQueryOptionsUrl
     public int? Skip { get; set; }
     [DefaultValue("prod")]
     public string? Search { get; set; }
-    [DefaultValue("Id, Code, Name, Price, Stocks, Rating")]
+    [DefaultValue("Id, Code, Name, Price, Stocks, Rating, StockSumQuantity, Description, Type")]
     public string? Select { get; set; }
 
     /// <summary>
