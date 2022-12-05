@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoModels", "DemoModels\De
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoFrontendBlazorServer", "DemoFrontendBlazorServer\DemoFrontendBlazorServer.csproj", "{E4E6B44A-4E3B-434F-A76C-4ED2FCAA34D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoFrontendBlazorWasm", "DemoFrontendBlazorWasm\DemoFrontendBlazorWasm.csproj", "{B271D7F5-02E4-4D35-8291-AFF195E96821}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoFrontendBlazorWasm", "DemoFrontendBlazorWasm\DemoFrontendBlazorWasm.csproj", "{B271D7F5-02E4-4D35-8291-AFF195E96821}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

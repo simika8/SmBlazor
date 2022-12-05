@@ -5,7 +5,7 @@
 @inject HttpClient Http
 @inject IJSRuntime JsRuntime
 
-<Grid @ref="Grid" Settings=@Settings SetupClickCallback="@SetupClickCallback"/>
+<Grid @ref="Grid" Settings=@Settings SetupClickCallback="@SetupClick"/>
 
 
 @{/*
@@ -22,17 +22,65 @@
 @RenderFragmentGridToolbarExt2(OnlyStocksChanged)
 */}
 
-<button id="Button2" onclick="@SetupClickCallback" class="oi oi-cog"></button>
+<button id="Button2" @onclick="SetupClick" class="oi oi-cog"></button>
 
 @RenderFragmentGridToolbarExt3(new Delegates {ChangeEventDelegate = OnlyStocksChanged, SetupClickCallback = SetupClickCallback3})
 
 
+<button @onclick="SetupClick">OPEN</button>
+
+@if (SelectedButton != null)
+{
+    <p>You have selected @SelectedButton</p>
+}
+
+@* 👇 Use the modal component *@
+<Modal @bind-Open="IsModalOpened" Close="OnClose">
+    <form method="dialog">
+        <textarea @bind="SettingsJson"/>
+
+        <button @onclick="SetupOk">Ok</button>
+        <button @onclick="SetupCancel">Cancel</button>
+    </form>
+</Modal>
 
 
 @OnlyStocks
 
 
 @code {
+    public bool IsModalOpened { get; set; }
+    public string SelectedButton { get; set; }
+
+    public void SetupClick()
+    {
+
+        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
+        IsModalOpened = true;
+        //return modalRef.Show();
+        //return null;
+    }
+
+    private void SetupOk()
+    {
+        Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
+        IsModalOpened = false;
+        //return modalRef.Hide();
+    }
+
+    private void SetupCancel()
+    {
+        IsModalOpened = false;
+        //return modalRef.Hide();
+    }
+    
+    void OnClose(string value)
+    {
+        SelectedButton = value;
+    }
+
+
+
     public class Delegates
     {
         public ChangeEventDelegate? ChangeEventDelegate { get; set;}
@@ -134,63 +182,44 @@
         var x4 = MyFunc4(5);
     }
 
-            /*private RenderFragment renderBindableTextBox(object o, string PropName) {
-            RenderFragment item = b => {
-            b.OpenComponent<Input>(0);
-            b.AddAttribute(1, "Text", o.GetType().GetProperty(PropName).GetValue(o).ToString());
-        b.AddAttribute(2, "TextChanged", EventCallback.Factory.Create<System.String>(this, str => { o.GetType().GetProperty(PropName).SetValue(o, str); }));
+        /*private RenderFragment renderBindableTextBox(object o, string PropName) {
+    RenderFragment item = b => {
+    b.OpenComponent<Input>(0);
+    b.AddAttribute(1, "Text", o.GetType().GetProperty(PropName).GetValue(o).ToString());
+    b.AddAttribute(2, "TextChanged", EventCallback.Factory.Create<System.String>(this, str => { o.GetType().GetProperty(PropName).SetValue(o, str); }));
         b.CloseComponent();
         };
         return item;
         }*/
-        /*private RenderFragment CreateComponent() => builder =>
+    /*private RenderFragment CreateComponent() => builder =>
         {
 
-        builder.OpenElement(0, "input");
-        builder.AddAttribute(1, "type", "checkbox");
-        //builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, _value => DateValue = _value, DateValue));
-        builder.AddAttribute(2, "onclick",
-        Microsoft.AspNetCore.Components.CompilerServices.RuntimeHelpers.TypeCheck<Microsoft.AspNetCore.Components.EventCallback<Microsoft.AspNetCore.Components.Web.MouseEventArgs>>(Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,
+    builder.OpenElement(0, "input");
+    builder.AddAttribute(1, "type", "checkbox");
+    //builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, _value => DateValue = _value, DateValue));
+    builder.AddAttribute(2, "onclick",
+    Microsoft.AspNetCore.Components.CompilerServices.RuntimeHelpers.TypeCheck<Microsoft.AspNetCore.Components.EventCallback<Microsoft.AspNetCore.Components.Web.MouseEventArgs>>(Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,
     (args) => Console.WriteLine(args.ToString(), "Button with text")
     )));
-        builder.CloseComponent();
-        };*/
-        /*protected override void BuildRenderTree(RenderTreeBuilder builder)
-        {
-        <div></div>
-        builder.OpenElement(0, "input");
-        builder.AddMultipleAttributes(1, base.AdditionalAttributes);
-        builder.AddAttribute(2, "class", base.CssClass);
-        builder.AddAttribute(3, "value", BindConverter.FormatValue(base.CurrentValue));
-        builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>((object)this, (Action<string>)delegate (string? __value)
-            {
-        base.CurrentValueAsString = __value;
-        }, base.CurrentValueAsString, (CultureInfo?)null));
-        builder.SetUpdatesAttributeName("value");              // <-------- THIS FIXES THE ISSUE
-        builder.CloseElement();
+    builder.CloseComponent();
+    };*/
+    /*protected override void BuildRenderTree(RenderTreeBuilder builder)
+    {
+    <div></div>
+    builder.OpenElement(0, "input");
+    builder.AddMultipleAttributes(1, base.AdditionalAttributes);
+    builder.AddAttribute(2, "class", base.CssClass);
+    builder.AddAttribute(3, "value", BindConverter.FormatValue(base.CurrentValue));
+    builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>((object)this, (Action<string>)delegate (string? __value)
+    {
+    base.CurrentValueAsString = __value;
+    }, base.CurrentValueAsString, (CultureInfo?)null));
+    builder.SetUpdatesAttributeName("value");              // <-------- THIS FIXES THE ISSUE
+    builder.CloseElement();
     }*/
 
 
-    public Task SetupClickCallback()
-    {
 
-        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
-        //return modalRef.Show();
-        return null;
-    }
-
-    private Task SetupOk()
-    {
-        Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
-        //return modalRef.Hide();
-        return null;
-    }
-
-    private Task SetupCancel()
-    {
-        //return modalRef.Hide();
-        return null;
-    }
 
     protected override async Task OnParametersSetAsync()
     {

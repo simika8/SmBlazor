@@ -71,3 +71,22 @@ export function GetScrollTop(element) {
     let st = element.scrollTop;
     return st;
 }
+
+
+export function blazorInitializeModal(dialog, reference) {
+    dialog.addEventListener("close", async e => {
+        await reference.invokeMethodAsync("OnClose", dialog.returnValue);
+    });
+}
+
+export function blazorOpenModal(dialog) {
+    if (!dialog.open) {
+        dialog.showModal();
+    }
+}
+
+export function blazorCloseModal(dialog) {
+    if (dialog.open) {
+        dialog.close();
+    }
+}
