@@ -1,10 +1,11 @@
 ﻿@using System.Text.Json.Serialization
+@using Microsoft.AspNetCore.Components.Rendering
 @using SmBlazor
 @using System.Text.Json
 @inject HttpClient Http
 @inject IJSRuntime JsRuntime
 
-<Grid @ref="Grid" Settings=@Settings SetupClickCallback="@ShowModalSetup"/>
+<Grid @ref="Grid" Settings=@Settings SetupClickCallback="@SetupClickCallback"/>
 
 <Modal @ref="modalRef">
     <ModalContent Centered>
@@ -16,7 +17,7 @@
             <Field>
                 <FieldLabel>Settings</FieldLabel>
                 
-                <MemoEdit @bind-Text="@SettingsJson" Rows="30"/>
+                <MemoEdit @bind-Text="@SettingsJson" Rows="25"/>
             </Field>
         </ModalBody>
         <ModalFooter>
@@ -26,12 +27,169 @@
     </ModalContent>
 </Modal>
 
+
+@{/*
+@Render(OnlyStocks)
+@CreateComponent()
+
+
+<input type="checkbox" id="addition" @bind-value="@OnlyStocks"/>
+@OnlyStocks
+
+<input type="checkbox" id="addition" onchange="@InputChanged"/>
+@CreateDynamicComponent
+@RenderFragmentGridToolbarExt(this)
+@RenderFragmentGridToolbarExt2(OnlyStocksChanged)
+*/}
+
+<button id="Button2" onclick="@SetupClickCallback" class="oi oi-cog"></button>
+
+@RenderFragmentGridToolbarExt3(new Delegates {ChangeEventDelegate = OnlyStocksChanged, SetupClickCallback = SetupClickCallback3})
+
+
+
+
+@OnlyStocks
+
+
 @code {
-
-
+    public class Delegates
+    {
+        public ChangeEventDelegate? ChangeEventDelegate { get; set;}
+        public ClickEventDelegate? SetupClickCallback { get; set;}
+    }
     private Modal modalRef;
 
-    private Task ShowModalSetup()
+
+    [Parameter]
+    public bool OnlyStocks { get; set; }
+    void OnlyStocksChanged(ChangeEventArgs e)
+    {
+        OnlyStocks = (bool)e.Value;
+        RenderFragmentGridToolbarExt(this);
+        //DelegatedCall<Func<ChangeEventArgs>>(Action<Func<ChangeEventArgs>> action)
+    }
+    public Task SetupClickCallback2()
+    {
+        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
+        return modalRef.Show();
+    }
+    protected Task SetupClickCallback3(MouseEventArgs mouseEventArgs)
+    {
+        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
+        return modalRef.Show();
+
+        /*await Task.Delay(new TimeSpan(0, 0, 2));
+ 
+        Notes.Add(new Note(NewComment));
+        NewComment = string.Empty;*/
+    }
+    public delegate void ChangeEventDelegate(ChangeEventArgs e);
+    public delegate Task ClickEventDelegate(MouseEventArgs mouseEventArgs);
+
+    
+
+    /*[Parameter]
+    public RenderFragment<ProductList>? RenderFragmentGridToolbarExt { get; set; }*/
+
+    public RenderFragment<ProductList> RenderFragmentGridToolbarExt = productlist => __builder =>
+    {
+        var bchecked = productlist.OnlyStocks;
+        <label for="addition">Only products with stock</label>
+    <input type="checkbox" id="addition" onchange="@productlist.OnlyStocksChanged"/>
+    };
+
+    public RenderFragment<ChangeEventDelegate> RenderFragmentGridToolbarExt2 = changeEventDelegate => __builder =>
+    {
+        <label for="addition">Only products with stock</label>
+        <input type="checkbox" id="addition" onchange="@changeEventDelegate"/>
+    };
+
+    public RenderFragment<dynamic> RenderFragmentGridToolbarExt3 = delegates => __builder =>
+    {
+        <label for="addition">Only products with stock</label>
+        <input type="checkbox" id="addition" onchange="@delegates.ChangeEventDelegate"/>
+
+        <button id="Button3" onclick="@delegates.SetupClickCallback" class="oi oi-cog"></button>
+    };
+
+    RenderFragment CreateDynamicComponent = builder =>
+    {
+        builder.OpenElement(0, "input");
+        builder.CloseComponent();
+    };
+    /*void CreateDynamicComponent2b(RenderTreeBuilder builder)
+    {
+        builder.OpenElement(0, "input");
+        builder.CloseComponent();
+    }
+    RenderFragment CreateDynamicComponent2(RenderTreeBuilder builder)
+    {
+
+        RenderFragment del2 = CreateDynamicComponent2b;
+        return del2;
+    }*/
+
+    string MyFunc1(int x) {
+        return x.ToString();
+    }
+    Func<int, string> MyFunc2 = 
+        delegate (int x) { return x.ToString(); };
+    Func<int, string> MyFunc3 =
+        x => x.ToString();
+    string MyFunc4(int x) =>
+        x.ToString();
+
+    delegate string Del(int i);
+
+    void Proba()
+    {
+        Del del = x => x.ToString();
+        var x = del(5);
+        var x1 = MyFunc1(5);
+        var x2 = MyFunc2(5);
+        var x3 = MyFunc3(5);
+        var x4 = MyFunc4(5);
+    }
+
+    /*private RenderFragment renderBindableTextBox(object o, string PropName) {
+        RenderFragment item = b => {
+            b.OpenComponent<Input>(0);
+            b.AddAttribute(1, "Text", o.GetType().GetProperty(PropName).GetValue(o).ToString());
+            b.AddAttribute(2, "TextChanged", EventCallback.Factory.Create<System.String>(this, str => { o.GetType().GetProperty(PropName).SetValue(o, str); }));
+            b.CloseComponent();
+        };
+        return item;
+    }*/
+    /*private RenderFragment CreateComponent() => builder =>
+    {
+
+        builder.OpenElement(0, "input");
+        builder.AddAttribute(1, "type", "checkbox");
+        //builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, _value => DateValue = _value, DateValue));
+        builder.AddAttribute(2, "onclick",
+        Microsoft.AspNetCore.Components.CompilerServices.RuntimeHelpers.TypeCheck<Microsoft.AspNetCore.Components.EventCallback<Microsoft.AspNetCore.Components.Web.MouseEventArgs>>(Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,
+            (args) => Console.WriteLine(args.ToString(), "Button with text")
+        )));
+        builder.CloseComponent();
+    };*/
+    /*protected override void BuildRenderTree(RenderTreeBuilder builder)
+	{
+        <div></div>
+		builder.OpenElement(0, "input");
+		builder.AddMultipleAttributes(1, base.AdditionalAttributes);
+		builder.AddAttribute(2, "class", base.CssClass);
+		builder.AddAttribute(3, "value", BindConverter.FormatValue(base.CurrentValue));
+		builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>((object)this, (Action<string>)delegate (string? __value)
+		{
+			base.CurrentValueAsString = __value;
+		}, base.CurrentValueAsString, (CultureInfo?)null));
+		builder.SetUpdatesAttributeName("value");              // <-------- THIS FIXES THE ISSUE
+		builder.CloseElement();
+	}*/
+
+
+    public Task SetupClickCallback()
     {
 
         SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
