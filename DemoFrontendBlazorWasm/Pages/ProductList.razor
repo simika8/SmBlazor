@@ -35,7 +35,7 @@
 }
 
 @* 👇 Use the modal component *@
-<Modal @bind-Open="IsModalOpened" Close="OnClose">
+<Modal @ref="Modal">
     <form method="dialog">
         <textarea @bind="SettingsJson"/>
 
@@ -49,6 +49,7 @@
 
 
 @code {
+    public Modal Modal{ get; set; }
     public bool IsModalOpened { get; set; }
     public string SelectedButton { get; set; }
 
@@ -56,30 +57,20 @@
     {
 
         SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
-        IsModalOpened = true;
-        //return modalRef.Show();
-        //return null;
+        Modal.Open2();
     }
 
     private void SetupOk()
     {
         Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
-        IsModalOpened = false;
-        //return modalRef.Hide();
+        Modal.Close2();
     }
 
     private void SetupCancel()
     {
         IsModalOpened = false;
-        //return modalRef.Hide();
+        Modal.Close2();
     }
-    
-    void OnClose(string value)
-    {
-        SelectedButton = value;
-    }
-
-
 
     public class Delegates
     {

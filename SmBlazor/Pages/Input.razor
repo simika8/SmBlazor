@@ -46,8 +46,12 @@
 
 
     private SmBlazor.SmJsInterop? SmJsInterop { get; set; }
-
-
+    public async Task<IJSObjectReference> GetJsObjectReference()
+    {
+        if (SmJsInterop is null)
+            SmJsInterop = new SmBlazor.SmJsInterop(JsRuntime);
+        return await SmJsInterop.GetJsObjectReference();
+    }
 
     [JSInvokable("setValueFromJS")]
     public void SetValueFromJS(string newValue)
@@ -68,9 +72,9 @@
 
     public async Task SetValueFromCode(string newValue)
     {
-        SmJsInterop = new SmBlazor.SmJsInterop(JsRuntime);
+        await (await GetJsObjectReference())
+            .InvokeAsync<bool>("setValue", InputElementRef.Current, newValue);
 
-        await SmJsInterop.SetValue(InputElementRef.Current, newValue);
         Console.WriteLine("SetValueFromCode");
 
     }
@@ -90,27 +94,16 @@
         {
             var componentRef = DotNetObjectReference.Create(this);
 
-            SmJsInterop = new SmBlazor.SmJsInterop(JsRuntime);
-
-            await SmJsInterop.SubscribeToChange(componentRef, InputElementRef.Current);
+            await (await GetJsObjectReference())
+                .InvokeVoidAsync("subscribeToChange", new object[] { componentRef, InputElementRef.Current });
         }
     }
     
     public async ValueTask DisposeAsync()
     {
         componentRef?.Dispose();
-        if ( SmJsInterop != null)
-        {
-            try
-            {
-                await SmJsInterop.DisposeAsync();
-            }
-            catch 
-            {
-                ;
-            }
-            
-        }
+        if (!(SmJsInterop is null))
+            await SmJsInterop.DisposeAsync();
     }
     
 
