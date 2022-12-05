@@ -3,3 +3,13 @@ textarea {
     height:400px;
     font-size:xx-small;
 }
+
+button {
+    border: 1px solid #ddd;
+    padding: 0px;
+    margin: 8px;
+    margin-right: 0px;
+    background-color: #FFFFFF;
+    width: 32px;
+    height: 32px;
+}
