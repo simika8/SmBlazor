@@ -57,19 +57,19 @@
     {
 
         SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
-        Modal.Open2();
+        Modal.ShowModal();
     }
 
     private void SetupOk()
     {
         Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
-        Modal.Close2();
+        Modal.Close();
     }
 
     private void SetupCancel()
     {
         IsModalOpened = false;
-        Modal.Close2();
+        Modal.Close();
     }
 
     public class Delegates

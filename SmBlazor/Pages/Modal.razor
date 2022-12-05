@@ -3,5 +3,18 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime JsRuntime
 
-<dialog @ref="_element">@ChildContent</dialog>
+<!-- 
 
+<dialog @ref="_element">@ChildContent</dialog>
+-->
+
+@if (Open)
+{
+<div class="modal fade show" id="myModal" style="display:block" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @ChildContent
+        </div>
+    </div>
+</div>
+}
