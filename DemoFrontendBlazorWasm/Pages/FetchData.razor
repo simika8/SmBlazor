@@ -1,57 +1,44 @@
 ﻿@page "/fetchdata"
 @inject HttpClient Http
-
-<PageTitle>Weather forecast</PageTitle>
-
-<h1>Weather forecast</h1>
-
-<p>This component demonstrates fetching data from the server.</p>
-
-@if (forecasts == null)
+<textarea @bind="SettingsJson"/>
+<button class="btn btn-primary" @onclick="@ModalShow">Show Dialog!</button>
+@if (showModal)
 {
-    <p><em>Loading...</em></p>
+    <div class="modal fade show" id="myModal" style="display:block" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Confirm action</h4>
+                    <button type="button" class="close" @onclick="@ModalCancel">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <p>This is the modal content!</p>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn" @onclick="@ModalCancel">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick=@ModalOk>Delete</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 }
-else
+<hr />
+@code
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-
-@code {
-    private WeatherForecast[]? forecasts;
-
-    protected override async Task OnInitializedAsync()
+    bool showModal = false;
+    string SettingsJson; 
+    void ModalShow() => showModal = true;
+    void ModalCancel() => showModal = false;
+    void ModalOk()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
-    }
-
-    public class WeatherForecast
-    {
-        public DateTime Date { get; set; }
-
-        public int TemperatureC { get; set; }
-
-        public string? Summary { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        Console.WriteLine("Modal ok");
+        showModal = false;
     }
 }

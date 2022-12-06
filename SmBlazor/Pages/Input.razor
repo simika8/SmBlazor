@@ -93,9 +93,19 @@
         if (firstRender)
         {
             var componentRef = DotNetObjectReference.Create(this);
+            if (InputElementRef == null)
+                return;
+            var curr = InputElementRef.Current;
+            if (InputElementRef.Current == null)
+                return;
+            if (componentRef == null)
+                return;
+            var jso = await GetJsObjectReference();
+            if (jso == null)
+                return;
 
-            await (await GetJsObjectReference())
-                .InvokeVoidAsync("subscribeToChange", new object[] { componentRef, InputElementRef.Current });
+            await (jso)
+                .InvokeVoidAsync("subscribeToChange", new object[] { componentRef, curr });
         }
     }
     

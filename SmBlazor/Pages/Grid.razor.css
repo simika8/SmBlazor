@@ -1,4 +1,9 @@
-﻿.BS thead tr th {
+﻿label {
+    flex-grow: 1;
+    background-color: blue;
+}
+
+.BS thead tr th {
     overflow: hidden;
 }
 
@@ -32,6 +37,7 @@
     height: 32px;
     border: 1px solid #ddd;
     margin-top: 9px;
+    margin-bottom: 8px;
     /*margin-right:5px;*/
     /*padding: 7px;*/
 }

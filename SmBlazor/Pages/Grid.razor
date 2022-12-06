@@ -26,7 +26,7 @@
             <div class="Icon oi oi-magnifying-glass"/>
             <Input @ref="Input" @bind-Value=@Settings.Search CursorEvent=@CursorEvent OnChange=@SearchChanged />
         </div>
-        <button id="Button" @onclick="@SetupClickCallback" class="oi oi-cog"></button>
+        @ChildContent
     </div>
     <div class="GridHeadDiv">
         <table>
@@ -74,13 +74,13 @@
 
 
 @code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
 
     [EditorRequired]
     [Parameter]
     public SmGridSettings Settings { get; set; } = null!;
 
-    [Parameter]
-    public EventCallback SetupClickCallback { get; set; }
 
     private SmGridState State { get; set; } = new();
 
