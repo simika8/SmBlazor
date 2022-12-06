@@ -18,9 +18,9 @@ namespace SmBlazor
         //public int Cursor { get; set; } = 0;
         public StyleSettings StyleSettings { get; set; } = StyleSettingsHelper.GetDefaultStyleSettings();
         public string IdFieldName { get; set; } = "Id";
-        public DataSourceSettings DataSourceSettings { get; set; }
+        public DataSourceSettings DataSourceSettings { get; set; } = new();
+        public Dictionary<string, string> ExtraParams { get; set; } = new();
         public Columns Columns { get; set; } = new Columns();
-
     }
 
     public class DataSourceSettings
@@ -28,7 +28,7 @@ namespace SmBlazor
         public string DataSourceApiBaseUri { get; set; } = null!;
         public string DataSourceApiPathUri { get; set; } = null!;
         public string DataSourceApiNameUri { get; set; } = null!;
-        public List<string> DataSourceOdataExpand { get; set; } = new();
+        public string DataSourceApiExtraParams { get; set; } = null!;
     }
 
 }

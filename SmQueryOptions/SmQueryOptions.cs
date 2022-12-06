@@ -13,12 +13,11 @@ using System.Threading.Tasks;
 
 namespace SmQueryOptionsNs;
 
-
 public class SmQueryOptions
 {
     public int? Top { get; set; }
     public int? Skip { get; set; }
     public string? Search { get; set; }
     public HashSet<string>? Select { get; set; }
-
 }
+

@@ -99,7 +99,7 @@ public class SmQueryOptionsUrl
         return res;
     }
 
-    public static string CalculateURL(SmQueryOptions qo)
+    public static string CalculateURL(SmQueryOptions qo, Dictionary<string, string>? extraParams)
     {
         var qou = Parse(qo);
 
@@ -111,7 +111,17 @@ public class SmQueryOptionsUrl
         urlParams["top"] = qou.Top?.ToString();
         urlParams["skip"] = qou.Skip?.ToString();
         urlParams["select"] = qou.Select;
-        
+
+        if (extraParams != null)
+        {
+            foreach (var extraParam in extraParams)
+            {
+                urlParams[extraParam.Key] = extraParam.Value;
+            }
+        }
+            
+
+
 
         var url = string.Join("&", urlParams.Where(x => !string.IsNullOrEmpty(x.Value)).Select(x => $"{x.Key}={x.Value}"));
 

@@ -108,7 +108,7 @@ namespace SmBlazor
             int queryId = Interlocked.Increment(ref _queryIdGenerator);
 
             var qo = SmQueryOptionsHelper.CreateSmQueryOptions(settings, top, skip);
-            var res = await DataSource.GetRows(qo);
+            var res = await DataSource.GetRows(qo, settings.ExtraParams);
 
             var queryIsObsolete = !Equals(_queryIdGenerator, queryId);
             if (queryIsObsolete)

@@ -23,9 +23,9 @@ namespace SmBlazor
             ApiNameUri = apiNameUri;
         }
 
-        public async Task<List<dynamic?>> GetRows(SmQueryOptions qo)
+        public async Task<List<dynamic?>> GetRows(SmQueryOptions qo, Dictionary<string, string>? extraParams)
         {
-            var qoUri = SmQueryOptionsUrl.CalculateURL(qo);
+            var qoUri = SmQueryOptionsUrl.CalculateURL(qo, extraParams);
             ;
             CancelAllRuningQueries();
 

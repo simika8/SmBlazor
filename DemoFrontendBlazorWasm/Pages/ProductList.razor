@@ -8,7 +8,7 @@
 <Grid @ref="Grid" Settings=@Settings>
     <div type="AlignCenterDiv">
         <label for="OnlyStocks">Only products with stock</label>
-        <input type="checkbox" id="OnlyStocks" @bind-value="@OnlyStocks"/>
+        <input type="checkbox" id="OnlyStocks" @bind-value="OnlyStocks"/>
         <button @onclick="SetupClick" class="oi oi-cog"></button>
     </div>
 </Grid>
@@ -22,10 +22,16 @@
     </div>
 </Modal>
 
+
 @code {
     public Modal Modal{ get; set; }
+
     [Parameter]
-    public bool OnlyStocks { get; set; }
+    public bool OnlyStocks { 
+        get => Settings.ExtraParams.TryGetValue("OnlyStocks2", out var str) ? bool.Parse(str) : false; 
+        set => Settings.ExtraParams["OnlyStocks"] = value.ToString(); 
+    }
+
     public string SettingsJson { get; set; } = string.Empty;
 
 
@@ -57,8 +63,8 @@
         DataSourceSettings = new()
         {
             DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
-            DataSourceApiPathUri = "/api",
-            DataSourceApiNameUri = "Product",
+            DataSourceApiPathUri = "/api/Product",
+            DataSourceApiNameUri = "Search",
         },
         Columns = new()
         {
@@ -73,7 +79,18 @@
             new() { FieldName = "Type", PropertyTypeName = "DemoModels.ProductType", Width = 40, },
             new() { FieldName = "Description", PropertyTypeName = "Description", Width = 60, },
         },
-
-
+        ExtraParams = new()
     };
+
+    public override bool Equals(object obj)
+    {
+        return obj is ProductList list &&
+               OnlyStocks == list.OnlyStocks;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        
+    }
+
 }
