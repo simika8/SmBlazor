@@ -6,65 +6,33 @@
 @inject IJSRuntime JsRuntime
 
 <Grid @ref="Grid" Settings=@Settings>
-    @*
-    <label for="OnlyStocks">Only products with stock</label>
-    <input type="checkbox" id="OnlyStocks" @bind-value="@OnlyStocks"/>
-    *@
-    <div type="GridToolbarDivExtra">
+    <div type="AlignCenterDiv">
         <label for="OnlyStocks">Only products with stock</label>
         <input type="checkbox" id="OnlyStocks" @bind-value="@OnlyStocks"/>
         <button @onclick="SetupClick" class="oi oi-cog"></button>
     </div>
 </Grid>
 
-
-@{/*
-@Render(OnlyStocks)
-@CreateComponent()
-
-
-<input type="checkbox" id="addition" @bind-value="@OnlyStocks"/>
-@OnlyStocks
-
-<input type="checkbox" id="addition" onchange="@InputChanged"/>
-@CreateDynamicComponent
-@RenderFragmentGridToolbarExt(this)
-@RenderFragmentGridToolbarExt2(OnlyStocksChanged)
-*/}
-
-<button id="Button2" @onclick="SetupClick" class="oi oi-cog"></button>
-
-@RenderFragmentGridToolbarExt3(new Delegates {ChangeEventDelegate = OnlyStocksChanged, SetupClickCallback = SetupClickCallback3})
-
-
-<button @onclick="SetupClick">OPEN</button>
-
-@if (SelectedButton != null)
-{
-    <p>You have selected @SelectedButton</p>
-}
-
 <Modal @ref="Modal">
-    <form method="dialog">
+    <div type="AlignCenterDiv">
         <textarea @bind="SettingsJson"/>
 
         <button @onclick="SetupOk">Ok</button>
         <button @onclick="SetupCancel">Cancel</button>
-    </form>
+    </div>
 </Modal>
-
-
-@OnlyStocks
-
 
 @code {
     public Modal Modal{ get; set; }
-    public bool IsModalOpened { get; set; }
-    public string SelectedButton { get; set; }
+    [Parameter]
+    public bool OnlyStocks { get; set; }
+    public string SettingsJson { get; set; } = string.Empty;
+
+
+    private Grid? Grid { get; set; }
 
     public void SetupClick()
     {
-
         SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
         Modal.ShowModal();
     }
@@ -77,179 +45,21 @@
 
     private void SetupCancel()
     {
-        IsModalOpened = false;
         Modal.Close();
     }
 
-    public class Delegates
-    {
-        public ChangeEventDelegate? ChangeEventDelegate { get; set;}
-        public ClickEventDelegate? SetupClickCallback { get; set;}
-    }
-
-
-    [Parameter]
-    public bool OnlyStocks { get; set; }
-    void OnlyStocksChanged(ChangeEventArgs e)
-    {
-        OnlyStocks = (bool)e.Value;
-        RenderFragmentGridToolbarExt(this);
-        //DelegatedCall<Func<ChangeEventArgs>>(Action<Func<ChangeEventArgs>> action)
-    }
-    public Task SetupClickCallback2()
-    {
-        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
-        //return modalRef.Show();
-        return null;
-
-    }
-    protected Task SetupClickCallback3(MouseEventArgs mouseEventArgs)
-    {
-        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
-        //return modalRef.Show();
-        return null;
-
-        /*await Task.Delay(new TimeSpan(0, 0, 2));
- 
-        Notes.Add(new Note(NewComment));
-        NewComment = string.Empty;*/
-    }
-    public delegate void ChangeEventDelegate(ChangeEventArgs e);
-    public delegate Task ClickEventDelegate(MouseEventArgs mouseEventArgs);
-
-    
-
-    /*[Parameter]
-    public RenderFragment<ProductList>? RenderFragmentGridToolbarExt { get; set; }*/
-
-    public RenderFragment<ProductList> RenderFragmentGridToolbarExt = productlist => __builder =>
-    {
-        var bchecked = productlist.OnlyStocks;
-        <label for="addition">Only products with stock</label>
-    <input type="checkbox" id="addition" onchange="@productlist.OnlyStocksChanged"/>
-    };
-
-    public RenderFragment<ChangeEventDelegate> RenderFragmentGridToolbarExt2 = changeEventDelegate => __builder =>
-    {
-        <label for="addition">Only products with stock</label>
-        <input type="checkbox" id="addition" onchange="@changeEventDelegate"/>
-    };
-
-    public RenderFragment<dynamic> RenderFragmentGridToolbarExt3 = delegates => __builder =>
-    {
-        <label for="addition">Only products with stock</label>
-        <input type="checkbox" id="addition" onchange="@delegates.ChangeEventDelegate"/>
-
-    <button id="Button3" onclick="@delegates.SetupClickCallback" class="oi oi-cog"></button>
-    };
-
-    RenderFragment CreateDynamicComponent = builder =>
-    {
-        builder.OpenElement(0, "input");
-        builder.CloseComponent();
-    };
-    /*void CreateDynamicComponent2b(RenderTreeBuilder builder)
-        {
-        builder.OpenElement(0, "input");
-    builder.CloseComponent();
-    }
-    RenderFragment CreateDynamicComponent2(RenderTreeBuilder builder)
-        {
-
-        RenderFragment del2 = CreateDynamicComponent2b;
-        return del2;
-    }*/
-
-    string MyFunc1(int x) {
-        return x.ToString();
-    }
-    Func<int, string> MyFunc2 = 
-        delegate (int x) { return x.ToString(); };
-    Func<int, string> MyFunc3 =
-        x => x.ToString();
-    string MyFunc4(int x) =>
-        x.ToString();
-
-    delegate string Del(int i);
-
-    void Proba()
-    {
-        Del del = x => x.ToString();
-        var x = del(5);
-        var x1 = MyFunc1(5);
-        var x2 = MyFunc2(5);
-        var x3 = MyFunc3(5);
-        var x4 = MyFunc4(5);
-    }
-
-        /*private RenderFragment renderBindableTextBox(object o, string PropName) {
-    RenderFragment item = b => {
-    b.OpenComponent<Input>(0);
-    b.AddAttribute(1, "Text", o.GetType().GetProperty(PropName).GetValue(o).ToString());
-    b.AddAttribute(2, "TextChanged", EventCallback.Factory.Create<System.String>(this, str => { o.GetType().GetProperty(PropName).SetValue(o, str); }));
-    b.CloseComponent();
-    };
-    return item;
-    }*/
-    /*private RenderFragment CreateComponent() => builder =>
-    {
-
-    builder.OpenElement(0, "input");
-    builder.AddAttribute(1, "type", "checkbox");
-    //builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, _value => DateValue = _value, DateValue));
-    builder.AddAttribute(2, "onclick",
-    Microsoft.AspNetCore.Components.CompilerServices.RuntimeHelpers.TypeCheck<Microsoft.AspNetCore.Components.EventCallback<Microsoft.AspNetCore.Components.Web.MouseEventArgs>>(Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,
-    (args) => Console.WriteLine(args.ToString(), "Button with text")
-    )));
-    builder.CloseComponent();
-    };*/
-    /*protected override void BuildRenderTree(RenderTreeBuilder builder)
-    {
-    <div></div>
-    builder.OpenElement(0, "input");
-    builder.AddMultipleAttributes(1, base.AdditionalAttributes);
-    builder.AddAttribute(2, "class", base.CssClass);
-    builder.AddAttribute(3, "value", BindConverter.FormatValue(base.CurrentValue));
-    builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>((object)this, (Action<string>)delegate (string? __value)
-    {
-    base.CurrentValueAsString = __value;
-    }, base.CurrentValueAsString, (CultureInfo?)null));
-    builder.SetUpdatesAttributeName("value");              // <-------- THIS FIXES THE ISSUE
-    builder.CloseElement();
-    }*/
-
-
-
-
-    protected override async Task OnParametersSetAsync()
-    {
-        ;
-    }
-
-    public string SettingsJson { get; set; } = string.Empty;
-
-
-    private Grid? Grid { get; set; }
 
     private SmGridSettings Settings { get; set; } = new SmGridSettings()
     {
-        /*DataSourceSettings = new()
-        {
-            //DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
-            DataSourceApiBaseUri = "https://localhost:7157",
-            DataSourceApiPathUri = "/odata",
-            DataSourceApiNameUri = "ProductOdata",
-            DataSourceOdataExpand = new List<string>() { "Ext", "Stocks" },
-        },/**/
+        Name = "Products",
+        Height = 300,
+        StyleSettings = StyleSettingsHelper.GetDefaultStyleSettings(),
         DataSourceSettings = new()
         {
             DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
-            //DataSourceApiBaseUri = "https://localhost:7157",
             DataSourceApiPathUri = "/api",
             DataSourceApiNameUri = "Product",
-        },/**/
-
-        Name = "Products",
+        },
         Columns = new()
         {
             new() { FieldName = "Id", PropertyTypeName = "Guid", Width = 150, },
@@ -263,18 +73,7 @@
             new() { FieldName = "Type", PropertyTypeName = "DemoModels.ProductType", Width = 40, },
             new() { FieldName = "Description", PropertyTypeName = "Description", Width = 60, },
         },
-        Height = 300,
-        StyleSettings = StyleSettingsHelper.GetDefaultStyleSettings()
 
 
     };
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        //Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
-        //Settings = await Common.GetFromJsonAsync<SmGridSettings>(JsRuntime, Http, "sample-data/SmGridSettings.json");
-    }
-
-
 }
