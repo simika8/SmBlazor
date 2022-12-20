@@ -40,7 +40,7 @@ public class ProductController : DictionaryBaseController<DemoModels.Product>
         var sw = System.Diagnostics.Stopwatch.StartNew();
         #endregion
 
-        var smQueryOptions = SmQueryOptionsUrl.Parse(top, skip, search, select);
+        var smQueryOptions = SmQueryOptionsUrlHelper.Parse(top, skip, search, select);
 
 
         var table = Database.DictionaryDatabase.Products;

@@ -13,14 +13,8 @@ using System.Threading.Tasks;
 
 namespace SmQueryOptionsNs;
 
-public class SmQueryOptionsUrl
+public static class SmQueryOptionsUrlHelper
 {
-    public int? Top { get; set; }
-    public int? Skip { get; set; }
-    public string? Search { get; set; }
-    public string? Select { get; set; }
-
-    
     public static SmQueryOptions Parse(int? top, int? skip, string? search, string? select)
     {
         var qou = new SmQueryOptions();
@@ -51,7 +45,7 @@ public class SmQueryOptionsUrl
         urlParams["skip"] = queryOptions.Skip?.ToString();
         urlParams["search"] = queryOptions.Search;
         urlParams["select"] = (queryOptions.Select == null) ? null : string.Join(", ", queryOptions.Select); ;
-        
+
         return urlParams;
 
     }
