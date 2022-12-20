@@ -37,7 +37,7 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "DemoBackend", Version = "v1" });
     c.ExampleFilters();
     var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename), true);
 
     string[] methodsOrder = new string[] {"post", "get", "put", "patch", "delete", };
     //c.OrderActionsBy(apiDesc => $"{apiDesc.ActionDescriptor.RouteValues["controller"]}");

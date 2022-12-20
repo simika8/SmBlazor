@@ -14,9 +14,13 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Controllers;
 
+/// <summary>
+/// CRUD for inmem Product Dictionary
+/// </summary>
+
 [Route("api/[controller]")]
 [ApiController]
-public class ProductController : DictionaryBaseController<DemoModels.Product>
+public class ProductController : DictionaryCrudBaseController<DemoModels.Product>
 {
     public ProductController()
     {
@@ -24,83 +28,22 @@ public class ProductController : DictionaryBaseController<DemoModels.Product>
         Table = Database.DictionaryDatabase.Products;
     }
 
-    /// <summary>
-    /// search products View
-    /// </summary>
-    /// <param name="top" example="10"></param>
-    /// <param name="skip"></param>
-    /// <param name="search" example="prod"></param>
-    /// <param name="select" example="Id, Code, Name, Price, Stocks, Rating, StockSumQuantity, Description, Type"></param>
-    /// <param name="OnlyStocks"></param>
-    /// <returns></returns>
-    [HttpGet(nameof(Search))]
-    public async Task<ActionResult<IEnumerable<DemoModels.ProductSearch>>> Search(int? top, int? skip, string? search, string? select, bool OnlyStocks = false)
+    private class PatchProductExample : IExamplesProvider<Newtonsoft.Json.Linq.JObject>
     {
-        #region delay
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        #endregion
+        public Newtonsoft.Json.Linq.JObject GetExamples()
+        {
+            var example = new
+            {
+                Name = "newName",
+                Rating = 3
+            };
 
-        var smQueryOptions = SmQueryOptionsUrlHelper.Parse(top, skip, search, select);
-
-
-        var table = Database.DictionaryDatabase.Products;
-        var query = GetBaseQuery(table, smQueryOptions, OnlyStocks);
-
-        query = query.ApplySkipTop(smQueryOptions);
-        var queryResult = await query.RunQuery();
-        var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
-
-        #region delay
-        sw.Stop();
-        var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptions);
-        var rndTime = new Random(smQueryOptionsUrlJson.GetHashCode());
-        var timeMs = (int)(Math.Pow(rndTime.NextDouble(), 4) * (AdminController.MaxQueryMilliseconds - AdminController.MinQueryMilliseconds) + AdminController.MinQueryMilliseconds);
-
-        if (timeMs - (int)sw.ElapsedMilliseconds > 0)
-            await Task.Delay(timeMs - (int)sw.ElapsedMilliseconds);
-        #endregion
-        return Ok(res);
+            var res = Newtonsoft.Json.Linq.JObject.FromObject(example);
 
 
+            return res;
+        }
     }
-
-    private DemoModels.ProductSearch ProjectResultItem(DemoModels.Product x, SmQueryOptions smQueryOptions)
-    {
-        var res = new DemoModels.ProductSearch();
-        SmQueryOptionsNs.Mapper.CopyProperties(x, res, false, false, smQueryOptions.Select);
-        if (smQueryOptions.Select?.Contains("StockSumQuantity".ToLower()) ?? true)
-            res.StockSumQuantity = (x.Stocks?.Count() > 0) ? x.Stocks?.Sum(x => x.Quantity) : null;
-        if (smQueryOptions.Select?.Contains("Description".ToLower()) ?? true)
-            res.Description = x.Ext?.Description;
-        return res;
-    }
-
-    private IEnumerable<DemoModels.Product> GetBaseQuery(Dictionary<Guid, DemoModels.Product> table, SmQueryOptions smQueryOptions, bool OnlyStocks)
-    {
-        var baseQuery = table.Select(x => x.Value);
-
-        #region apply OnlyStocks
-        if (OnlyStocks)
-            baseQuery = baseQuery.Where(x => x.Stocks != null && x.Stocks.Sum(x => x.Quantity) > 0);
-        #endregion
-
-        #region apply search
-        if (smQueryOptions.Search == null)
-            baseQuery = baseQuery.Where(x => true);
-        else
-            baseQuery = baseQuery.Where(x =>
-                (x.Name != null && x.Name.ToLower().Contains(smQueryOptions.Search.ToLower()))
-                ||
-                (x.Code != null && x.Code.ToLower().StartsWith(smQueryOptions.Search.ToLower()))
-
-            );
-        #endregion
-        var query = baseQuery;
-
-        return query;
-
-    }
-
 
     [HttpPatch("{id:Guid}")]
     [SwaggerRequestExample(typeof(Newtonsoft.Json.Linq.JObject), typeof(PatchProductExample))]
