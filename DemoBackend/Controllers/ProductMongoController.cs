@@ -23,14 +23,14 @@ namespace Controllers
         }
 
         [HttpGet(nameof(Search))]
-        public async Task<ActionResult> Search([FromQuery] SmQueryOptionsUrl smQueryOptionsUrl, bool OnlyStocks = false)
+        public async Task<ActionResult> Search(int? top, int? skip, string? search, string? select, bool OnlyStocks = false)
         {
-            ;
             #region delay
             var sw = System.Diagnostics.Stopwatch.StartNew();
             #endregion
 
-            var smQueryOptions = SmQueryOptionsUrl.Parse(smQueryOptionsUrl);
+            var smQueryOptions = SmQueryOptionsUrl.Parse(top, skip, search, select);
+
 
 
             var table = Database.SmDemoProductMongoDatabase.Product;
@@ -42,7 +42,7 @@ namespace Controllers
 
             #region delay
             sw.Stop();
-            var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptionsUrl);
+            var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptions);
             var rndTime = new Random(smQueryOptionsUrlJson.GetHashCode());
             var timeMs = (int)(Math.Pow(rndTime.NextDouble(), 4) * (AdminController.MaxQueryMilliseconds - AdminController.MinQueryMilliseconds) + AdminController.MinQueryMilliseconds);
 

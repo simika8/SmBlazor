@@ -1,4 +1,5 @@
-﻿using Swashbuckle.AspNetCore.Filters;
+﻿using SmQueryOptionsNs;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Controllers;
 
@@ -17,3 +18,4 @@ public class PatchProductExample : IExamplesProvider<Newtonsoft.Json.Linq.JObjec
         return res;
     }
 }
+

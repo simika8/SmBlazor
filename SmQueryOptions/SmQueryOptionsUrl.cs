@@ -15,102 +15,49 @@ namespace SmQueryOptionsNs;
 
 public class SmQueryOptionsUrl
 {
-    [DefaultValue(10)]
     public int? Top { get; set; }
     public int? Skip { get; set; }
-    [DefaultValue("prod")]
     public string? Search { get; set; }
-    [DefaultValue("Id, Code, Name, Price, Stocks, Rating, StockSumQuantity, Description, Type")]
     public string? Select { get; set; }
 
-    /// <summary>
-    /// : Name sw 'Product, with spec chars ('',&?) in it''s name, asdf.', Id eq 3, Price between 12.2 and 323.2
-    /// -> 
-    /// Name sw 'Product, with spec chars ('',&?) in it''s name, asdf.'
-    /// Id eq 3
-    /// Price between 12.2 and 323.2
-    /// </summary>
-    /// <param name="data"></param>
-    /// <returns></returns>
-    private static List<string> SmSplit(string? data)
+    
+    public static SmQueryOptions Parse(int? top, int? skip, string? search, string? select)
     {
-        var res2 = new List<string>();
-        if (data == null)
-            return res2;
+        var qou = new SmQueryOptions();
 
-        var res1 = data.Split(',').ToList();
+        qou.Top = top;
+        qou.Skip = skip;
+        qou.Search = search;
 
-        var currentLine = "";
-        foreach (var line in res1)
+
+        //select example value: "Id, Name, Price, Rating"
+        if (select != null)
         {
-            if (currentLine == "")
+            qou.Select = new();
+            var selectFields = select.Split(',', StringSplitOptions.TrimEntries);
+            foreach (var selectField in selectFields)
             {
-                currentLine = line;
-            }
-            else
-            {
-                currentLine = currentLine + "," + line;
-            }
-
-            var count = currentLine.Count(c => c == '\'');
-            if (count % 2 == 0)
-            {
-                res2.Add(currentLine.Trim().Replace("''", "'", StringComparison.InvariantCulture));
-                currentLine = "";
+                qou.Select.Add(selectField.ToLowerInvariant().Trim());
             }
         }
 
-        return res2.ToList();
-
+        return qou;
     }
-    public static SmQueryOptions Parse(SmQueryOptionsUrl queryOptionsUrl)
+    private static Dictionary<string, string?> GetUrlParams(SmQueryOptions queryOptions)
     {
-        var res = new SmQueryOptions();
-
-        res.Top = queryOptionsUrl.Top;
-        res.Skip = queryOptionsUrl.Skip;
-        res.Search = queryOptionsUrl.Search;
-
-
-        //queryOptionsUrl.Select = "Id, Name, Price, Rating"
-        if (queryOptionsUrl.Select != null)
-        {
-            res.Select = new();
-            var selects = SmSplit(queryOptionsUrl.Select);
-            foreach (var select in selects)
-            {
-                res.Select.Add(select.ToLowerInvariant().Trim());
-            }
-        }
-
-        return res;
-    }
-
-    public static SmQueryOptionsUrl Parse(SmQueryOptions queryOptions)
-    {
-        var res = new SmQueryOptionsUrl();
-
-        res.Top = queryOptions.Top;
-        res.Skip = queryOptions.Skip;
-        res.Search = queryOptions.Search;
-
-        if (queryOptions.Select != null)
-            res.Select = string.Join(", ", queryOptions.Select);
-        return res;
-    }
-
-    public static string CalculateURL(SmQueryOptions qo, Dictionary<string, string>? extraParams)
-    {
-        var qou = Parse(qo);
-
         var urlParams = new Dictionary<string, string?>();
 
+        urlParams["top"] = queryOptions.Top?.ToString();
+        urlParams["skip"] = queryOptions.Skip?.ToString();
+        urlParams["search"] = queryOptions.Search;
+        urlParams["select"] = (queryOptions.Select == null) ? null : string.Join(", ", queryOptions.Select); ;
+        
+        return urlParams;
 
-
-        urlParams["search"] = qou.Search;
-        urlParams["top"] = qou.Top?.ToString();
-        urlParams["skip"] = qou.Skip?.ToString();
-        urlParams["select"] = qou.Select;
+    }
+    public static string CalculateURL(SmQueryOptions queryOptions, Dictionary<string, string>? extraParams)
+    {
+        var urlParams = GetUrlParams(queryOptions);
 
         if (extraParams != null)
         {
@@ -119,9 +66,6 @@ public class SmQueryOptionsUrl
                 urlParams[extraParam.Key] = extraParam.Value;
             }
         }
-            
-
-
 
         var url = string.Join("&", urlParams.Where(x => !string.IsNullOrEmpty(x.Value)).Select(x => $"{x.Key}={x.Value}"));
 
