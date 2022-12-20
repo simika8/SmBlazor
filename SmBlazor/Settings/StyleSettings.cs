@@ -27,7 +27,7 @@ namespace SmBlazor
             | StyleSettings.ColumnAlign
             | StyleSettings.Basic
             | StyleSettings.Extra
-            | StyleSettings.BasicScrollBar
+            | StyleSettings.ExtraScrollBar
             ;
         }
 

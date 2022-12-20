@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Common;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -23,64 +22,6 @@ namespace Controllers
     public abstract class DictionaryBaseController<T> : ControllerBase where T : class
     {
         protected Dictionary<Guid, T> Table { get; set; } = new Dictionary<Guid, T> { };
-
-        
-
-        [HttpGet("{id:Guid}")]
-        public async Task<ActionResult<T>> Get(Guid id)
-        {
-            if (Table.TryGetValue(id, out var entity))
-            {
-                return entity;
-            }
-            else
-                return NotFound();
-        }
-
-        [HttpPut]
-        public IActionResult Put(Guid id, [FromBody] T modifiedEntity)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (Table.TryGetValue(id, out var entity))
-            {
-                Table[id] = modifiedEntity;
-                //entity = modifiedEntity;
-            } else
-                return NotFound();
-
-            return NoContent();
-        }
-
-       [HttpPatch]
-        public IActionResult Patch(Guid id, [FromBody] JsonPatchDocument<T> patch)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (Table.TryGetValue(id, out var entity))
-            {
-                patch.ApplyTo(entity);
-
-                var isValid = TryValidateModel(entity);
-                if (!isValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                //Table[key] = entity;
-                //entity = modifiedEntity;
-            }
-            else
-                return NotFound();
-
-            return NoContent();
-        }
 
         [HttpPost]
         public IActionResult Post([FromBody] T entity)
@@ -104,6 +45,25 @@ namespace Controllers
 
         }
 
+
+        [HttpPut]
+        public IActionResult Put(Guid id, [FromBody] T modifiedEntity)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (Table.TryGetValue(id, out var entity))
+            {
+                Table[id] = modifiedEntity;
+                //entity = modifiedEntity;
+            } else
+                return NotFound();
+
+            return NoContent();
+        }
+
         [HttpDelete]
         public async Task<ActionResult<T>> Delete(Guid id)
         {
@@ -117,29 +77,80 @@ namespace Controllers
             return NoContent();
         }
 
-
-        /*protected virtual Expression? SearchExpression<T>(ParameterExpression parameterExpression, string? search)
+        [HttpGet("{id:Guid}")]
+        public async Task<ActionResult<T>> Get(Guid id)
         {
-            const string defaultSearchPropertyName = "Name";
+            if (Table.TryGetValue(id, out var entity))
+            {
+                return entity;
+            }
+            else
+                return NotFound();
+        }
+        
+        /*
+        /// <summary>
+        /// JsonPatch
+        /// </summary>
+        [HttpPatch("JsonPatch")]
+        public IActionResult JsonPatch(Guid id, [FromBody] Microsoft.AspNetCore.JsonPatch.JsonPatchDocument<T> patch)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            PropertyInfo? propertyInfo = typeof(T).GetProperties()
-                .Where(x => x.PropertyType == typeof(string))
-                .Where(x => x.Name == defaultSearchPropertyName)
-                .FirstOrDefault();
-            if (propertyInfo == null)
-                return null;
+            if (Table.TryGetValue(id, out var entity))
+            {
+                patch.ApplyTo(entity);
 
-            if (string.IsNullOrWhiteSpace(search))
-                return null;
+                var isValid = TryValidateModel(entity);
+                if (!isValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            var expressions = new List<Expression>();
+                //Table[key] = entity;
+                //entity = modifiedEntity;
+            }
+            else
+                return NotFound();
 
-            AddExpressionIfNotNull(expressions, SmQueryOptionsNs.SmQueryOptions.StartsWithCaseInsensitiveExpression<T>(parameterExpression, defaultSearchPropertyName, search));
-
-            Expression aggregatedExpression = expressions.Aggregate((prev, current) => Expression.Or(prev, current));
-
-            return aggregatedExpression;
+            return NoContent();
         }*/
+
+        /// <summary>
+        /// json merge patch
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="patch"></param>
+        /// <returns></returns>
+        [HttpPatch]
+        public virtual IActionResult Patch(Guid id, [FromBody] Newtonsoft.Json.Linq.JObject patch)
+        {
+            if (Table.TryGetValue(id, out var entity))
+            {
+                var sourceObject = Newtonsoft.Json.Linq.JObject.FromObject(entity);
+                sourceObject.Merge(patch, new Newtonsoft.Json.Linq.JsonMergeSettings() { MergeArrayHandling = Newtonsoft.Json.Linq.MergeArrayHandling.Union });
+                entity = sourceObject.ToObject<T>(); 
+
+                var isValid = TryValidateModel(entity);
+                if (!isValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                Table[id] = entity;
+            }
+            else
+                return NotFound();
+
+            return NoContent();
+
+
+        }
+
+
 
         protected void AddExpressionIfNotNull(List<Expression> list, Expression? item)
         {
