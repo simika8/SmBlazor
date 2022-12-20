@@ -88,36 +88,6 @@ namespace Controllers
                 return NotFound();
         }
         
-        /*
-        /// <summary>
-        /// JsonPatch
-        /// </summary>
-        [HttpPatch("JsonPatch")]
-        public IActionResult JsonPatch(Guid id, [FromBody] Microsoft.AspNetCore.JsonPatch.JsonPatchDocument<T> patch)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (Table.TryGetValue(id, out var entity))
-            {
-                patch.ApplyTo(entity);
-
-                var isValid = TryValidateModel(entity);
-                if (!isValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                //Table[key] = entity;
-                //entity = modifiedEntity;
-            }
-            else
-                return NotFound();
-
-            return NoContent();
-        }*/
 
         /// <summary>
         /// json merge patch
