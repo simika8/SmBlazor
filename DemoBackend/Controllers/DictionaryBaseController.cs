@@ -46,7 +46,7 @@ namespace Controllers
         }
 
 
-        [HttpPut]
+        [HttpPut("{id:Guid}")]
         public IActionResult Put(Guid id, [FromBody] T modifiedEntity)
         {
             if (!ModelState.IsValid)
@@ -64,7 +64,7 @@ namespace Controllers
             return NoContent();
         }
 
-        [HttpDelete]
+        [HttpDelete("{id:Guid}")]
         public async Task<ActionResult<T>> Delete(Guid id)
         {
             if (Table.ContainsKey(id))
@@ -95,7 +95,7 @@ namespace Controllers
         /// <param name="id"></param>
         /// <param name="patch"></param>
         /// <returns></returns>
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         public virtual IActionResult Patch(Guid id, [FromBody] Newtonsoft.Json.Linq.JObject patch)
         {
             if (Table.TryGetValue(id, out var entity))

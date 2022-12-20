@@ -23,7 +23,7 @@ namespace Controllers
         }
 
         [HttpGet(nameof(Search))]
-        public async Task<ActionResult> Search(int? top, int? skip, string? search, string? select, bool OnlyStocks = false)
+        public async Task<ActionResult<IEnumerable<DemoModels.ProductSearch>>> Search(int? top, int? skip, string? search, string? select, bool OnlyStocks = false)
         {
             #region delay
             var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -54,9 +54,9 @@ namespace Controllers
 
         }
 
-        private DemoModels.ProductDto ProjectResultItem(DemoModels.Product x, SmQueryOptions smQueryOptions)
+        private DemoModels.ProductSearch ProjectResultItem(DemoModels.Product x, SmQueryOptions smQueryOptions)
         {
-            var res = new DemoModels.ProductDto();
+            var res = new DemoModels.ProductSearch();
             SmQueryOptionsNs.Mapper.CopyProperties(x, res, false, false, smQueryOptions.Select);
             if (smQueryOptions.Select?.Contains("StockSumQuantity".ToLower()) ?? true)
                 res.StockSumQuantity = (x.Stocks?.Count() > 0) ? x.Stocks?.Sum(x => x.Quantity) : null;

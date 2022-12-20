@@ -38,6 +38,14 @@ builder.Services.AddSwaggerGen(c =>
     c.ExampleFilters();
     var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
+    string[] methodsOrder = new string[] {"post", "get", "put", "patch", "delete", };
+    //c.OrderActionsBy(apiDesc => $"{apiDesc.ActionDescriptor.RouteValues["controller"]}");
+    //c.OrderActionsBy(apiDesc => $"{apiDesc.ActionDescriptor.RouteValues["controller"]}_{Array.IndexOf(methodsOrder, apiDesc.HttpMethod?.ToLower())}");
+    //c.OrderActionsBy(apiDesc => $"{Array.IndexOf(methodsOrder, apiDesc.HttpMethod?.ToLower())}");
+    c.OrderActionsBy(apiDesc => $"{apiDesc.RelativePath}_{Array.IndexOf(methodsOrder, apiDesc.HttpMethod?.ToLower())}");
+    //c.OrderActionsBy(apiDesc => $"{(new Random()).Next()}");
+
 });
 builder.Services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
 

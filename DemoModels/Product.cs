@@ -34,6 +34,7 @@ namespace DemoModels
     {
         [Key]
         [BsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public Guid ProductId { get; set; }
         public string? Description { get; set; }
         public double? MinimumStock { get; set; }
@@ -42,8 +43,10 @@ namespace DemoModels
     public class InventoryStock
     {
         [BsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public Guid Id { get; set; }
         [BsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public Guid ProductId { get; set; }
         public Guid StoreId { get; set; }
         public double Quantity { get; set; }

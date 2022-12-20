@@ -2,7 +2,7 @@
 
 namespace DemoModels
 {
-    public class ProductDto
+    public class ProductSearch
     {
         public Guid? Id { get; set; }
         public string? Code { get; set; }
