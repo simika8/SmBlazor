@@ -23,7 +23,7 @@ namespace Controllers
         }
 
         [HttpGet(nameof(Search))]
-        public async Task<ActionResult> Search([ModelBinder(BinderType = typeof(SmQueryOptionsUrlBinder.SmQueryOptionsUrlBinder))] SmQueryOptionsUrl smQueryOptionsUrl, bool OnlyStocks = false)
+        public async Task<ActionResult> Search([FromQuery] SmQueryOptionsUrl smQueryOptionsUrl, bool OnlyStocks = false)
         {
             ;
             #region delay
