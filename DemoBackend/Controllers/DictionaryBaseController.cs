@@ -102,7 +102,9 @@ namespace Controllers
             {
                 var sourceObject = Newtonsoft.Json.Linq.JObject.FromObject(entity);
                 sourceObject.Merge(patch, new Newtonsoft.Json.Linq.JsonMergeSettings() { MergeArrayHandling = Newtonsoft.Json.Linq.MergeArrayHandling.Union });
-                entity = sourceObject.ToObject<T>(); 
+                entity = sourceObject.ToObject<T>();
+                if (entity == null)
+                    return NotFound("entity == null");
 
                 var isValid = TryValidateModel(entity);
                 if (!isValid)
