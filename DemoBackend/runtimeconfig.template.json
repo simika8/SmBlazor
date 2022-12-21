@@ -1,6 +1,6 @@
 {
   "configProperties": {
-    "System.GC.HeapHardLimit": 200000000,
+    "System.GC.HeapHardLimit": 500000000,
     "System.GC.HighMemoryPercent": 50
   },
   "runtimeOptions": {
