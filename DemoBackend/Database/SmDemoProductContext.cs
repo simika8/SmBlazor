@@ -1,7 +1,12 @@
 ﻿using Database;
 using DemoModels;
+using MemoryPack;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Newtonsoft.Json;
 
 namespace Database;
 
@@ -85,6 +90,34 @@ public class SmDemoProductContext : DbContext
         options
            .UseLowerCaseNamingConvention();
 
+
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Product>().Property(p => p.Stocks).HasDeepValueComparer();
+        modelBuilder.Entity<Product>().Property(p => p.Ext).HasDeepValueComparer();
+    }
+}
+
+public static class ValueConversionExtensions
+{
+    public static PropertyBuilder<T> HasDeepValueComparer<T>(this PropertyBuilder<T> propertyBuilder)
+    {
+        //example from: https://stackoverflow.com/a/53051419
+        //instead of manually set IsModified:
+        //db.Entry(entity).Property(b => b.xProperty).IsModified = true;
+
+        ValueComparer<T> comparer = new ValueComparer<T>(
+            (l, r) => MemoryPackSerializer.Serialize(l, null).SequenceEqual(MemoryPackSerializer.Serialize(r, null)),
+            v => v == null ? 0 : MemoryPackSerializer.Serialize(v, null).GetHashCode(),
+            v => MemoryPackSerializer.Deserialize<T>(MemoryPackSerializer.Serialize(v, null), null)!
+            );
+        propertyBuilder.Metadata.SetValueComparer(comparer);
+
+
+
+        return propertyBuilder;
 
     }
 }

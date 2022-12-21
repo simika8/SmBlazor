@@ -5,6 +5,7 @@ using Database;
 using DemoModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,13 +14,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DemoBackend.Migrations
 {
     [DbContext(typeof(SmDemoProductContext))]
-    partial class SmDemoProductContextModelSnapshot : ModelSnapshot
+    [Migration("20221221093122_proba2")]
+    partial class proba2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.1")
+                .HasAnnotation("ProductVersion", "7.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -39,7 +42,7 @@ namespace DemoBackend.Migrations
                         .HasColumnType("text")
                         .HasColumnName("code");
 
-                    b.Property<string>("Ext")
+                    b.Property<ProductExt>("Ext")
                         .HasColumnType("jsonb")
                         .HasColumnName("ext");
 

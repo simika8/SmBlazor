@@ -42,18 +42,17 @@ public class ProductSearchController : ControllerBase
 
     }
 
-
     /// <summary>
-    /// Search in in-memory dictionary
+    /// Search in in-memory Products database
     /// </summary>
     /// <param name="top" example="10"></param>
     /// <param name="skip"></param>
     /// <param name="search" example="prod"></param>
     /// <param name="select" example="Id, Code, Name, Price, StockSumQuantity">Select fields in response</param>
-    /// <param name="OnlyStocks">Search fory only item with stocks</param>
+    /// <param name="onlyStocks">Search fory only item with stocks</param>
     /// <returns>List of products</returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<DemoModels.ProductSearchResult>>> SearchDict(int? top, int? skip, string? search, string? select, bool OnlyStocks = false)
+    public async Task<ActionResult<IEnumerable<DemoModels.ProductSearchResult>>> Search(int? top, int? skip, string? search, string? select, bool onlyStocks = false)
     {
         #region delay
         var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -61,14 +60,22 @@ public class ProductSearchController : ControllerBase
 
         var smQueryOptions = SmQueryOptionsUrlHelper.Parse(top, skip, search, select);
 
-
-        var table = Database.DictionaryDatabase.Products;
-        var query = GetBaseQuery(table, smQueryOptions, OnlyStocks);
-
-        query = query.ApplySkipTop(smQueryOptions);
-        var queryResult = await query.RunQuery();
-        var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
-
+        IEnumerable<DemoModels.ProductSearchResult> res;
+        switch (AdminController.DbType)
+        {
+            case AdminController.DatabaseType.Dictionary:
+                res = await SearchDict(smQueryOptions, onlyStocks);
+                break;
+            case AdminController.DatabaseType.EfPg:
+                res = await SearchEf(smQueryOptions, onlyStocks);
+                break;
+            case AdminController.DatabaseType.Mongo:
+                res = await SearchMongo(smQueryOptions, onlyStocks);
+                break;
+            default:
+                res = await SearchDict(smQueryOptions, onlyStocks);
+                break;
+        }
         #region delay
         sw.Stop();
         var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptions);
@@ -79,91 +86,43 @@ public class ProductSearchController : ControllerBase
             await Task.Delay(timeMs - (int)sw.ElapsedMilliseconds);
         #endregion
         return Ok(res);
-
-
     }
 
-    /// <summary>
-    /// Search in PostgreSQL database via Entity Framework Core.
-    /// </summary>
-    /// <param name="top" example="10"></param>
-    /// <param name="skip"></param>
-    /// <param name="search" example="prod"></param>
-    /// <param name="select" example="Id, Code, Name, Price, StockSumQuantity">Select fields in response</param>
-    /// <param name="OnlyStocks">Search fory only item with stocks</param>
-    /// <returns>List of products</returns>
-
-    [HttpGet(nameof(SearchEf))]
-    public async Task<ActionResult<IEnumerable<DemoModels.ProductSearchResult>>> SearchEf(int? top, int? skip, string? search, string? select, bool OnlyStocks = false)
+    private async Task<IEnumerable<DemoModels.ProductSearchResult>> SearchDict(SmQueryOptions smQueryOptions, bool onlyStocks = false)
     {
-        #region delay
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        #endregion
+        var table = Database.DictionaryDatabase.Products;
+        var query = GetBaseQuery(table, smQueryOptions, onlyStocks);
 
-        var smQueryOptions = SmQueryOptionsUrlHelper.Parse(top, skip, search, select);
+        query = query.ApplySkipTop(smQueryOptions);
+        var queryResult = await query.RunQuery();
+        var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
 
+        return res;
+    }
 
+    private async Task<IEnumerable<DemoModels.ProductSearchResult>> SearchEf(SmQueryOptions smQueryOptions, bool onlyStocks = false)
+    {
         using var db = new Database.SmDemoProductContext();
         var table = db.Product;
-        var query = GetBaseQueryEf(table, smQueryOptions, OnlyStocks);
+        var query = GetBaseQueryEf(table, smQueryOptions, onlyStocks);
 
         query = query.ApplySkipTop(smQueryOptions);
         var queryResult = await query.RunQuery();
         var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
 
-        #region delay
-        sw.Stop();
-        var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptions);
-        var rndTime = new Random(smQueryOptionsUrlJson.GetHashCode());
-        var timeMs = (int)(Math.Pow(rndTime.NextDouble(), 4) * (AdminController.MaxQueryMilliseconds - AdminController.MinQueryMilliseconds) + AdminController.MinQueryMilliseconds);
-
-        if (timeMs - (int)sw.ElapsedMilliseconds > 0)
-            await Task.Delay(timeMs - (int)sw.ElapsedMilliseconds);
-        #endregion
-        return Ok(res);
-
-
+        return res;
     }
 
-    /// <summary>
-    /// Search in MongoDB database via MongoDB.Driver. 
-    /// </summary>
-    /// <param name="top" example="10"></param>
-    /// <param name="skip"></param>
-    /// <param name="search" example="prod"></param>
-    /// <param name="select" example="Id, Code, Name, Price, StockSumQuantity">Select fields in response</param>
-    /// <param name="OnlyStocks">Search fory only item with stocks</param>
-    /// <returns>List of products</returns>
-    [HttpGet(nameof(SearchMongo))]
-    public async Task<ActionResult<IEnumerable<DemoModels.ProductSearchResult>>> SearchMongo(int? top, int? skip, string? search, string? select, bool OnlyStocks = false)
+    private async Task<IEnumerable<DemoModels.ProductSearchResult>> SearchMongo(SmQueryOptions smQueryOptions, bool onlyStocks = false)
     {
-        #region delay
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        #endregion
-
-        var smQueryOptions = SmQueryOptionsUrlHelper.Parse(top, skip, search, select);
-
-
-
         var table = Database.SmDemoProductMongoDatabase.Product;
-        var query = GetBaseQueryMongo(table, smQueryOptions, OnlyStocks);
+        var query = GetBaseQueryMongo(table, smQueryOptions, onlyStocks);
 
         query = query.ApplySkipTop(smQueryOptions);
         var queryResult = await query.RunQuery();
         var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
 
-        #region delay
-        sw.Stop();
-        var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptions);
-        var rndTime = new Random(smQueryOptionsUrlJson.GetHashCode());
-        var timeMs = (int)(Math.Pow(rndTime.NextDouble(), 4) * (AdminController.MaxQueryMilliseconds - AdminController.MinQueryMilliseconds) + AdminController.MinQueryMilliseconds);
-
-        if (timeMs - (int)sw.ElapsedMilliseconds > 0)
-            await Task.Delay(timeMs - (int)sw.ElapsedMilliseconds);
-        #endregion
-        return Ok(res);
-
-
+        return res;
     }
 
 

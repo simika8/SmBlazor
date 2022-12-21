@@ -5,6 +5,7 @@ using Database;
 using DemoModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,13 +14,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DemoBackend.Migrations
 {
     [DbContext(typeof(SmDemoProductContext))]
-    partial class SmDemoProductContextModelSnapshot : ModelSnapshot
+    [Migration("20221221090923_proba")]
+    partial class proba
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.1")
+                .HasAnnotation("ProductVersion", "7.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -38,10 +41,6 @@ namespace DemoBackend.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("text")
                         .HasColumnName("code");
-
-                    b.Property<string>("Ext")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("ext");
 
                     b.Property<string>("Name")
                         .HasColumnType("text")
@@ -71,6 +70,41 @@ namespace DemoBackend.Migrations
                         .HasName("pk_product");
 
                     b.ToTable("product", (string)null);
+                });
+
+            modelBuilder.Entity("DemoModels.ProductExt", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("productid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<double?>("MinimumStock")
+                        .HasColumnType("double precision")
+                        .HasColumnName("minimumstock");
+
+                    b.HasKey("ProductId")
+                        .HasName("pk_productext");
+
+                    b.ToTable("productext", (string)null);
+                });
+
+            modelBuilder.Entity("DemoModels.ProductExt", b =>
+                {
+                    b.HasOne("DemoModels.Product", null)
+                        .WithOne("Ext")
+                        .HasForeignKey("DemoModels.ProductExt", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_productext_product_productid");
+                });
+
+            modelBuilder.Entity("DemoModels.Product", b =>
+                {
+                    b.Navigation("Ext");
                 });
 #pragma warning restore 612, 618
         }

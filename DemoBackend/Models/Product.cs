@@ -1,27 +1,23 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using MemoryPack;
+using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 
-namespace DemoModels2
+namespace DemoModels
 {
+    /// <summary>
+    /// Product Type
+    /// </summary>
     public enum ProductType
     {
+        /// <summary>Product = 0</summary>
         Product = 0,
+        /// <summary>Service = 1</summary>
         Service = 1,
+        /// <summary>Information = 2</summary>
         Information = 2,
     }
-    public partial class Product2
-    {
-        public Guid Id { get; set; }
-        public string? Code { get; set; }
-        public string? Name { get; set; }
-        public bool? Active { get; set; }
-        public double? Price { get; set; }
-        public DateTime? ReleaseDate { get; set; }
-        public int? Rating { get; set; }
-        public ProductType? Type { get; set; }
-    }
 
-
+    [MemoryPackable]
     public partial class Product
     {
         public Guid Id { get; set; }
@@ -44,25 +40,15 @@ namespace DemoModels2
     //special 1 to 1 (or 1 to 0) relationship. ProductExt can be empty to some Product
     //Primary key: ProductExt.ProductId
     //Special: Primary key value equals to Products.Id
-
+    [MemoryPackable]
     public partial record ProductExt
     {
-        [Key]
-        [BsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
-        public Guid ProductId { get; set; }
         public string? Description { get; set; }
         public double? MinimumStock { get; set; }
     }
-
+    [MemoryPackable]
     public partial class InventoryStock
     {
-        [BsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
-        public Guid Id { get; set; }
-        [BsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
-        public Guid ProductId { get; set; }
         public Guid StoreId { get; set; }
         public double Quantity { get; set; }
 

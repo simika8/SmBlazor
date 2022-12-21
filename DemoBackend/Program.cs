@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Common;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
+using Microsoft.OpenApi.Any;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Xml.Linq;
+using System.Runtime.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,13 +25,13 @@ var builder = WebApplication.CreateBuilder(args);
                         DemoModels.ProductODataEdmModel.GetEdmModel()).Filter().Expand().Select().Count().SkipToken().OrderBy().SetMaxTop(500))
                 ;*/
 
-builder.Services.AddControllers(options =>
+builder.Services.AddControllers(/*options =>
     {
         options.InputFormatters.Insert(0, MyJpif.GetJsonPatchInputFormatter());
-    }).AddNewtonsoftJson(opt =>
+    }*/).AddNewtonsoftJson(opt =>
     {
-        opt.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
         opt.UseMemberCasing();
+        opt.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
         opt.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
     });
 
@@ -37,7 +41,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "DemoBackend", Version = "v1" });
     c.ExampleFilters();
     var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename), true);
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+    c.IncludeXmlComments(xmlPath, true);
 
     string[] methodsOrder = new string[] {"post", "get", "put", "patch", "delete", };
     //c.OrderActionsBy(apiDesc => $"{apiDesc.ActionDescriptor.RouteValues["controller"]}");

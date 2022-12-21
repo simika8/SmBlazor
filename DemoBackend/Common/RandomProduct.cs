@@ -64,7 +64,6 @@ namespace Common
                 Active = rnd.Next(2) == 0,
                 Ext = new ProductExt()
                 {
-                    ProductId = id,
                     Description = RandomProduct.RandomSentences(rnd.Next(5, 10), rnd.Next(3, 10), rnd),
                     MinimumStock = rnd.Next(1, 10),
                 },
@@ -85,8 +84,6 @@ namespace Common
                 {
                     p.Stocks.Add(new InventoryStock()
                     {
-                        Id = Guid.NewGuid(),
-                        ProductId = id,
                         StoreId = TestGuid("Store " + i.ToString()),
                         Quantity = rnd.Next(1, 10),
                     });
