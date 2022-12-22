@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Database;
+using DemoModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -32,14 +34,14 @@ namespace Controllers;
 [ApiController]
 public class ProductSearchController : ControllerBase
 {
+    protected ProductRepo SearchRepo { get; set; }
+    protected CrudRepo<Product, Guid> CrudRepo { get; set; }
     public ProductSearchController()
     {
-        Database.DictionaryDatabase.InitRandomData();
+        SearchRepo = new ProductRepo();
 
-        Database.SmDemoProductContext.InitRandomData();
-
-        Database.SmDemoProductMongoDatabase.InitRandomData();
-
+        CrudRepo = new CrudRepo<DemoModels.Product, Guid>(Database.DictionaryDatabase.Products);
+        CrudRepo.InitRandomData();
     }
 
     /// <summary>
@@ -59,23 +61,8 @@ public class ProductSearchController : ControllerBase
         #endregion
 
         var smQueryOptions = SmQueryOptionsUrlHelper.Parse(top, skip, search, select);
-
-        IEnumerable<DemoModels.ProductSearchResult> res;
-        switch (AdminController.DbType)
-        {
-            case AdminController.DatabaseType.Dictionary:
-                res = await SearchDict(smQueryOptions, onlyStocks);
-                break;
-            case AdminController.DatabaseType.EfPg:
-                res = await SearchEf(smQueryOptions, onlyStocks);
-                break;
-            case AdminController.DatabaseType.Mongo:
-                res = await SearchMongo(smQueryOptions, onlyStocks);
-                break;
-            default:
-                res = await SearchDict(smQueryOptions, onlyStocks);
-                break;
-        }
+        var res = await ProductRepo.Search(smQueryOptions, onlyStocks);
+        
         #region delay
         sw.Stop();
         var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptions);
@@ -85,140 +72,10 @@ public class ProductSearchController : ControllerBase
         if (timeMs - (int)sw.ElapsedMilliseconds > 0)
             await Task.Delay(timeMs - (int)sw.ElapsedMilliseconds);
         #endregion
+
         return Ok(res);
     }
 
-    private async Task<IEnumerable<DemoModels.ProductSearchResult>> SearchDict(SmQueryOptions smQueryOptions, bool onlyStocks = false)
-    {
-        var table = Database.DictionaryDatabase.Products;
-        var query = GetBaseQuery(table, smQueryOptions, onlyStocks);
-
-        query = query.ApplySkipTop(smQueryOptions);
-        var queryResult = await query.RunQuery();
-        var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
-
-        return res;
-    }
-
-    private async Task<IEnumerable<DemoModels.ProductSearchResult>> SearchEf(SmQueryOptions smQueryOptions, bool onlyStocks = false)
-    {
-        using var db = new Database.SmDemoProductContext();
-        var table = db.Product;
-        var query = GetBaseQueryEf(table, smQueryOptions, onlyStocks);
-
-        query = query.ApplySkipTop(smQueryOptions);
-        var queryResult = await query.RunQuery();
-        var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
-
-        return res;
-    }
-
-    private async Task<IEnumerable<DemoModels.ProductSearchResult>> SearchMongo(SmQueryOptions smQueryOptions, bool onlyStocks = false)
-    {
-        var table = Database.SmDemoProductMongoDatabase.Product;
-        var query = GetBaseQueryMongo(table, smQueryOptions, onlyStocks);
-
-        query = query.ApplySkipTop(smQueryOptions);
-        var queryResult = await query.RunQuery();
-        var res = queryResult.Select(x => ProjectResultItem(x, smQueryOptions));
-
-        return res;
-    }
-
-
-    private DemoModels.ProductSearchResult ProjectResultItem(DemoModels.Product x, SmQueryOptions smQueryOptions)
-    {
-        var res = new DemoModels.ProductSearchResult();
-        SmQueryOptionsNs.Mapper.CopyProperties(x, res, false, false, smQueryOptions.Select);
-        if (smQueryOptions.Select?.Contains("StockSumQuantity".ToLower()) ?? true)
-            res.StockSumQuantity = (x.Stocks?.Count() > 0) ? x.Stocks?.Sum(x => x.Quantity) : null;
-        if (smQueryOptions.Select?.Contains("Description".ToLower()) ?? true)
-            res.Description = x.Ext?.Description;
-        return res;
-    }
-
-    private IEnumerable<DemoModels.Product> GetBaseQuery(Dictionary<Guid, DemoModels.Product> table, SmQueryOptions smQueryOptions, bool OnlyStocks)
-    {
-        var baseQuery = table.Select(x => x.Value);
-
-        #region apply OnlyStocks
-        if (OnlyStocks)
-            baseQuery = baseQuery.Where(x => x.Stocks != null && x.Stocks.Sum(x => x.Quantity) > 0);
-        #endregion
-
-        #region apply search
-        if (smQueryOptions.Search == null)
-            baseQuery = baseQuery.Where(x => true);
-        else
-            baseQuery = baseQuery.Where(x =>
-                (x.Name != null && x.Name.ToLower().Contains(smQueryOptions.Search.ToLower()))
-                ||
-                (x.Code != null && x.Code.ToLower().StartsWith(smQueryOptions.Search.ToLower()))
-
-            );
-        #endregion
-        var query = baseQuery;
-
-        return query;
-
-    }
-
-    private IQueryable<DemoModels.Product> GetBaseQueryEf(DbSet<DemoModels.Product> table, SmQueryOptions smQueryOptions, bool OnlyStocks)
-    {
-        var baseQuery = table
-            .Include(x => x.Stocks)
-            .Include(x => x.Ext)
-            .OrderBy(x => x.Id)
-            .AsQueryable();
-
-        #region apply OnlyStocks
-        if (OnlyStocks)
-            baseQuery = baseQuery.Where(x => x.Stocks != null && x.Stocks.Sum(x => x.Quantity) > 0);
-        #endregion
-
-        #region apply search
-        if (smQueryOptions.Search == null)
-            baseQuery = baseQuery.Where(x => true);
-        else
-            baseQuery = baseQuery.Where(x =>
-                (x.Name != null && x.Name.ToLower().Contains(smQueryOptions.Search.ToLower()))
-                ||
-                (x.Code != null && x.Code.ToLower().StartsWith(smQueryOptions.Search.ToLower()))
-
-            );
-        #endregion
-        var query = baseQuery;
-        return query;
-
-    }
-
-    private IFindFluent<DemoModels.Product, DemoModels.Product> GetBaseQueryMongo(IMongoCollection<DemoModels.Product> table, SmQueryOptions smQueryOptions, bool OnlyStocks)
-    {
-
-        var filterbuilder = Builders<DemoModels.Product>.Filter;
-        FilterDefinition<DemoModels.Product>? searchFilter = filterbuilder.Empty;
-        var baseQuery = table;
-
-        #region apply OnlyStocks
-        if (OnlyStocks)
-        {
-            searchFilter &= filterbuilder.Gte("Stocks.Quantity", 0);
-        }
-        #endregion
-
-        #region apply search
-        if (smQueryOptions.Search != null)
-        {
-            searchFilter &= filterbuilder.Gte(x => x.Name, smQueryOptions.Search)
-                & filterbuilder.Lte(x => x.Name, smQueryOptions.Search + "zzzz")
-                ;
-        }
-        #endregion
-
-        var fo = new FindOptions() { Collation = new Collation("hu", strength: CollationStrength.Primary) };
-        var query = baseQuery.Find(searchFilter, fo);
-        return query;
-    }
 
 
 }

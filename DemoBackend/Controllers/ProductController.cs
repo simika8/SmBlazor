@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -20,12 +22,18 @@ namespace Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ProductController : DictionaryCrudBaseController<DemoModels.Product>
+public class ProductController : CrudBaseController<DemoModels.Product>
 {
+    protected ProductRepo SearchRepo { get; set; }
+
     public ProductController()
     {
-        Database.DictionaryDatabase.InitRandomData();
-        Table = Database.DictionaryDatabase.Products;
+        CrudRepo = new CrudRepo<DemoModels.Product, Guid>(Database.DictionaryDatabase.Products);
+        CrudRepo.InitRandomData();
+
+
+        SearchRepo = new ProductRepo();
+        
     }
 
     private class PatchProductExample : IExamplesProvider<Newtonsoft.Json.Linq.JObject>

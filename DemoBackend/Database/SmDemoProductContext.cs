@@ -34,7 +34,7 @@ public class SmDemoProductContext : DbContext
             return;
         Initialized = true;
         using var db = new SmDemoProductContext();
-        var prodCount = 10000;
+        var prodCount = 100000;
         try
         {
             db.Database.Migrate();

@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Database;
 using DemoModels;
 using MemoryPack;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,6 @@ public class AdminController : ControllerBase
 {
     public static int MinQueryMilliseconds { get; set; } = 100;
     public static int MaxQueryMilliseconds { get; set; } = 3000;
-    public static DatabaseType DbType { get; set; } = DatabaseType.Dictionary;
     /// <summary>
     /// DB type
     /// </summary>
@@ -57,7 +57,7 @@ public class AdminController : ControllerBase
     [HttpPut(nameof(SetDataBase))]
     public async Task<ActionResult> SetDataBase(DatabaseType dbType)
     {
-        DbType = dbType;
+        CrudRepo<Product, Guid>.DbType = dbType;
         return Ok(dbType);
     }
 

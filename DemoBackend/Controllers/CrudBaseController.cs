@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Common;
+using Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -18,9 +19,10 @@ namespace Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public abstract class DictionaryCrudBaseController<T> : ControllerBase where T : class
+public abstract class CrudBaseController<T> : ControllerBase where T : class
 {
-    protected Dictionary<Guid, T> Table { get; set; } = new Dictionary<Guid, T> { };
+    protected CrudRepo<T, Guid> CrudRepo { get; set; } = null!;
+
 
     [HttpPost]
     public IActionResult Post([FromBody] T entity)
@@ -32,11 +34,12 @@ public abstract class DictionaryCrudBaseController<T> : ControllerBase where T :
             return BadRequest(new ErrorResponse(1, "Invalid modelstate", ModelState));
         }
 
-        if (Table.TryGetValue(id, out var dbentity))
+        if (CrudRepo.Read(id, out var dbentity))
         {
             return Conflict(new ErrorResponse(2, "Entity already exists", dbentity));
         }
-        Table[id] = entity;
+        CrudRepo.Create(id, entity);
+        //Table[id] = entity;
 
         return CreatedAtAction(nameof(Post), id, entity);
 
@@ -46,7 +49,7 @@ public abstract class DictionaryCrudBaseController<T> : ControllerBase where T :
     public async Task<ActionResult<T>> Get(Guid id)
     {
         await Task.Delay(0);
-        if (Table.TryGetValue(id, out var entity))
+        if (CrudRepo.Read(id, out var entity))
         {
             return entity;
         }
@@ -63,9 +66,9 @@ public abstract class DictionaryCrudBaseController<T> : ControllerBase where T :
             return BadRequest(new ErrorResponse(4, "Invalid modelstate", ModelState));
         }
 
-        if (Table.TryGetValue(id, out var entity))
+        if (CrudRepo.Read(id, out var entity))
         {
-            Table[id] = modifiedEntity;
+            CrudRepo.Update(id, modifiedEntity);
             return Ok(modifiedEntity);
         }
         else
@@ -79,7 +82,8 @@ public abstract class DictionaryCrudBaseController<T> : ControllerBase where T :
     [HttpPatch("{id:Guid}")]
     public virtual IActionResult Patch(Guid id, [FromBody] Newtonsoft.Json.Linq.JObject patch)
     {
-        if (Table.TryGetValue(id, out var entity))
+
+        if (CrudRepo.Read(id, out var entity))
         {
             var sourceObject = Newtonsoft.Json.Linq.JObject.FromObject(entity);
             sourceObject.Merge(patch, new Newtonsoft.Json.Linq.JsonMergeSettings() { MergeArrayHandling = Newtonsoft.Json.Linq.MergeArrayHandling.Union });
@@ -93,7 +97,7 @@ public abstract class DictionaryCrudBaseController<T> : ControllerBase where T :
                 return BadRequest(new ErrorResponse(7, "Invalid modelstate", ModelState));
             }
 
-            Table[id] = entity;
+            CrudRepo.Update(id, entity);
             return Ok(entity);
         }
         else
@@ -105,9 +109,8 @@ public abstract class DictionaryCrudBaseController<T> : ControllerBase where T :
     [HttpDelete("{id:Guid}")]
     public async Task<ActionResult<T>> Delete(Guid id)
     {
-        if (Table.ContainsKey(id))
+        if (CrudRepo.Delete(id))
         {
-            Table.Remove(id);
             return NoContent();
         }
         else
