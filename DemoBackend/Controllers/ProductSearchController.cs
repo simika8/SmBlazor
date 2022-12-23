@@ -66,7 +66,7 @@ public class ProductSearchController : ControllerBase
         sw.Stop();
         var smQueryOptionsUrlJson = System.Text.Json.JsonSerializer.Serialize(smQueryOptions);
         var rndTime = new Random(smQueryOptionsUrlJson.GetHashCode());
-        var timeMs = (int)(Math.Pow(rndTime.NextDouble(), 4) * (AdminController.MaxQueryMilliseconds - AdminController.MinQueryMilliseconds) + AdminController.MinQueryMilliseconds);
+        var timeMs = (int)(Math.Pow(rndTime.NextDouble(), 4) * (RepositoryAdmin.MaxQueryMilliseconds - RepositoryAdmin.MinQueryMilliseconds) + RepositoryAdmin.MinQueryMilliseconds);
 
         if (timeMs - (int)sw.ElapsedMilliseconds > 0)
             await Task.Delay(timeMs - (int)sw.ElapsedMilliseconds);

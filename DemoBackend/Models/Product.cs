@@ -20,7 +20,7 @@ namespace DemoModels
     }
 
     [MemoryPackable]
-    public partial class Product
+    public partial class Product : Reporitory.IHasId<Guid>
     {
         public Guid Id { get; set; }
         public string? Code { get; set; }

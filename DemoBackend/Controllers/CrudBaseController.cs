@@ -19,7 +19,7 @@ namespace Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public abstract class CrudBaseController<T> : ControllerBase where T : class
+public abstract class CrudBaseController<T> : ControllerBase where T : class, IHasId<Guid>
 {
     protected RepositoryCrud<T, Guid> RepositoryCrud { get; set; } = new();
 

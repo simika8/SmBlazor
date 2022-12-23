@@ -11,8 +11,25 @@ using static Controllers.AdminController;
 
 namespace Reporitory;
 
+/// <summary>
+/// DB type
+/// </summary>
+public enum DatabaseType
+{
+    /// <summary>dict</summary>
+    Dictionary,
+    /// <summary>EfPg</summary>
+    EfPg,
+    /// <summary>Mongo</summary>
+    Mongo,
+}
+
+
 public static class RepositoryAdmin
 {
+    public static int MinQueryMilliseconds { get; set; } = 100;
+    public static int MaxQueryMilliseconds { get; set; } = 300;
+
     public static DatabaseType DbType { get; set; } = DatabaseType.Dictionary;
     public static HashSet<DatabaseType> Initialized = new();
     public static void InitRandomData()
@@ -23,13 +40,13 @@ public static class RepositoryAdmin
 
         switch (RepositoryAdmin.DbType)
         {
-            case AdminController.DatabaseType.Dictionary:
+            case DatabaseType.Dictionary:
                 InitRandomDataDict();
                 break;
-            case AdminController.DatabaseType.EfPg:
+            case DatabaseType.EfPg:
                 InitRandomDataEf();
                 break;
-            case AdminController.DatabaseType.Mongo:
+            case DatabaseType.Mongo:
                 InitRandomDataMongo();
                 break;
         }
@@ -140,10 +157,4 @@ public static class RepositoryAdmin
 
         #endregion
     }
-
-
-
-
-
-
 }

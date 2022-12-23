@@ -19,18 +19,17 @@ public class RepositoryProductSearch
         IEnumerable<DemoModels.ProductSearchResult> res;
         switch (RepositoryAdmin.DbType)
         {
-            case AdminController.DatabaseType.Dictionary:
+            case DatabaseType.Dictionary:
                 res = await RepositoryProductSearch.SearchDict(smQueryOptions, onlyStocks);
                 break;
-            case AdminController.DatabaseType.EfPg:
+            case DatabaseType.EfPg:
                 res = await RepositoryProductSearch.SearchEf(smQueryOptions, onlyStocks);
                 break;
-            case AdminController.DatabaseType.Mongo:
+            case DatabaseType.Mongo:
                 res = await RepositoryProductSearch.SearchMongo(smQueryOptions, onlyStocks);
                 break;
             default:
-                res = await RepositoryProductSearch.SearchDict(smQueryOptions, onlyStocks);
-                break;
+                throw new NotSupportedException();
         }
         return res;
     }
@@ -99,7 +98,7 @@ public class RepositoryProductSearch
 
         #region apply OnlyStocks
         if (OnlyStocks)
-            baseQuery = baseQuery.Where(x => x.Stocks != null/* && x.Stocks.Sum(x => x.Quantity) > 0*/);
+            baseQuery = baseQuery.Where(x => x.Stocks != null && x.Stocks.Sum(x => x.Quantity) > 0);
         #endregion
 
         #region apply search
@@ -170,8 +169,8 @@ public class RepositoryProductSearch
         #region apply OnlyStocks
         if (OnlyStocks)
         {
-            //searchFilter &= filterbuilder.Gte("Stocks.Quantity", 0);
-            searchFilter &= filterbuilder.Exists("Stocks.Quantity");
+            searchFilter &= filterbuilder.Gte("Stocks.Quantity", 0);
+            //searchFilter &= filterbuilder.Exists("Stocks.Quantity");
         }
         #endregion
 

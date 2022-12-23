@@ -27,28 +27,14 @@ namespace Controllers;
 [ApiController]
 public class AdminController : ControllerBase
 {
-    public static int MinQueryMilliseconds { get; set; } = 100;
-    public static int MaxQueryMilliseconds { get; set; } = 3000;
-    /// <summary>
-    /// DB type
-    /// </summary>
-    public enum DatabaseType
-    {
-        /// <summary>dict</summary>
-        Dictionary,
-        /// <summary>EfPg</summary>
-        EfPg,
-        /// <summary>Mongo</summary>
-        Mongo,
-    }
 
     [HttpPut(nameof(SetSearchRunTime))]
     public async Task<ActionResult> SetSearchRunTime(int minQueryMilliseconds, int maxQueryMilliseconds)
     {
-        MinQueryMilliseconds = minQueryMilliseconds;
-        MaxQueryMilliseconds = maxQueryMilliseconds;
+        RepositoryAdmin.MinQueryMilliseconds = minQueryMilliseconds;
+        RepositoryAdmin.MaxQueryMilliseconds = maxQueryMilliseconds;
 
-        return Ok(( MinQueryMilliseconds, MaxQueryMilliseconds));
+        return Ok((RepositoryAdmin.MinQueryMilliseconds, RepositoryAdmin.MaxQueryMilliseconds));
     }
     /// <summary>
     /// 
