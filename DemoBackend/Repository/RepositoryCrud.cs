@@ -3,41 +3,24 @@ using Microsoft.EntityFrameworkCore;
 using SharpCompress.Common;
 using SmQueryOptionsNs;
 using static Controllers.AdminController;
+using Database;
 
-namespace Database;
+namespace Reporitory;
 
-public class CrudRepo<T, TKey> where T : class where TKey : notnull
+public class RepositoryCrud<T, TKey> where T : class where TKey : notnull
 {
-    public static DatabaseType DbType { get; set; } = DatabaseType.Dictionary;
+    
 
-    public Dictionary<TKey, T> Table { get; set; } = new() { };
-
-    public CrudRepo(Dictionary<TKey, T> table){
-        Table = table;
-    }
-    public void InitRandomData()
-    {
-        switch (CrudRepo<T, TKey>.DbType)
-        {
-            case AdminController.DatabaseType.Dictionary:
-                Database.DictionaryDatabase.InitRandomData();
-                break;
-            case AdminController.DatabaseType.EfPg:
-                Database.SmDemoProductContext.InitRandomData();
-                break;
-            case AdminController.DatabaseType.Mongo:
-                Database.SmDemoProductMongoDatabase.InitRandomData();
-                break;
-        }
-
+    public RepositoryCrud(){
+        RepositoryAdmin.InitRandomData();
     }
 
     public T? Create(TKey key, T value)
     {
-        switch (CrudRepo<T, TKey>.DbType)
+        switch (RepositoryAdmin.DbType)
         {
             case AdminController.DatabaseType.Dictionary:
-                Table[key] = value;
+                DictionaryDatabase.GetTable<T, TKey>()[key] = value;
                 break;
             case AdminController.DatabaseType.EfPg:
                 break;
@@ -52,10 +35,10 @@ public class CrudRepo<T, TKey> where T : class where TKey : notnull
     public bool Read(TKey key, out T value)
     {
         using var db = new Database.SmDemoProductContext();
-        switch (CrudRepo<T, TKey>.DbType)
+        switch (RepositoryAdmin.DbType)
         {
             case AdminController.DatabaseType.Dictionary:
-                return Table.TryGetValue(key, out value);
+                return DictionaryDatabase.GetTable<T, TKey>().TryGetValue(key, out value);
             case AdminController.DatabaseType.EfPg:
                 value = db.Find<T>(key);
                 return true;
@@ -70,10 +53,10 @@ public class CrudRepo<T, TKey> where T : class where TKey : notnull
     }
     public T? Update(TKey key, T value)
     {
-        switch (CrudRepo<T, TKey>.DbType)
+        switch (RepositoryAdmin.DbType)
         {
             case AdminController.DatabaseType.Dictionary:
-                Table[key] = value;
+                DictionaryDatabase.GetTable<T, TKey>()[key] = value;
                 break;
             case AdminController.DatabaseType.EfPg:
                 value = UpdateEf(key, value);
@@ -98,13 +81,13 @@ public class CrudRepo<T, TKey> where T : class where TKey : notnull
 
     public bool Delete(TKey key)
     {
-        switch (CrudRepo<T, TKey>.DbType)
+        switch (RepositoryAdmin.DbType)
         {
             case AdminController.DatabaseType.Dictionary:
-                var found = Table.ContainsKey(key);
+                var found = DictionaryDatabase.GetTable<T, TKey>().ContainsKey(key);
                 if (found)
                 {
-                    Table.Remove(key);
+                    DictionaryDatabase.GetTable<T, TKey>().Remove(key);
                 }
                 return found;
             case AdminController.DatabaseType.EfPg:

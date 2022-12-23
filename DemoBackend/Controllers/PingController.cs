@@ -19,7 +19,7 @@ public class PingController : ControllerBase
     [HttpGet()]
     public async Task<ActionResult> Ping()
     {
-        Database.DictionaryDatabase.InitRandomData();
+        Reporitory.RepositoryAdmin.InitRandomData();
         await Task.Delay(0);
         return Ok();
     }

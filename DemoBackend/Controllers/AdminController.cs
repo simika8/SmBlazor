@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Reporitory;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -57,7 +58,7 @@ public class AdminController : ControllerBase
     [HttpPut(nameof(SetDataBase))]
     public async Task<ActionResult> SetDataBase(DatabaseType dbType)
     {
-        CrudRepo<Product, Guid>.DbType = dbType;
+        RepositoryAdmin.DbType = dbType;
         return Ok(dbType);
     }
 
@@ -69,7 +70,7 @@ public class AdminController : ControllerBase
         
 
 
-        Database.SmDemoProductContext.InitRandomData();
+        RepositoryAdmin.InitRandomDataEf();
         using var db = new Database.SmDemoProductContext();
         var prod = db.Product.First(x => x.Code == "C0000001");
 

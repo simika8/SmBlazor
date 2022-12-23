@@ -1,6 +1,8 @@
 ﻿using MemoryPack;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DemoModels
 {
@@ -27,19 +29,17 @@ namespace DemoModels
         public double? Price { get; set; }
         public DateTime? ReleaseDate { get; set; }
         public int? Rating { get; set; }
-        public ProductType? Type {  get; set; }
+        public ProductType? Type { get; set; }
         [System.ComponentModel.DataAnnotations.Schema.Column(TypeName = "jsonb")]
         public ProductExt? Ext { get; set; }
         [System.ComponentModel.DataAnnotations.Schema.Column(TypeName = "jsonb")]
         public List<InventoryStock>? Stocks { get; set; }
 
+        //helper data field only for EF core
+        internal double? StockSumQuantity { get => Stocks?.Sum(x =>x.Quantity); set { } }
+
     }
 
-
-    //Products table Extension
-    //special 1 to 1 (or 1 to 0) relationship. ProductExt can be empty to some Product
-    //Primary key: ProductExt.ProductId
-    //Special: Primary key value equals to Products.Id
     [MemoryPackable]
     public partial record ProductExt
     {

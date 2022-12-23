@@ -12,6 +12,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Events;
+using Reporitory;
 
 namespace Database
 {
@@ -20,33 +21,6 @@ namespace Database
         private static Dictionary<Guid, Product> ProductsDict { get; set; } = new Dictionary<Guid, Product>();
         public static IMongoCollection<Product> Product { get; set; }
         public static bool Initialized { get; set; }
-
-        public static void InitRandomData()
-        {
-            if (Initialized)
-                return;
-            Initialized = true;
-
-            var db = GetDb();
-            Product = GetCollection<Product>(db);
-
-            var prodCount = 100000;
-
-            var oldcount = Product?.CountDocuments(new MongoDB.Bson.BsonDocument()) ?? 0;
-            if (oldcount == prodCount)
-                return;
-
-            db.DropCollection("Product");
-
-            Product = GetCollection<Product>(db);
-
-            var inmem = DictionaryDatabase.GetProductDict(prodCount).Select(x => x.Value).ToList();
-            var inmemchunked = inmem.ChunkBy(1000);
-            foreach (var chunk in inmemchunked)
-            {
-                Product.InsertMany(chunk);
-            }
-        }
 
         public static List<List<T>> ChunkBy<T>(this List<T> source, int chunkSize)
         {

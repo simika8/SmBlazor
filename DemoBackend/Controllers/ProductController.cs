@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using SmQueryOptionsNs;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Reporitory;
 
 namespace Controllers;
 
@@ -24,16 +25,11 @@ namespace Controllers;
 [ApiController]
 public class ProductController : CrudBaseController<DemoModels.Product>
 {
-    protected ProductRepo SearchRepo { get; set; }
-
     public ProductController()
     {
-        CrudRepo = new CrudRepo<DemoModels.Product, Guid>(Database.DictionaryDatabase.Products);
-        CrudRepo.InitRandomData();
+        RepositoryAdmin.InitRandomData();
 
 
-        SearchRepo = new ProductRepo();
-        
     }
 
     private class PatchProductExample : IExamplesProvider<Newtonsoft.Json.Linq.JObject>

@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SmQueryOptionsNs;
 using Swashbuckle.AspNetCore.SwaggerGen;
-
+using Reporitory;
 
 namespace Controllers;
 
@@ -21,8 +21,7 @@ namespace Controllers;
 [ApiController]
 public abstract class CrudBaseController<T> : ControllerBase where T : class
 {
-    protected CrudRepo<T, Guid> CrudRepo { get; set; } = null!;
-
+    protected RepositoryCrud<T, Guid> RepositoryCrud { get; set; } = new();
 
     [HttpPost]
     public IActionResult Post([FromBody] T entity)
@@ -34,11 +33,11 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class
             return BadRequest(new ErrorResponse(1, "Invalid modelstate", ModelState));
         }
 
-        if (CrudRepo.Read(id, out var dbentity))
+        if (RepositoryCrud.Read(id, out var dbentity))
         {
             return Conflict(new ErrorResponse(2, "Entity already exists", dbentity));
         }
-        CrudRepo.Create(id, entity);
+        RepositoryCrud.Create(id, entity);
         //Table[id] = entity;
 
         return CreatedAtAction(nameof(Post), id, entity);
@@ -49,7 +48,7 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class
     public async Task<ActionResult<T>> Get(Guid id)
     {
         await Task.Delay(0);
-        if (CrudRepo.Read(id, out var entity))
+        if (RepositoryCrud.Read(id, out var entity))
         {
             return entity;
         }
@@ -66,9 +65,9 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class
             return BadRequest(new ErrorResponse(4, "Invalid modelstate", ModelState));
         }
 
-        if (CrudRepo.Read(id, out var entity))
+        if (RepositoryCrud.Read(id, out var entity))
         {
-            CrudRepo.Update(id, modifiedEntity);
+            RepositoryCrud.Update(id, modifiedEntity);
             return Ok(modifiedEntity);
         }
         else
@@ -83,10 +82,10 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class
     public virtual IActionResult Patch(Guid id, [FromBody] Newtonsoft.Json.Linq.JObject patch)
     {
 
-        if (CrudRepo.Read(id, out var entity))
+        if (RepositoryCrud.Read(id, out var entity))
         {
             var sourceObject = Newtonsoft.Json.Linq.JObject.FromObject(entity);
-            sourceObject.Merge(patch, new Newtonsoft.Json.Linq.JsonMergeSettings() { MergeArrayHandling = Newtonsoft.Json.Linq.MergeArrayHandling.Union });
+            sourceObject.Merge(patch, new Newtonsoft.Json.Linq.JsonMergeSettings() { MergeArrayHandling = Newtonsoft.Json.Linq.MergeArrayHandling.Replace});
             entity = sourceObject.ToObject<T>();
             if (entity == null)
                 return BadRequest(new ErrorResponse(6, "entity == null", entity));
@@ -97,7 +96,7 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class
                 return BadRequest(new ErrorResponse(7, "Invalid modelstate", ModelState));
             }
 
-            CrudRepo.Update(id, entity);
+            RepositoryCrud.Update(id, entity);
             return Ok(entity);
         }
         else
@@ -109,7 +108,7 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class
     [HttpDelete("{id:Guid}")]
     public async Task<ActionResult<T>> Delete(Guid id)
     {
-        if (CrudRepo.Delete(id))
+        if (RepositoryCrud.Delete(id))
         {
             return NoContent();
         }

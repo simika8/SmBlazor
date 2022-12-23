@@ -39,7 +39,7 @@ namespace DemoBackend.Migrations
                         .HasColumnType("text")
                         .HasColumnName("code");
 
-                    b.Property<string>("Ext")
+                    b.Property<ProductExt>("Ext")
                         .HasColumnType("jsonb")
                         .HasColumnName("ext");
 
@@ -58,6 +58,10 @@ namespace DemoBackend.Migrations
                     b.Property<DateTime?>("ReleaseDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("releasedate");
+
+                    b.Property<double?>("StockSumQuantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("stocksumquantity");
 
                     b.Property<List<InventoryStock>>("Stocks")
                         .HasColumnType("jsonb")

@@ -14,6 +14,7 @@ using MongoDB.Driver;
 using SmQueryOptionsNs;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Reporitory;
 
 namespace Controllers;
 
@@ -34,14 +35,12 @@ namespace Controllers;
 [ApiController]
 public class ProductSearchController : ControllerBase
 {
-    protected ProductRepo SearchRepo { get; set; }
-    protected CrudRepo<Product, Guid> CrudRepo { get; set; }
+    protected RepositoryProductSearch SearchRepo { get; set; }
     public ProductSearchController()
     {
-        SearchRepo = new ProductRepo();
+        SearchRepo = new RepositoryProductSearch();
 
-        CrudRepo = new CrudRepo<DemoModels.Product, Guid>(Database.DictionaryDatabase.Products);
-        CrudRepo.InitRandomData();
+        RepositoryAdmin.InitRandomData();
     }
 
     /// <summary>
@@ -61,7 +60,7 @@ public class ProductSearchController : ControllerBase
         #endregion
 
         var smQueryOptions = SmQueryOptionsUrlHelper.Parse(top, skip, search, select);
-        var res = await ProductRepo.Search(smQueryOptions, onlyStocks);
+        var res = await RepositoryProductSearch.Search(smQueryOptions, onlyStocks);
         
         #region delay
         sw.Stop();
