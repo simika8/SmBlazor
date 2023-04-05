@@ -24,7 +24,7 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class, IH
     protected RepositoryCrud<T, Guid> RepositoryCrud { get; set; } = new();
 
     [HttpPost]
-    public IActionResult Post([FromBody] T entity)
+    public async Task<IActionResult> Post([FromBody] T entity)
     {
         var id = Others.GetGuidKey(entity);
 
@@ -33,11 +33,11 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class, IH
             return BadRequest(new ErrorResponse(1, "Invalid modelstate", ModelState));
         }
 
-        if (RepositoryCrud.Read(id, out var dbentity))
-        {
+        var dbentity = await RepositoryCrud.Read(id);
+        if (dbentity != null)
             return Conflict(new ErrorResponse(2, "Entity already exists", dbentity));
-        }
-        RepositoryCrud.Create(id, entity);
+
+        await RepositoryCrud.Create(id, entity);
         //Table[id] = entity;
 
         return CreatedAtAction(nameof(Post), id, entity);
@@ -48,30 +48,29 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class, IH
     public async Task<ActionResult<T>> Get(Guid id)
     {
         await Task.Delay(0);
-        if (RepositoryCrud.Read(id, out var entity))
-        {
-            return entity;
-        }
-        else
+        var dbentity = await RepositoryCrud.Read(id);
+        if (dbentity == null)
             return NotFound(new ErrorResponse(3, "Not found", id));
+        
+        return dbentity;
+            
     }
 
 
     [HttpPut("{id:Guid}")]
-    public IActionResult Put(Guid id, [FromBody] T modifiedEntity)
+    public async Task<IActionResult> Put(Guid id, [FromBody] T modifiedEntity)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(new ErrorResponse(4, "Invalid modelstate", ModelState));
         }
 
-        if (RepositoryCrud.Read(id, out var entity))
-        {
-            RepositoryCrud.Update(id, modifiedEntity);
-            return Ok(modifiedEntity);
-        }
-        else
-            return BadRequest(new ErrorResponse(5, "Not found", id));
+        var dbentity = await RepositoryCrud.Read(id);
+        if (dbentity == null)
+            return NotFound(new ErrorResponse(5, "Not found", id));
+
+        await RepositoryCrud.Update(id, modifiedEntity);
+        return Ok(modifiedEntity);
 
     }
 
@@ -79,28 +78,25 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class, IH
     /// json merge patch
     /// </summary>
     [HttpPatch("{id:Guid}")]
-    public virtual IActionResult Patch(Guid id, [FromBody] Newtonsoft.Json.Linq.JObject patch)
+    public virtual async Task<IActionResult> Patch(Guid id, [FromBody] Newtonsoft.Json.Linq.JObject patch)
     {
+        var dbentity = await RepositoryCrud.Read(id);
+        if (dbentity == null)
+            return NotFound(new ErrorResponse(8, "Not found", id));
 
-        if (RepositoryCrud.Read(id, out var entity))
-        {
-            var sourceObject = Newtonsoft.Json.Linq.JObject.FromObject(entity);
-            sourceObject.Merge(patch, new Newtonsoft.Json.Linq.JsonMergeSettings() { MergeArrayHandling = Newtonsoft.Json.Linq.MergeArrayHandling.Replace});
-            entity = sourceObject.ToObject<T>();
-            if (entity == null)
-                return BadRequest(new ErrorResponse(6, "entity == null", entity));
+        var sourceObject = Newtonsoft.Json.Linq.JObject.FromObject(dbentity);
+        sourceObject.Merge(patch, new Newtonsoft.Json.Linq.JsonMergeSettings() { MergeArrayHandling = Newtonsoft.Json.Linq.MergeArrayHandling.Replace});
+        dbentity = sourceObject.ToObject<T>();
+        if (dbentity == null)
+            return BadRequest(new ErrorResponse(6, "entity == null", dbentity));
 
-            var isValid = TryValidateModel(entity);
-            if (!isValid)
-            {
-                return BadRequest(new ErrorResponse(7, "Invalid modelstate", ModelState));
-            }
+        var isValid = TryValidateModel(dbentity);
+        if (!isValid)
+            return BadRequest(new ErrorResponse(7, "Invalid modelstate", ModelState));
 
-            RepositoryCrud.Update(id, entity);
-            return Ok(entity);
-        }
-        else
-            return BadRequest(new ErrorResponse(8, "Not found", id));
+        await RepositoryCrud.Update(id, dbentity);
+        return Ok(dbentity);
+            
 
     }
 
@@ -108,21 +104,12 @@ public abstract class CrudBaseController<T> : ControllerBase where T : class, IH
     [HttpDelete("{id:Guid}")]
     public async Task<ActionResult<T>> Delete(Guid id)
     {
-        if (RepositoryCrud.Delete(id))
+        if (await RepositoryCrud.Delete(id))
         {
             return NoContent();
         }
         else
-            return BadRequest(new ErrorResponse(9, "Not found", id));
+            return NotFound(new ErrorResponse(9, "Not found", id));
     }
 
-
-
-
-
-    protected void AddExpressionIfNotNull(List<Expression> list, Expression? item)
-    {
-        if (item != null)
-            list.Add(item);
-    }
 }

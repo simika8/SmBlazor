@@ -23,7 +23,7 @@ public class RepositoryCrud<T, TKey> where T : class, IHasId<TKey>/*, new()*/ wh
         RepositoryAdmin.InitRandomData();
     }
 
-    public T? Create(TKey key, T value)
+    public async Task<T?> Create(TKey key, T value)
     {
         switch (RepositoryAdmin.DbType)
         {
@@ -35,13 +35,13 @@ public class RepositoryCrud<T, TKey> where T : class, IHasId<TKey>/*, new()*/ wh
                 {
                     var efTable = efDb.Set<T>();
                     efTable.Add(value);
-                    efDb.SaveChanges();
+                    await efDb.SaveChangesAsync();
                 }
                 break;
             case DatabaseType.Mongo:
                 var dbMongo = SmDemoProductMongoDatabase.GetDb();
                 var tableMongo = SmDemoProductMongoDatabase.GetCollection<T>(dbMongo);
-                tableMongo.InsertOne(value);
+                await tableMongo.InsertOneAsync(value);
                 break;
         }
 
@@ -49,32 +49,27 @@ public class RepositoryCrud<T, TKey> where T : class, IHasId<TKey>/*, new()*/ wh
     }
 
 
-    public bool Read(TKey key, out T value)
+    public async Task<T?> Read(TKey key)
     {
+        T? res;
         switch (RepositoryAdmin.DbType)
         {
             case DatabaseType.Dictionary:
-                return DictionaryDatabase.GetTable<T, TKey>().TryGetValue(key, out value);
+                return DictionaryDatabase.GetTable<T, TKey>().TryGetValue(key, out res)? res:null;
             case DatabaseType.EfPg:
                 using (var efDb = new Database.SmDemoProductContext())
                 {
-                    value = efDb.Find<T>(key);
+                    return await efDb.FindAsync<T>(key);
                 }
-                return value != null;
             case DatabaseType.Mongo:
                 var dbMongo = SmDemoProductMongoDatabase.GetDb();
                 var tableMongo = SmDemoProductMongoDatabase.GetCollection<T>(dbMongo);
-                value = tableMongo.Find(x => x.Id.Equals(key)).SingleOrDefault();
+                return await tableMongo.Find(x => x.Id.Equals(key)).SingleOrDefaultAsync();
 
-                return value != null;
         }
-
-        value = null!;
-        return false;
-
-
+        return null;
     }
-    public T? Update(TKey key, T value)
+    public async Task<T?> Update(TKey key, T value)
     {
         switch (RepositoryAdmin.DbType)
         {
@@ -87,20 +82,20 @@ public class RepositoryCrud<T, TKey> where T : class, IHasId<TKey>/*, new()*/ wh
                     var efTable = efDb.Set<T>();
                     efTable.Attach(value);
                     efDb.Entry<T>(value).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    efDb.SaveChanges();
+                    await efDb.SaveChangesAsync();
                 }
                 break;
             case DatabaseType.Mongo:
                 var dbMongo = SmDemoProductMongoDatabase.GetDb();
                 var tableMongo = SmDemoProductMongoDatabase.GetCollection<T>(dbMongo);
-                tableMongo.ReplaceOne(x => x.Id.Equals(key), value);
+                await tableMongo.ReplaceOneAsync(x => x.Id.Equals(key), value);
                 break;
         }
 
         return value;
     }
 
-    public bool Delete(TKey key)
+    public async Task<bool> Delete(TKey key)
     {
         switch (RepositoryAdmin.DbType)
         {
@@ -114,18 +109,18 @@ public class RepositoryCrud<T, TKey> where T : class, IHasId<TKey>/*, new()*/ wh
             case DatabaseType.EfPg:
                 using (var efDb = new Database.SmDemoProductContext())
                 {
-                    var value = efDb.Find<T>(key);
+                    var value = await efDb.FindAsync<T>(key);
                     if (value == null)
                         return false;
 
                     efDb.Remove(value);
-                    efDb.SaveChanges();
+                    await efDb.SaveChangesAsync();
                 }
                 return true;
             case DatabaseType.Mongo:
                 var dbMongo = SmDemoProductMongoDatabase.GetDb();
                 var tableMongo = SmDemoProductMongoDatabase.GetCollection<T>(dbMongo);
-                var res = tableMongo.DeleteOne(x => x.Id.Equals(key));
+                var res = await tableMongo.DeleteOneAsync(x => x.Id.Equals(key));
                 return res.DeletedCount == 1;
         }
 

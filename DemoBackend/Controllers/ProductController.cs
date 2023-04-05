@@ -51,9 +51,9 @@ public class ProductController : CrudBaseController<DemoModels.Product>
 
     [HttpPatch("{id:Guid}")]
     [SwaggerRequestExample(typeof(Newtonsoft.Json.Linq.JObject), typeof(PatchProductExample))]
-    public override IActionResult Patch(Guid id, [FromBody] Newtonsoft.Json.Linq.JObject patch)
+    public override async Task<IActionResult> Patch(Guid id, [FromBody] Newtonsoft.Json.Linq.JObject patch)
     {
-        var res = base.Patch(id, patch);
+        var res = await base.Patch(id, patch);
         return res;
     }
 
