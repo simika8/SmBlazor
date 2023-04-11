@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SharpCompress.Common;
 using SmQueryOptionsNs;
-using static Controllers.AdminController;
+using static Controllers.TestController;
 using Database;
 using DemoModels;
 using MongoDB.Driver;

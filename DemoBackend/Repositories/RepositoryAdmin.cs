@@ -7,7 +7,7 @@ using MongoDB.Driver;
 using SharpCompress.Common;
 using SmQueryOptionsNs;
 using System.Data;
-using static Controllers.AdminController;
+using static Controllers.TestController;
 
 namespace Reporitory;
 
@@ -119,6 +119,7 @@ public static class RepositoryAdmin
         foreach (var tableName in tableNames)
         {
             db.Database.ExecuteSqlRaw($"drop table if exists \"{tableName}\" cascade;");
+            
         }
     ;
     }

@@ -6,7 +6,7 @@ using MongoDB.Driver;
 using SmQueryOptionsNs;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using static Controllers.AdminController;
+using static Controllers.TestController;
 
 namespace Reporitory;
 
