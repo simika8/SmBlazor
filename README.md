@@ -6,3 +6,5 @@ https://smdemoblazorserver.azurewebsites.net
 
 WASM Demo
 https://smdemoblazorwasm.azurewebsites.net
+
+teszt
