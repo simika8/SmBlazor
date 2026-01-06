@@ -1,9 +1,9 @@
 ﻿/**************Layout***************/
-.BS tbody tr td {
+tbody tr td {
     overflow: hidden;
 }
 
-.BS tr.Cursor {
+tr.Cursor {
     color: #fff;
     background-color: rgba(92,149,197,1);
 }

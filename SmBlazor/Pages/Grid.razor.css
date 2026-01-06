@@ -3,7 +3,7 @@
     background-color: blue;
 }
 
-.BS thead tr th {
+thead tr th {
     overflow: hidden;
 }
 
@@ -18,11 +18,11 @@
     height: 32px;
 }
 
-.BS .InputDiv .Icon {
+.InputDiv .Icon {
     margin: 8px;
 }
 
-.BS .GridToolbarDiv {
+.GridToolbarDiv {
     display: flex;
     flex-wrap: wrap;
     /*align-items:center;*/
@@ -30,7 +30,7 @@
 }
 
 
-.BS .GridToolbarDiv .InputDiv {
+.GridToolbarDiv .InputDiv {
     display: flex;
     align-items: center;
     flex-grow: 1;
@@ -43,23 +43,12 @@
 }
 /****************/
 
-.BS table {
+.Grid table {
     table-layout: fixed;
     width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
-.BSB .GridBodyDiv {
-    overflow: scroll;
-    overflow-y: scroll;
-    overflow-x: auto;
-}
-
-.BSB .GridHeadDiv {
-    padding-right: 17px;
-}
-
 
 .ES th {
     text-align: left;
@@ -92,30 +81,26 @@
 .ES table thead tr:not(:last-child) {
     border-bottom: 1px solid #ddd;
 }
+/*************/
+
+/*16 px normal scrollbar for all*/
+.ES.Grid .GridBodyDiv {overflow: auto;}
+.ES.Grid .GridHeadDiv {padding-right: 16px;}
 
 
+/*thin scrollbar for all*/
+.Grid.SBT .GridBodyDiv {scrollbar-width: thin;}
+/*10px default for Chrome/Edge/Safari*/
+.Grid.SBT .GridHeadDiv {padding-right: 10px;}
+/*8px for Firefox */
+@supports (-moz-appearance: none) {.Grid.SBT .GridHeadDiv {padding-right: 8px;} }
 
-@-moz-document url-prefix() {
-    .ESB .GridHeadDiv {
-        padding-right: 8px;
-    }
-    .ESB .GridBodyDiv {
-        overflow: scroll;
-        overflow-x: auto;
-        scrollbar-width: thin;
-    }
-}
-@media screen and (-webkit-min-device-pixel-ratio:0) and (min-resolution:.001dpcm) {
-    .ESB .GridBodyDiv {
-        overflow: overlay;
-    }
-    .ESB ::-webkit-scrollbar {
-        width: 8px;
-    }
-    .ESB ::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.2);
-    }
-    .ESB ::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.00);
-    }
-}
+
+/*8px scrollbar for all*/
+.Grid.SB8 .GridBodyDiv {scrollbar-width: auto;}
+.Grid.SB8 .GridHeadDiv {padding-right: 8px;}
+.Grid.SB8 .GridBodyDiv::-webkit-scrollbar {width: 8px;}
+.Grid.SB8 .GridBodyDiv::-webkit-scrollbar-thumb {background: rgba(0, 0, 0, 0.2);}
+.Grid.SB8 .GridBodyDiv::-webkit-scrollbar-track {background: rgba(0, 0, 0, 0.0);}
+@supports (-moz-appearance: none) {.Grid.SB8 .GridBodyDiv {scrollbar-width: thin;} }
+

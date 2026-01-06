@@ -5,13 +5,16 @@
 @inject HttpClient Http
 @inject IJSRuntime JsRuntime
 
-<Grid @ref="Grid" Settings=@Settings>
-    <div type="AlignCenterDiv">
-        <label for="OnlyStocks">Only products with stock</label>
-        <input type="checkbox" id="OnlyStocks" @bind-value="OnlyStocks"/>
-        <button @onclick="SetupClick" class="oi oi-cog"></button>
-    </div>
-</Grid>
+<div class="grid-wrapper">
+    <Grid @ref="Grid" Settings=@Settings>
+        <div type="AlignCenterDiv">
+            <label for="OnlyStocks">Only products with stock</label>
+            <input type="checkbox" id="OnlyStocks" @bind-value="OnlyStocks" />
+            <button @onclick="SetupClick" class="oi oi-cog"></button>
+        </div>
+    </Grid>
+</div>
+
 
 <SmModal @ref="smModal">
     <div type="AlignCenterDiv">

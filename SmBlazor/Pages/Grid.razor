@@ -7,16 +7,24 @@
 <div class="Grid @Settings.Name @StyleSettingsHelper.GetStyleClasses(Settings.StyleSettings)" translate="no" spellcheck="false">
 
 
-    @if (Settings.StyleSettings.HasFlag(StyleSettings.GridHeight)){
+    @if (Settings.StyleSettings.HasFlag(StyleSettings.SetGridHeight)){
         var gridHeight = Settings.Height.ToString()+"px";
         <style>.GridBodyDiv {height: @gridHeight;}</style>
+    } else
+    {
+        <style>.Grid {display: flex; flex-direction: column;max-height: 90vh;}</style>
+        //<style>.Grid {display: flex; flex-direction: column;flex: 1 1 auto;overflow: auto;}</style>
+        //<style>.Grid {display: flex; flex-direction: column;max-height: 100%;overflow: auto;}</style>
+        //<style>.Grid {display: flex; flex-direction: column;flex: 1 1 auto;overflow: hidden;}</style>
+        //<style>.Grid {display: flex; flex-direction: column;min-height: 0;}</style>
+        //<style>.GridBodyDiv {flex: 1 1 auto; min-height: 0; overflow: auto;}</style>
     }
-    @if (Settings.StyleSettings.HasFlag(StyleSettings.ColumnAlign) || Settings.StyleSettings.HasFlag(StyleSettings.ColumnWidth)){
+    @if (Settings.StyleSettings.HasFlag(StyleSettings.SetColumnWidth)){
         for (int i = 0; i < Settings.Columns.VisibleColumns().Count; i++)
         {
             var col = Settings.Columns.VisibleColumns()[i];
             var nthchild = i + 1;
-            var colWidth = Settings.StyleSettings.HasFlag(StyleSettings.ColumnWidth)? col.Width.ToString()+"px;":null;
+            var colWidth = Settings.StyleSettings.HasFlag(StyleSettings.SetColumnWidth)? col.Width.ToString()+"px;":null;
             var textAlign = col.RightAligned ? "right" : null;
             <style> th:nth-child(@nthchild), td:nth-child(@nthchild) { text-align: @textAlign; width: @colWidth} </style>
         }

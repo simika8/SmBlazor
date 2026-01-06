@@ -38,3 +38,9 @@ input {
 .AlignCenterDiv {
     align-items: center;
 }
+
+.grid-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* a szül? magassága marad */
+}
