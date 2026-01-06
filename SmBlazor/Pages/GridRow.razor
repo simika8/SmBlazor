@@ -45,6 +45,14 @@
         StateHasChanged();
     }
 
+    public object? GetPropertyValue(string FieldName)
+    {
+        var col = Columns.SingleOrDefault(x => x.FieldName == FieldName);
+        if (col == null)
+            throw new Exception("Field not exists: " + FieldName);
+        var val = GridData.GetPropertyValue(Row, col.SplittedFieldName);
+        return val;
+    }
     private async Task InternalRowClick(MouseEventArgs mouseEventArgs)
     {
         if (TrElement == null)

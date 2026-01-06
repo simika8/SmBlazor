@@ -14,7 +14,10 @@
 }
 
 
-<Grid @ref="Grid" Settings=@Settings ExtraGridHeader=@ExtraGridHeader/>
+<button >foo</button>
+<Grid @ref="Grid" Settings=@Settings ExtraGridHeader=@ExtraGridHeader OnSelectRow=@OnSelectRow />
+<div>@SelectedRow?.GetPropertyValue("Code")</div>
+<button>bar</button>
 
 
 <SmModal @ref="smModal">
@@ -48,7 +51,7 @@
     }
 
     public string SettingsJson { get; set; } = string.Empty;
-
+    public GridRow? SelectedRow { get; set; }
 
     private Grid? Grid { get; set; }
 
@@ -98,5 +101,11 @@
         },
         ExtraParams = new()
     };
+
+    private void OnSelectRow(GridRow? value)
+    {
+        SelectedRow = value;
+        var s = SelectedRow?.GetPropertyValue("Code");
+    }
 
 }

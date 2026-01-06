@@ -91,6 +91,9 @@
     [Parameter]
     public SmGridSettings Settings { get; set; } = null!;
 
+    [Parameter]
+    public EventCallback<GridRow?> OnSelectRow { get; set; }
+
 
     private SmGridState State { get; set; } = new();
 
@@ -224,6 +227,8 @@
     }
     private async Task SetCursor(int? cursor)
     {
+        ;
+        GridRow? selectedRow = null;
         if (cursor == null)
             return;
         if (State.Cursor != cursor)
@@ -231,18 +236,21 @@
             if (cursor >= 0)
             {
                 var idx = cursor.ToString()??"";
-                GridRows[idx]?.SetCursor(true);
+                selectedRow = GridRows[idx];
+                selectedRow?.SetCursor(true);
             }
 
             if (State.Cursor >= 0)
             {
-                var idx2 = State.Cursor.ToString() ?? "";
-                GridRows[idx2]?.SetCursor(false);
+                var idxold = State.Cursor.ToString() ?? "";
+                GridRows[idxold]?.SetCursor(false);
             }
 
             State.Cursor = (int)cursor;
             await ScrollToCursor();
         }
+        if (OnSelectRow.HasDelegate && State.Cursor >= 0)
+            await OnSelectRow.InvokeAsync(selectedRow);
         if (State.Cursor == GridData.Rows?.Count - 1 && State.Cursor > 0)
             await LoadMoreRecords();
 
@@ -336,6 +344,8 @@
 
         await GridData.ReQuery(Settings);
         State.Cursor = -1;
+        if (OnSelectRow.HasDelegate)
+            await OnSelectRow.InvokeAsync(null);
 
         _myShouldRender = true;
         StateHasChanged();
