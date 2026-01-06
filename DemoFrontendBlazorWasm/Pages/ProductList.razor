@@ -4,15 +4,18 @@
 @using System.Text.Json
 @inject HttpClient Http
 @inject IJSRuntime JsRuntime
-<div class="grid-wrapper">
-    <Grid @ref="Grid" Settings=@Settings>
-        <div type="AlignCenterDiv">
-            <label for="OnlyStocks">Only products with stock</label>
-            <input type="checkbox" id="OnlyStocks" @bind-value="OnlyStocks"/>
-            <button @onclick="SetupClick" class="oi oi-cog"></button>
-        </div>
-    </Grid>
-</div>
+
+@{
+    RenderFragment ExtraGridHeader = @<div class="ExtraGridHeader">
+        <label for="OnlyStocks">Only products with stock</label>
+        <input type="checkbox" id="OnlyStocks" @bind-value="OnlyStocks" />
+        <button @onclick="SetupClick" class="oi oi-cog"></button>
+    </div>;
+}
+
+
+<Grid @ref="Grid" Settings=@Settings ExtraGridHeader=@ExtraGridHeader/>
+
 
 <SmModal @ref="smModal">
     <div type="AlignCenterDiv">
@@ -24,13 +27,24 @@
 </SmModal>
 
 
-@code {
-    public SmModal smModal{ get; set; }
 
+@code {
+    public SmModal? smModal { get; set; }
+
+    private bool _onlyStocks;
     [Parameter]
-    public bool OnlyStocks { 
-        get => Settings.ExtraParams.TryGetValue("OnlyStocks2", out var str) ? bool.Parse(str) : false; 
-        set => Settings.ExtraParams["OnlyStocks"] = value.ToString(); 
+    public bool OnlyStocks
+    {
+        get => _onlyStocks;
+        set
+        {
+            if (_onlyStocks != value)
+            {
+                _onlyStocks = value;
+                Settings.ExtraParams["OnlyStocks"] = value.ToString();
+                StateHasChanged();
+            }
+        }
     }
 
     public string SettingsJson { get; set; } = string.Empty;
@@ -41,18 +55,20 @@
     public void SetupClick()
     {
         SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
-        smModal.ShowModal();
+        smModal?.ShowModal();
     }
 
     private void SetupOk()
     {
-        Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
-        smModal.Close();
+        var newSettings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
+        if (newSettings != null)
+            Settings = newSettings;
+        smModal?.Close();
     }
 
     private void SetupCancel()
     {
-        smModal.Close();
+        smModal?.Close();
     }
 
 
@@ -71,8 +87,8 @@
         {
             new() { FieldName = "Id", PropertyTypeName = "Guid", Width = 150, },
             new() { FieldName = "Code", PropertyTypeName = "string", Width = 60, },
-            new() { FieldName = "Name", PropertyTypeName = "string", Width = 170, Title = "Név", },
-            new() { FieldName = "Active", PropertyTypeName = "bool", Width = 20, Title = "Aktív", },
+            new() { FieldName = "Name", PropertyTypeName = "string", Width = 170, Title = "Product Name", },
+            new() { FieldName = "Active", PropertyTypeName = "bool", Width = 20, },
             new() { FieldName = "Price", PropertyTypeName = "double", Width = 40, RightAligned = true, },
             new() { FieldName = "Rating", PropertyTypeName = "int", Width = 20},
             new() { FieldName = "StockSumQuantity", PropertyTypeName = "double", Width = 20, Title = "Stock", RightAligned = true, },
@@ -82,16 +98,5 @@
         },
         ExtraParams = new()
     };
-
-    public override bool Equals(object obj)
-    {
-        return obj is ProductList list &&
-               OnlyStocks == list.OnlyStocks;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        
-    }
 
 }

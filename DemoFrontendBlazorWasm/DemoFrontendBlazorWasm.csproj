@@ -17,12 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Pages\ProductList.razor">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Pages\ProductList.razor.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

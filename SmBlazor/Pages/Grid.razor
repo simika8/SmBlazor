@@ -34,7 +34,7 @@
             <div class="Icon oi oi-magnifying-glass"/>
             <Input @ref="Input" @bind-Value=@Settings.Search CursorEvent=@CursorEvent OnChange=@SearchChanged />
         </div>
-        @ChildContent
+        @ExtraGridHeader
     </div>
     <div class="GridHeadDiv">
         <table>
@@ -82,8 +82,10 @@
 
 
 @code {
+    /*[Parameter]
+    public RenderFragment? ChildContent { get; set; }*/
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public RenderFragment? ExtraGridHeader { get; set; }
 
     [EditorRequired]
     [Parameter]
