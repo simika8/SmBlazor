@@ -1,54 +1,35 @@
 ﻿@using System.Text.Json.Serialization
+@using Microsoft.AspNetCore.Components.Rendering
 @using SmBlazor
+@using System.Text.Json
 @inject HttpClient Http
 @inject IJSRuntime JsRuntime
 
-<Grid @ref="Grid" Settings=@Settings/>
+<Grid @ref="Grid" Settings=@Settings>
+    <div type="AlignCenterDiv">
+        <label for="OnlyStocks">Only products with stock</label>
+        <input type="checkbox" id="OnlyStocks" @bind-value="OnlyStocks"/>
+        <button @onclick="SetupClick" class="oi oi-cog"></button>
+    </div>
+</Grid>
 
-<Button Color="Color.Primary" Clicked="@ShowModal">Setup</Button>
-<Modal @ref="modalRef">
-    <ModalContent Centered>
-        <ModalHeader>
-            <ModalTitle>Employee edit</ModalTitle>
-            <CloseButton />
-        </ModalHeader>
-        <ModalBody>
-            <Field>
-                <FieldLabel>Settings</FieldLabel>
-                
-                <MemoEdit @bind-Text="@SettingsJson" Rows="30"/>
-            </Field>
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Primary" Clicked="@Ok">Ok</Button>
-            <Button Color="Color.Secondary" Clicked="@Cancel">Cancel</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
+<SmModal @ref="smModal">
+    <div type="AlignCenterDiv">
+        <textarea @bind="SettingsJson"/>
+
+        <button @onclick="SetupOk">Ok</button>
+        <button @onclick="SetupCancel">Cancel</button>
+    </div>
+</SmModal>
+
 
 @code {
-    private Modal modalRef;
+    public SmModal smModal{ get; set; }
 
-    private Task ShowModal()
-    {
-        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, new System.Text.Json.JsonSerializerOptions() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping} );
-        return modalRef.Show();
-    }
-
-    private Task Ok()
-    {
-        Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson);
-        return modalRef.Hide();
-    }
-
-    private Task Cancel()
-    {
-        return modalRef.Hide();
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        ;
+    [Parameter]
+    public bool OnlyStocks { 
+        get => Settings.ExtraParams.TryGetValue("OnlyStocks2", out var str) ? bool.Parse(str) : false; 
+        set => Settings.ExtraParams["OnlyStocks"] = value.ToString(); 
     }
 
     public string SettingsJson { get; set; } = string.Empty;
@@ -56,31 +37,60 @@
 
     private Grid? Grid { get; set; }
 
+    public void SetupClick()
+    {
+        SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
+        smModal.ShowModal();
+    }
+
+    private void SetupOk()
+    {
+        Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
+        smModal.Close();
+    }
+
+    private void SetupCancel()
+    {
+        smModal.Close();
+    }
+
+
     private SmGridSettings Settings { get; set; } = new SmGridSettings()
     {
-        /*DataSourceSettings = new()
-        {
-            //DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
-            DataSourceApiBaseUri = "https://localhost:7157",
-            DataSourceApiPathUri = "/odata",
-            DataSourceApiNameUri = "ProductOdata",
-            DataSourceOdataExpand = new List<string>() { "Ext", "Stocks" },
-        },/**/
+        Name = "Products",
+        Height = 300,
+        StyleSettings = StyleSettingsHelper.GetDefaultStyleSettings(),
         DataSourceSettings = new()
         {
             DataSourceApiBaseUri = "https://smdemobackend.azurewebsites.net",
-            //DataSourceApiBaseUri = "https://localhost:7157",
             DataSourceApiPathUri = "/api",
-            DataSourceApiNameUri = "Product",
-        },/**/
+            DataSourceApiNameUri = "ProductSearch",
+        },
+        Columns = new()
+        {
+            new() { FieldName = "Id", PropertyTypeName = "Guid", Width = 150, },
+            new() { FieldName = "Code", PropertyTypeName = "string", Width = 60, },
+            new() { FieldName = "Name", PropertyTypeName = "string", Width = 170, Title = "Név", },
+            new() { FieldName = "Active", PropertyTypeName = "bool", Width = 20, Title = "Aktív", },
+            new() { FieldName = "Price", PropertyTypeName = "double", Width = 40, RightAligned = true, },
+            new() { FieldName = "Rating", PropertyTypeName = "int", Width = 20},
+            new() { FieldName = "StockSumQuantity", PropertyTypeName = "double", Width = 20, Title = "Stock", RightAligned = true, },
+            new() { FieldName = "ReleaseDate", PropertyTypeName = "DateTime", Width = 90, },
+            new() { FieldName = "Type", PropertyTypeName = "DemoModels.ProductType", Width = 40, },
+            new() { FieldName = "Description", PropertyTypeName = "Description", Width = 60, },
+        },
+        ExtraParams = new()
     };
 
-
-    protected override async Task OnInitializedAsync()
+    public override bool Equals(object obj)
     {
-        //Settings.StyleSettings = Settings.StyleSettings & (~StyleSettings.BasicScrollBar) | StyleSettings.ExtraScrollBar;
-        Settings = await Common.GetFromJsonAsync<SmGridSettings>(JsRuntime, Http, "sample-data/SmGridSettings.json");
+        return obj is ProductList list &&
+               OnlyStocks == list.OnlyStocks;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        
+    }
 
 }

@@ -1,15 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Blazorise.Bootstrap5" Version="1.1.2" />
-    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.1.2" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DemoModels\DemoModels.csproj" />
@@ -23,6 +18,12 @@
     <Content Update="wwwroot\sample-data\SmGridSettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Pages\ProductList.razor.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -13,18 +13,18 @@
     </div>
 </Grid>
 
-<Modal @ref="Modal">
+<SmModal @ref="smModal">
     <div type="AlignCenterDiv">
         <textarea @bind="SettingsJson"/>
 
         <button @onclick="SetupOk">Ok</button>
         <button @onclick="SetupCancel">Cancel</button>
     </div>
-</Modal>
+</SmModal>
 
 
 @code {
-    public Modal Modal{ get; set; }
+    public SmModal smModal{ get; set; }
 
     [Parameter]
     public bool OnlyStocks { 
@@ -40,18 +40,18 @@
     public void SetupClick()
     {
         SettingsJson = System.Text.Json.JsonSerializer.Serialize(Settings, Common.smJso);
-        Modal.ShowModal();
+        smModal.ShowModal();
     }
 
     private void SetupOk()
     {
         Settings = System.Text.Json.JsonSerializer.Deserialize<SmGridSettings>(SettingsJson, Common.smJso);
-        Modal.Close();
+        smModal.Close();
     }
 
     private void SetupCancel()
     {
-        Modal.Close();
+        smModal.Close();
     }
 
 

@@ -8,10 +8,10 @@ using Microsoft.JSInterop;
 
 namespace SmBlazor;
 
-public partial class Modal
+public partial class SmModal
 {
 
-    private DotNetObjectReference<Modal> _this;
+    private DotNetObjectReference<SmModal> _this;
     private ElementReference _element;
     // Content of the dialog
     [Parameter]
